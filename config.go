@@ -50,7 +50,7 @@ type TLS struct {
 	auth tls.ClientAuthType
 }
 
-func (c *Config) InitDefaults() error { //nolint:gocognit
+func (c *Config) InitDefaults() error { //nolint:gocyclo,gocognit
 	const op = errors.Op("grpc_plugin_config")
 	if c.GrpcPool == nil {
 		c.GrpcPool = &pool.Config{}

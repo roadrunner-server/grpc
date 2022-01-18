@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	stderr "errors"
 	"sync"
 
 	"github.com/roadrunner-server/api/v2/plugins/config"
@@ -112,7 +113,7 @@ func (p *Plugin) Serve() chan error {
 		err = p.server.Serve(l)
 		if err != nil {
 			// skip errors when stopping the server
-			if err == grpc.ErrServerStopped {
+			if stderr.Is(err, grpc.ErrServerStopped) {
 				return
 			}
 
