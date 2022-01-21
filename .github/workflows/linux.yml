@@ -37,6 +37,11 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
+      - name: Install protoc
+        uses: arduino/setup-protoc@v1
+        with:
+          version: '3.x'
+
       - name: Init Go modules Cache # Docs: <https://git.io/JfAKn#go---modules>
         uses: actions/cache@v2
         with:
