@@ -36,6 +36,8 @@ type Plugin struct {
 	rrServer  server.Server
 	proxyList []*proxy.Proxy
 
+	statsExporter *statsExporter
+
 	log *zap.Logger
 }
 
@@ -74,6 +76,7 @@ func (p *Plugin) Init(cfg config.Configurer, log *zap.Logger, server server.Serv
 	p.log = new(zap.Logger)
 	*p.log = *log
 	p.mu = &sync.RWMutex{}
+	p.statsExporter = newStatsExporter(p)
 
 	return nil
 }
