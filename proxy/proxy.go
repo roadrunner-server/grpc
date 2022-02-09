@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/roadrunner-server/errors"
 	"github.com/roadrunner-server/goridge/v3/pkg/frame"
 	"github.com/roadrunner-server/grpc/v2/codec"
 	"github.com/roadrunner-server/sdk/v2/payload"
@@ -217,11 +218,25 @@ func (p *Proxy) getPld() *payload.Payload {
 	return pld
 }
 
+func GetOriginalErr(err error) string {
+	e, ok := err.(*errors.Error) //nolint:errorlint
+	if !ok {
+		return err.Error()
+	}
+
+	if e != nil {
+		return GetOriginalErr(e.Err)
+	}
+
+	return ""
+}
+
 // mounts proper error code for the error
 func wrapError(err error) error {
 	// internal agreement
-	if strings.Contains(err.Error(), delimiter) {
-		chunks := strings.Split(err.Error(), delimiter)
+	errMsg := GetOriginalErr(err)
+	if strings.Contains(errMsg, delimiter) {
+		chunks := strings.Split(errMsg, delimiter)
 		code := codes.Internal
 
 		// protect the slice access
