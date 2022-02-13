@@ -26,7 +26,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        go: ["1.17.6"]
+        go: ["1.17.7"]
         os: ["ubuntu-latest"]
     steps:
       - name: Set up Go ${{ matrix.go }}
@@ -40,7 +40,7 @@ jobs:
       - name: Install protoc
         uses: arduino/setup-protoc@v1
         with:
-          version: '3.x'
+          version: "3.x"
 
       - name: Init Go modules Cache # Docs: <https://git.io/JfAKn#go---modules>
         uses: actions/cache@v2
