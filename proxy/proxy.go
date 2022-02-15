@@ -8,11 +8,11 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/roadrunner-server/api/v2/payload"
+	"github.com/roadrunner-server/api/v2/pool"
 	"github.com/roadrunner-server/errors"
 	"github.com/roadrunner-server/goridge/v3/pkg/frame"
 	"github.com/roadrunner-server/grpc/v2/codec"
-	"github.com/roadrunner-server/sdk/v2/payload"
-	"github.com/roadrunner-server/sdk/v2/pool"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

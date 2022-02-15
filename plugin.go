@@ -7,11 +7,13 @@ import (
 
 	"github.com/roadrunner-server/api/v2/plugins/config"
 	"github.com/roadrunner-server/api/v2/plugins/server"
+	"github.com/roadrunner-server/api/v2/pool"
+	"github.com/roadrunner-server/api/v2/state/process"
 	"github.com/roadrunner-server/errors"
 	"github.com/roadrunner-server/grpc/v2/codec"
 	"github.com/roadrunner-server/grpc/v2/proxy"
-	"github.com/roadrunner-server/sdk/v2/pool"
-	"github.com/roadrunner-server/sdk/v2/state/process"
+	poolImpl "github.com/roadrunner-server/sdk/v2/pool"
+	processImpl "github.com/roadrunner-server/sdk/v2/state/process"
 	"github.com/roadrunner-server/sdk/v2/utils"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -86,14 +88,14 @@ func (p *Plugin) Serve() chan error {
 	errCh := make(chan error, 1)
 
 	var err error
-	p.gPool, err = p.rrServer.NewWorkerPool(context.Background(), &pool.Config{
+	p.gPool, err = p.rrServer.NewWorkerPool(context.Background(), &poolImpl.Config{
 		Debug:           p.config.GrpcPool.Debug,
 		NumWorkers:      p.config.GrpcPool.NumWorkers,
 		MaxJobs:         p.config.GrpcPool.MaxJobs,
 		AllocateTimeout: p.config.GrpcPool.AllocateTimeout,
 		DestroyTimeout:  p.config.GrpcPool.DestroyTimeout,
 		Supervisor:      p.config.GrpcPool.Supervisor,
-	}, p.config.Env)
+	}, p.config.Env, nil)
 	if err != nil {
 		errCh <- errors.E(op, err)
 		return errCh
@@ -166,7 +168,7 @@ func (p *Plugin) Workers() []*process.State {
 
 	ps := make([]*process.State, 0, len(workers))
 	for i := 0; i < len(workers); i++ {
-		state, err := process.WorkerProcessState(workers[i])
+		state, err := processImpl.WorkerProcessState(workers[i])
 		if err != nil {
 			return nil
 		}
