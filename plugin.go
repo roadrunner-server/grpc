@@ -91,6 +91,7 @@ func (p *Plugin) Serve() chan error {
 	var err error
 	p.gPool, err = p.rrServer.NewWorkerPool(context.Background(), &poolImpl.Config{
 		Debug:           p.config.GrpcPool.Debug,
+		Command:         p.config.GrpcPool.Command,
 		NumWorkers:      p.config.GrpcPool.NumWorkers,
 		MaxJobs:         p.config.GrpcPool.MaxJobs,
 		AllocateTimeout: p.config.GrpcPool.AllocateTimeout,
