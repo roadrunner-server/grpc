@@ -18,6 +18,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/encoding"
+	"google.golang.org/grpc/health/grpc_health_v1"
 
 	// Will register via init
 	_ "google.golang.org/grpc/encoding/gzip"
@@ -29,15 +30,15 @@ const (
 )
 
 type Plugin struct {
-	mu        *sync.RWMutex
-	config    *Config
-	gPool     pool.Pool
-	opts      []grpc.ServerOption
-	services  []func(server *grpc.Server)
-	server    *grpc.Server
-	rrServer  server.Server
-	proxyList []*proxy.Proxy
-
+	mu            *sync.RWMutex
+	config        *Config
+	gPool         pool.Pool
+	opts          []grpc.ServerOption
+	services      []func(server *grpc.Server)
+	server        *grpc.Server
+	rrServer      server.Server
+	proxyList     []*proxy.Proxy
+	healthServer  *HealthCheckServer
 	statsExporter *statsExporter
 
 	log *zap.Logger
@@ -113,9 +114,15 @@ func (p *Plugin) Serve() chan error {
 		return errCh
 	}
 
+	p.healthServer = NewHeathServer(p, p.log)
+	p.healthServer.RegisterServer(p.server)
+
 	go func() {
 		p.log.Info("grpc server was started", zap.String("address", p.config.Listen))
+
+		p.healthServer.SetServingStatus(grpc_health_v1.HealthCheckResponse_SERVING)
 		err = p.server.Serve(l)
+		p.healthServer.Shutdown()
 		if err != nil {
 			// skip errors when stopping the server
 			if stderr.Is(err, grpc.ErrServerStopped) {
@@ -135,9 +142,13 @@ func (p *Plugin) Stop() error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
+	p.healthServer.SetServingStatus(grpc_health_v1.HealthCheckResponse_NOT_SERVING)
+
 	if p.server != nil {
 		p.server.Stop()
 	}
+
+	p.healthServer.Shutdown()
 	return nil
 }
 
@@ -148,6 +159,10 @@ func (p *Plugin) Name() string {
 func (p *Plugin) Reset() error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
+
+	p.healthServer.SetServingStatus(grpc_health_v1.HealthCheckResponse_NOT_SERVING)
+	defer p.healthServer.SetServingStatus(grpc_health_v1.HealthCheckResponse_SERVING)
+
 	const op = errors.Op("grpc_plugin_reset")
 	p.log.Info("reset signal was received")
 	// destroy old pool

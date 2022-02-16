@@ -59,7 +59,7 @@ func (c *Config) InitDefaults() error { //nolint:gocyclo,gocognit
 	c.GrpcPool.InitDefaults()
 
 	if !strings.Contains(c.Listen, ":") {
-		return errors.E(op, errors.Errorf("mailformed grpc address, provided: %s", c.Listen))
+		return errors.E(op, errors.Errorf("malformed grpc address, provided: %s", c.Listen))
 	}
 
 	for i := 0; i < len(c.Proto); i++ {
