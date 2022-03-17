@@ -67,7 +67,7 @@ func NewProxy(name string, metadata string, grpcPool pool.Pool, mu *sync.RWMutex
 		pldPool: sync.Pool{
 			New: func() interface{} {
 				return &payload.Payload{
-					Codec:   frame.CODEC_JSON,
+					Codec:   frame.CodecJSON,
 					Context: make([]byte, 0, 100),
 					Body:    make([]byte, 0, 100),
 				}
@@ -214,7 +214,7 @@ func (p *Proxy) putPld(pld *payload.Payload) {
 
 func (p *Proxy) getPld() *payload.Payload {
 	pld := p.pldPool.Get().(*payload.Payload)
-	pld.Codec = frame.CODEC_JSON
+	pld.Codec = frame.CodecJSON
 	return pld
 }
 
