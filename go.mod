@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/emicklei/proto v1.9.2
-	github.com/goccy/go-json v0.9.5
+	github.com/goccy/go-json v0.9.6
 	github.com/prometheus/client_golang v1.12.1
 	github.com/roadrunner-server/api/v2 v2.13.0
 	github.com/roadrunner-server/errors v1.1.2
