@@ -12,6 +12,7 @@ import (
 	"github.com/roadrunner-server/errors"
 	"github.com/roadrunner-server/grpc/v2/codec"
 	"github.com/roadrunner-server/grpc/v2/proxy"
+	"github.com/roadrunner-server/sdk/v2/metrics"
 	poolImpl "github.com/roadrunner-server/sdk/v2/pool"
 	processImpl "github.com/roadrunner-server/sdk/v2/state/process"
 	"github.com/roadrunner-server/sdk/v2/utils"
@@ -39,7 +40,7 @@ type Plugin struct {
 	rrServer      server.Server
 	proxyList     []*proxy.Proxy
 	healthServer  *HealthCheckServer
-	statsExporter *statsExporter
+	statsExporter *metrics.StatsExporter
 
 	log *zap.Logger
 }
