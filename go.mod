@@ -6,10 +6,10 @@ require (
 	github.com/emicklei/proto v1.10.0
 	github.com/goccy/go-json v0.9.7
 	github.com/prometheus/client_golang v1.12.2
-	github.com/roadrunner-server/api/v2 v2.17.0
+	github.com/roadrunner-server/api/v2 v2.17.1
 	github.com/roadrunner-server/errors v1.1.2
 	github.com/roadrunner-server/goridge/v3 v3.4.1
-	github.com/roadrunner-server/sdk/v2 v2.14.0
+	github.com/roadrunner-server/sdk/v2 v2.14.1
 	github.com/stretchr/testify v1.7.1
 	go.uber.org/zap v1.21.0
 	golang.org/x/net v0.0.0-20220513224357-95641704303c
