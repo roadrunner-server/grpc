@@ -29,7 +29,9 @@ import (
 
 // Generate generates needed service classes
 func Generate(req *plugin.CodeGeneratorRequest) *plugin.CodeGeneratorResponse {
-	resp := &plugin.CodeGeneratorResponse{}
+	resp := &plugin.CodeGeneratorResponse{
+		SupportedFeatures: toPtr(uint64(plugin.CodeGeneratorResponse_FEATURE_PROTO3_OPTIONAL)),
+	}
 
 	for _, file := range req.ProtoFile {
 		for _, service := range file.Service {
@@ -46,12 +48,12 @@ func generate(
 	service *desc.ServiceDescriptorProto,
 ) *plugin.CodeGeneratorResponse_File {
 	return &plugin.CodeGeneratorResponse_File{
-		Name:    str(filename(file, service.Name)),
-		Content: str(body(req, file, service)),
+		Name:    toPtr(filename(file, service.Name)),
+		Content: toPtr(body(req, file, service)),
 	}
 }
 
-// helper to convert string into string pointer
-func str(str string) *string {
-	return &str
+// helper to convert into a pointer
+func toPtr[T any](val T) *T {
+	return &val
 }

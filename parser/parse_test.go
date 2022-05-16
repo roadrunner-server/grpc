@@ -14,6 +14,11 @@ func TestParseFile(t *testing.T) {
 	assert.Equal(t, "app.namespace", services[0].Package)
 }
 
+func TestParseMessageOptional(t *testing.T) {
+	_, err := File("message.proto", "")
+	assert.NoError(t, err)
+}
+
 func TestParseFileWithImportsNestedFolder(t *testing.T) {
 	services, err := File("./test_nested/test_import.proto", "./test_nested")
 	assert.NoError(t, err)
