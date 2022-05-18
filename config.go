@@ -14,11 +14,11 @@ import (
 type ClientAuthType string
 
 const (
-	NoClientCert               string = "no_client_cert"
-	RequestClientCert          string = "request_client_cert"
-	RequireAnyClientCert       string = "require_any_client_cert"
-	VerifyClientCertIfGiven    string = "verify_client_cert_if_given"
-	RequireAndVerifyClientCert string = "require_and_verify_client_cert"
+	NoClientCert               ClientAuthType = "no_client_cert"
+	RequestClientCert          ClientAuthType = "request_client_cert"
+	RequireAnyClientCert       ClientAuthType = "require_any_client_cert"
+	VerifyClientCertIfGiven    ClientAuthType = "verify_client_cert_if_given"
+	RequireAndVerifyClientCert ClientAuthType = "require_and_verify_client_cert"
 )
 
 type Config struct {
@@ -42,10 +42,10 @@ type Config struct {
 }
 
 type TLS struct {
-	Key      string `mapstructure:"key"`
-	Cert     string `mapstructure:"cert"`
-	RootCA   string `mapstructure:"root_ca"`
-	AuthType string `mapstructure:"client_auth_type"`
+	Key      string         `mapstructure:"key"`
+	Cert     string         `mapstructure:"cert"`
+	RootCA   string         `mapstructure:"root_ca"`
+	AuthType ClientAuthType `mapstructure:"client_auth_type"`
 	// auth type
 	auth tls.ClientAuthType
 }
