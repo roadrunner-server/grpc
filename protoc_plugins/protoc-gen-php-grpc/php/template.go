@@ -40,9 +40,6 @@ const phpBody = `<?php
 namespace {{ $ns.Namespace }};
 {{end}}
 use Spiral\RoadRunner\GRPC;
-{{- range $n := $ns.Import}}
-use {{ $n }};
-{{- end}}
 
 interface {{ .Service.Name | interface }} extends GRPC\ServiceInterface
 {
