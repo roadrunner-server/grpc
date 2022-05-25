@@ -5,7 +5,6 @@
 namespace Import;
 
 use Spiral\RoadRunner\GRPC;
-use Import\Sub;
 
 interface ServiceInterface extends GRPC\ServiceInterface
 {
@@ -23,10 +22,10 @@ interface ServiceInterface extends GRPC\ServiceInterface
 
     /**
     * @param GRPC\ContextInterface $ctx
-    * @param Sub\Message $in
-    * @return Sub\Message
+    * @param \Import\Sub\Message $in
+    * @return \Import\Sub\Message
     *
     * @throws GRPC\Exception\InvokeException
     */
-    public function ImportMethod(GRPC\ContextInterface $ctx, Sub\Message $in): Sub\Message;
+    public function ImportMethod(GRPC\ContextInterface $ctx, \Import\Sub\Message $in): \Import\Sub\Message;
 }

@@ -5,7 +5,6 @@
 namespace Test\CustomImport;
 
 use Spiral\RoadRunner\GRPC;
-use Test\CustomImport\Message;
 
 interface ServiceInterface extends GRPC\ServiceInterface
 {
@@ -23,10 +22,10 @@ interface ServiceInterface extends GRPC\ServiceInterface
 
     /**
     * @param GRPC\ContextInterface $ctx
-    * @param Message\Message $in
-    * @return Message\Message
+    * @param \Test\CustomImport\Message\Message $in
+    * @return \Test\CustomImport\Message\Message
     *
     * @throws GRPC\Exception\InvokeException
     */
-    public function ImportMethod(GRPC\ContextInterface $ctx, Message\Message $in): Message\Message;
+    public function ImportMethod(GRPC\ContextInterface $ctx, \Test\CustomImport\Message\Message $in): \Test\CustomImport\Message\Message;
 }

@@ -5,7 +5,6 @@
 namespace Test;
 
 use Spiral\RoadRunner\GRPC;
-use Google\Protobuf;
 
 interface ServiceInterface extends GRPC\ServiceInterface
 {
@@ -14,10 +13,10 @@ interface ServiceInterface extends GRPC\ServiceInterface
 
     /**
     * @param GRPC\ContextInterface $ctx
-    * @param Protobuf\GPBEmpty $in
-    * @return Protobuf\GPBEmpty
+    * @param \Google\Protobuf\GPBEmpty $in
+    * @return \Google\Protobuf\GPBEmpty
     *
     * @throws GRPC\Exception\InvokeException
     */
-    public function Test(GRPC\ContextInterface $ctx, Protobuf\GPBEmpty $in): Protobuf\GPBEmpty;
+    public function Test(GRPC\ContextInterface $ctx, \Google\Protobuf\GPBEmpty $in): \Google\Protobuf\GPBEmpty;
 }
