@@ -12,7 +12,7 @@ require (
 	github.com/roadrunner-server/sdk/v2 v2.14.5
 	github.com/stretchr/testify v1.7.2
 	go.uber.org/zap v1.21.0
-	golang.org/x/net v0.0.0-20220531201128-c960675eff93
+	golang.org/x/net v0.0.0-20220607020251-c690dde0001d
 	google.golang.org/grpc v1.47.0
 	google.golang.org/protobuf v1.28.0
 )
@@ -39,6 +39,6 @@ require (
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 	golang.org/x/text v0.3.7 // indirect
-	google.golang.org/genproto v0.0.0-20220602131408-e326c6e8e9c8 // indirect
+	google.golang.org/genproto v0.0.0-20220607223854-30acc4cbd2aa // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
