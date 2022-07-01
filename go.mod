@@ -3,16 +3,16 @@ module github.com/roadrunner-server/grpc/v2
 go 1.18
 
 require (
-	github.com/emicklei/proto v1.10.0
+	github.com/emicklei/proto v1.11.0
 	github.com/goccy/go-json v0.9.8
 	github.com/prometheus/client_golang v1.12.2
 	github.com/roadrunner-server/api/v2 v2.18.0
 	github.com/roadrunner-server/errors v1.1.2
-	github.com/roadrunner-server/goridge/v3 v3.4.4
-	github.com/roadrunner-server/sdk/v2 v2.16.0
+	github.com/roadrunner-server/goridge/v3 v3.4.5
+	github.com/roadrunner-server/sdk/v2 v2.17.3
 	github.com/stretchr/testify v1.8.0
 	go.uber.org/zap v1.21.0
-	golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e
+	golang.org/x/net v0.0.0-20220630215102-69896b714898
 	google.golang.org/grpc v1.47.0
 	google.golang.org/protobuf v1.28.0
 )
@@ -39,6 +39,6 @@ require (
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
 	golang.org/x/sys v0.0.0-20220627191245-f75cf1eec38b // indirect
 	golang.org/x/text v0.3.7 // indirect
-	google.golang.org/genproto v0.0.0-20220628213854-d9e0b6570c03 // indirect
+	google.golang.org/genproto v0.0.0-20220630174209-ad1d48641aa7 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
