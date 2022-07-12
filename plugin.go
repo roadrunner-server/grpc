@@ -23,6 +23,7 @@ import (
 
 	// Will register via init
 	_ "google.golang.org/grpc/encoding/gzip"
+	"google.golang.org/grpc/reflection"
 )
 
 const (
@@ -108,6 +109,12 @@ func (p *Plugin) Serve() chan error {
 	if err != nil {
 		errCh <- errors.E(op, err)
 		return errCh
+	}
+
+	// register reflection server
+	// doc: https://github.com/grpc/grpc-go/blob/master/Documentation/server-reflection-tutorial.md
+	if p.config.EnableReflectionServer {
+		reflection.Register(p.server)
 	}
 
 	l, err := utils.CreateListener(p.config.Listen)
