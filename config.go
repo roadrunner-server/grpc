@@ -22,8 +22,9 @@ const (
 )
 
 type Config struct {
-	Listen string   `mapstructure:"listen"`
-	Proto  []string `mapstructure:"proto"`
+	Listen                 string   `mapstructure:"listen"`
+	EnableReflectionServer bool     `mapstructure:"enable_reflection_server"`
+	Proto                  []string `mapstructure:"proto"`
 
 	TLS *TLS `mapstructure:"tls"`
 
