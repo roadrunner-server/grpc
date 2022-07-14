@@ -13,7 +13,10 @@ import (
 	"github.com/roadrunner-server/errors"
 	"github.com/roadrunner-server/goridge/v3/pkg/frame"
 	"github.com/roadrunner-server/grpc/v2/codec"
+	"github.com/roadrunner-server/sdk/v2/utils"
+	grpcv1 "go.buf.build/protocolbuffers/go/roadrunner-server/api/proto/grpc/v1"
 	"golang.org/x/net/context"
+	pbStatus "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -27,6 +30,7 @@ const (
 	peerAddr     string = ":peer.address"
 	peerAuthType string = ":peer.auth-type"
 	delimiter    string = "|:|"
+	apiErr       string = "error"
 )
 
 // base interface for Proxy class
@@ -103,10 +107,18 @@ func (p *Proxy) ServiceDesc() *grpc.ServiceDesc {
 }
 
 // Generate method handler proxy.
+// returns grpc method handler
+/*
+// MethodDesc represents an RPC service's method specification.
+type MethodDesc struct {
+	MethodName string
+	Handler    methodHandler
+}
+*/
 func (p *Proxy) methodHandler(method string) func(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	return func(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-		in := codec.RawMessage{}
-		if err := dec(&in); err != nil {
+		in := &codec.RawMessage{}
+		if err := dec(in); err != nil {
 			return nil, wrapError(err)
 		}
 
@@ -120,14 +132,14 @@ func (p *Proxy) methodHandler(method string) func(srv interface{}, ctx context.C
 		}
 
 		handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-			return p.invoke(ctx, method, req.(codec.RawMessage))
+			return p.invoke(ctx, method, req.(*codec.RawMessage))
 		}
 
 		return interceptor(ctx, in, info, handler)
 	}
 }
 
-func (p *Proxy) invoke(ctx context.Context, method string, in codec.RawMessage) (interface{}, error) {
+func (p *Proxy) invoke(ctx context.Context, method string, in *codec.RawMessage) (interface{}, error) {
 	pld := p.getPld()
 	defer p.putPld(pld)
 
@@ -172,13 +184,30 @@ func (p *Proxy) responseMetadata(resp *payload.Payload) (metadata.MD, error) {
 
 	if len(rpcMetadata) > 0 {
 		md = metadata.New(rpcMetadata)
+
+		// we have an error
+		if len(md.Get(apiErr)) > 0 {
+			st := &grpcv1.Status{}
+
+			// get an error
+			err = proto.Unmarshal(utils.AsBytes(md.Get(apiErr)[0]), st)
+			if err != nil {
+				return nil, err
+			}
+
+			return nil, status.ErrorProto(&pbStatus.Status{
+				Code:    st.GetCode(),
+				Message: st.GetMessage(),
+				Details: st.GetDetails(),
+			})
+		}
 	}
 
 	return md, nil
 }
 
 // makePayload generates RoadRunner compatible payload based on GRPC message.
-func (p *Proxy) makePayload(ctx context.Context, method string, body codec.RawMessage, pld *payload.Payload) error {
+func (p *Proxy) makePayload(ctx context.Context, method string, body *codec.RawMessage, pld *payload.Payload) error {
 	ctxMD := make(map[string][]string)
 
 	if md, ok := metadata.FromIncomingContext(ctx); ok {
@@ -200,7 +229,7 @@ func (p *Proxy) makePayload(ctx context.Context, method string, body codec.RawMe
 		return err
 	}
 
-	pld.Body = body
+	pld.Body = *body
 	pld.Context = ctxData
 
 	return nil
