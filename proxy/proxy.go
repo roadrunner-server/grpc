@@ -186,6 +186,8 @@ func (p *Proxy) responseMetadata(resp *payload.Payload) (metadata.MD, error) {
 		md = metadata.New(rpcMetadata)
 
 		// we have an error
+		// actually, if code is OK, status.ErrorProto will be nil
+		// but, we use this only in case of PHP exception happened
 		if len(md.Get(apiErr)) > 0 {
 			st := &grpcv1.Status{}
 
