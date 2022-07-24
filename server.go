@@ -33,9 +33,9 @@ func (p *Plugin) createGRPCserver() (*grpc.Server, error) {
 		}
 
 		// php proxy services
-		services, err := parser.File(p.config.Proto[i], path.Dir(p.config.Proto[i]))
-		if err != nil {
-			return nil, err
+		services, errP := parser.File(p.config.Proto[i], path.Dir(p.config.Proto[i]))
+		if errP != nil {
+			return nil, errP
 		}
 
 		for _, service := range services {
@@ -47,11 +47,6 @@ func (p *Plugin) createGRPCserver() (*grpc.Server, error) {
 			server.RegisterService(px.ServiceDesc(), px)
 			p.proxyList = append(p.proxyList, px)
 		}
-	}
-
-	// external and native  services
-	for _, r := range p.services {
-		r(server)
 	}
 
 	return server, nil
