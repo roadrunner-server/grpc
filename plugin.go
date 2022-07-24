@@ -25,6 +25,7 @@ import (
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protodesc"
+	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
 	"google.golang.org/protobuf/types/descriptorpb"
 
@@ -130,7 +131,7 @@ func (p *Plugin) Serve() chan error {
 	if p.config.EnableReflectionServer {
 		reflection.Register(p.server)
 		// register proto descriptions manually
-		err = registerProtoFile(p.config.Proto)
+		err = registerProtoFile(p.config.Proto, p.log)
 		if err != nil {
 			errCh <- err
 			return errCh
@@ -213,7 +214,28 @@ func (p *Plugin) Workers() []*process.State {
 	return ps
 }
 
-func registerProtoFile(protofiles []string) error {
+func registerProtoFile(protofiles []string, log *zap.Logger) error {
+	// panic handler
+	defer func() {
+		// panic handler, RR tried to register a file which already registered
+		if r := recover(); r != nil {
+			globalFiles := make([]string, 0, protoregistry.GlobalFiles.NumFiles())
+			protoregistry.GlobalFiles.RangeFiles(func(desc protoreflect.FileDescriptor) bool {
+				if desc.FullName() != "" {
+					globalFiles = append(globalFiles, desc.Path())
+				}
+				return true
+			})
+
+			searchedBy := make([]string, 0, len(protofiles))
+			for i := 0; i < len(protofiles); i++ {
+				searchedBy = append(searchedBy, filepath.Base(protofiles[i]))
+			}
+
+			log.Error("attempted to register a duplicate", zap.Strings("protofiles", searchedBy), zap.Strings("global_registry", globalFiles))
+		}
+	}()
+
 	for i := 0; i < len(protofiles); i++ {
 		// get absolute path to the file
 		absPath, err := filepath.Abs(filepath.Dir(protofiles[i]))
