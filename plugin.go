@@ -222,8 +222,9 @@ func registerProtoFile(protofiles []string) error {
 		}
 
 		fileName := filepath.Base(protofiles[i])
-
 		// check if we already have the file registered
+		// we use filename here, because we don't use these protos inside golang app
+		// and we register them by its name
 		_, err = protoregistry.GlobalFiles.FindFileByPath(fileName)
 		// it's ok if file not found, we need to register it
 		if err != nil && !stderr.Is(err, protoregistry.NotFound) {
@@ -244,7 +245,7 @@ func registerProtoFile(protofiles []string) error {
 			"-I"+absPath, filepath.Join(absPath, fileName))
 
 		// redirect messages from the command
-		// user should see and error if any
+		// user should see an error if any
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 
