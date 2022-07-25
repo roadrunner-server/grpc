@@ -9,12 +9,12 @@ require (
 	github.com/roadrunner-server/api/v2 v2.20.0
 	github.com/roadrunner-server/errors v1.1.2
 	github.com/roadrunner-server/goridge/v3 v3.4.5
-	github.com/roadrunner-server/sdk/v2 v2.18.0
+	github.com/roadrunner-server/sdk/v2 v2.18.1
 	github.com/stretchr/testify v1.8.0
 	go.buf.build/protocolbuffers/go/roadrunner-server/api v1.2.10
 	go.uber.org/zap v1.21.0
 	golang.org/x/net v0.0.0-20220722155237-a158d28d115b
-	google.golang.org/genproto v0.0.0-20220722212130-b98a9ff5e252
+	google.golang.org/genproto v0.0.0-20220725144611-272f38e5d71b
 	google.golang.org/grpc v1.48.0
 	google.golang.org/protobuf v1.28.0
 )
@@ -30,7 +30,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.37.0 // indirect
-	github.com/prometheus/procfs v0.7.3 // indirect
+	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/roadrunner-server/tcplisten v1.1.2 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/tklauser/go-sysconf v0.3.10 // indirect
