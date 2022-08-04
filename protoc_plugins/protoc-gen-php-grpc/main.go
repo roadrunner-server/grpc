@@ -24,7 +24,6 @@ package main
 
 import (
 	"io"
-	"io/ioutil"
 	"os"
 
 	"github.com/roadrunner-server/grpc/v2/protoc_plugins/protoc-gen-php-grpc/php"
@@ -44,7 +43,7 @@ func main() {
 }
 
 func readRequest(in io.Reader) (*plugin.CodeGeneratorRequest, error) {
-	data, err := ioutil.ReadAll(in)
+	data, err := io.ReadAll(in)
 	if err != nil {
 		return nil, err
 	}

@@ -69,7 +69,7 @@ func NewProxy(name string, metadata string, grpcPool pool.Pool, mu *sync.RWMutex
 		metadata: metadata,
 		methods:  make([]string, 0),
 		pldPool: sync.Pool{
-			New: func() interface{} {
+			New: func() any {
 				return &payload.Payload{
 					Codec:   frame.CodecJSON,
 					Context: make([]byte, 0, 100),
@@ -115,8 +115,8 @@ type MethodDesc struct {
 	Handler    methodHandler
 }
 */
-func (p *Proxy) methodHandler(method string) func(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	return func(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func (p *Proxy) methodHandler(method string) func(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+	return func(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 		in := &codec.RawMessage{}
 		if err := dec(in); err != nil {
 			return nil, wrapError(err)
@@ -131,7 +131,7 @@ func (p *Proxy) methodHandler(method string) func(srv interface{}, ctx context.C
 			FullMethod: fmt.Sprintf("/%s/%s", p.name, method),
 		}
 
-		handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		handler := func(ctx context.Context, req any) (any, error) {
 			return p.invoke(ctx, method, req.(*codec.RawMessage))
 		}
 
@@ -139,7 +139,7 @@ func (p *Proxy) methodHandler(method string) func(srv interface{}, ctx context.C
 	}
 }
 
-func (p *Proxy) invoke(ctx context.Context, method string, in *codec.RawMessage) (interface{}, error) {
+func (p *Proxy) invoke(ctx context.Context, method string, in *codec.RawMessage) (any, error) {
 	pld := p.getPld()
 	defer p.putPld(pld)
 

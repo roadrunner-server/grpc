@@ -1,7 +1,6 @@
 package protoc_plugins //nolint:revive,stylecheck
 
 import (
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -36,7 +35,7 @@ func protoc(t *testing.T, args []string) {
 
 func Test_Simple(t *testing.T) {
 	workdir, _ := os.Getwd()
-	tmpdir, err := ioutil.TempDir("", "proto-test")
+	tmpdir, err := os.MkdirTemp("", "proto-test")
 	require.NoError(t, err)
 
 	require.NoError(t, build())
@@ -63,7 +62,7 @@ func Test_Simple(t *testing.T) {
 
 func Test_PhpNamespaceOption(t *testing.T) {
 	workdir, _ := os.Getwd()
-	tmpdir, err := ioutil.TempDir("", "proto-test")
+	tmpdir, err := os.MkdirTemp("", "proto-test")
 	require.NoError(t, err)
 
 	require.NoError(t, build())
@@ -89,7 +88,7 @@ func Test_PhpNamespaceOption(t *testing.T) {
 
 func Test_UseImportedMessage(t *testing.T) {
 	workdir, _ := os.Getwd()
-	tmpdir, err := ioutil.TempDir("", "proto-test")
+	tmpdir, err := os.MkdirTemp("", "proto-test")
 	require.NoError(t, err)
 
 	require.NoError(t, build())
@@ -115,7 +114,7 @@ func Test_UseImportedMessage(t *testing.T) {
 
 func Test_PhpNamespaceOptionInUse(t *testing.T) {
 	workdir, _ := os.Getwd()
-	tmpdir, err := ioutil.TempDir("", "proto-test")
+	tmpdir, err := os.MkdirTemp("", "proto-test")
 	require.NoError(t, err)
 
 	require.NoError(t, build())
@@ -141,7 +140,7 @@ func Test_PhpNamespaceOptionInUse(t *testing.T) {
 
 func Test_UseOfGoogleEmptyMessage(t *testing.T) {
 	workdir, _ := os.Getwd()
-	tmpdir, err := ioutil.TempDir("", "proto-test")
+	tmpdir, err := os.MkdirTemp("", "proto-test")
 	require.NoError(t, err)
 
 	require.NoError(t, build())
@@ -169,12 +168,12 @@ func Test_UseOfGoogleEmptyMessage(t *testing.T) {
 func assertEqualFiles(t *testing.T, original, generated string) {
 	assert.FileExists(t, generated)
 
-	originalData, err := ioutil.ReadFile(original)
+	originalData, err := os.ReadFile(original)
 	if err != nil {
 		t.Fatal("Can't find original file for comparison")
 	}
 
-	generatedData, err := ioutil.ReadFile(generated)
+	generatedData, err := os.ReadFile(generated)
 	if err != nil {
 		t.Fatal("Can't find generated file for comparison")
 	}

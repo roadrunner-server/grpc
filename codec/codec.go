@@ -19,7 +19,7 @@ type Codec struct {
 }
 
 // Marshal returns the wire format of v. rawMessages would be returned without encoding.
-func (c *Codec) Marshal(v interface{}) ([]byte, error) {
+func (c *Codec) Marshal(v any) ([]byte, error) {
 	if raw, ok := v.(RawMessage); ok {
 		return raw, nil
 	}
@@ -28,7 +28,7 @@ func (c *Codec) Marshal(v interface{}) ([]byte, error) {
 }
 
 // Unmarshal parses the wire format into v. rawMessages would not be unmarshalled.
-func (c *Codec) Unmarshal(data []byte, v interface{}) error {
+func (c *Codec) Unmarshal(data []byte, v any) error {
 	if raw, ok := v.(*RawMessage); ok {
 		*raw = data
 		return nil
