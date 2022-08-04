@@ -1,6 +1,6 @@
 module github.com/roadrunner-server/grpc/v2
 
-go 1.18
+go 1.19
 
 require (
 	github.com/emicklei/proto v1.11.0
@@ -11,7 +11,7 @@ require (
 	github.com/roadrunner-server/goridge/v3 v3.4.5
 	github.com/roadrunner-server/sdk/v2 v2.18.2
 	github.com/stretchr/testify v1.8.0
-	go.buf.build/protocolbuffers/go/roadrunner-server/api v1.3.10
+	go.buf.build/protocolbuffers/go/roadrunner-server/api v1.3.11
 	go.uber.org/zap v1.21.0
 	golang.org/x/net v0.0.0-20220802222814-0bcc04d9c69b
 	google.golang.org/genproto v0.0.0-20220803205849-8f55acc8769f
