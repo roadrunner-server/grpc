@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/emicklei/proto v1.11.0
 	github.com/goccy/go-json v0.9.10
-	github.com/prometheus/client_golang v1.12.2
+	github.com/prometheus/client_golang v1.13.0
 	github.com/roadrunner-server/api/v2 v2.20.1
 	github.com/roadrunner-server/errors v1.2.0
 	github.com/roadrunner-server/goridge/v3 v3.5.0
@@ -14,7 +14,7 @@ require (
 	go.buf.build/protocolbuffers/go/roadrunner-server/api v1.3.11
 	go.uber.org/zap v1.21.0
 	golang.org/x/net v0.0.0-20220805013720-a33c5aa5df48
-	google.golang.org/genproto v0.0.0-20220804142021-4e6b2dfa6612
+	google.golang.org/genproto v0.0.0-20220805133916-01dd62135a58
 	google.golang.org/grpc v1.48.0
 	google.golang.org/protobuf v1.28.1
 )
