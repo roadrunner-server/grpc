@@ -22,11 +22,11 @@ const (
 )
 
 type Config struct {
-	Listen                 string   `mapstructure:"listen"`
-	EnableReflectionServer bool     `mapstructure:"enable_reflection_server"`
-	Proto                  []string `mapstructure:"proto"`
+	Listen string   `mapstructure:"listen"`
+	Proto  []string `mapstructure:"proto"`
 
-	TLS *TLS `mapstructure:"tls"`
+	ReflectionServer *ReflectionServer `mapstructure:"reflection_server"`
+	TLS              *TLS              `mapstructure:"tls"`
 
 	// Env is environment variables passed to the http pool
 	Env map[string]string `mapstructure:"env"`
@@ -40,6 +40,11 @@ type Config struct {
 	MaxConcurrentStreams  int64         `mapstructure:"max_concurrent_streams"`
 	PingTime              time.Duration `mapstructure:"ping_time"`
 	Timeout               time.Duration `mapstructure:"timeout"`
+}
+
+// ReflectionServer options
+type ReflectionServer struct {
+	Include []string `mapstructure:"include"`
 }
 
 type TLS struct {

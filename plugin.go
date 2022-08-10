@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	stderr "errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -128,10 +129,10 @@ func (p *Plugin) Serve() chan error {
 
 	// register reflection server
 	// doc: https://github.com/grpc/grpc-go/blob/master/Documentation/server-reflection-tutorial.md
-	if p.config.EnableReflectionServer {
+	if p.config.ReflectionServer != nil {
 		reflection.Register(p.server)
 		// register proto descriptions manually
-		err = registerProtoFile(p.config.Proto, p.log)
+		err = registerProtoFile(p.config.Proto, p.config.ReflectionServer.Include, p.log)
 		if err != nil {
 			errCh <- err
 			return errCh
@@ -214,7 +215,7 @@ func (p *Plugin) Workers() []*process.State {
 	return ps
 }
 
-func registerProtoFile(protofiles []string, log *zap.Logger) error {
+func registerProtoFile(protofiles []string, include []string, log *zap.Logger) error {
 	// panic handler
 	defer func() {
 		// panic handler, RR tried to register a file which already registered
@@ -262,9 +263,8 @@ func registerProtoFile(protofiles []string, log *zap.Logger) error {
 		tmpFile := filepath.Join(os.TempDir(), fileName+"_tmp.pb")
 		cmd := exec.Command( //nolint:gosec
 			"protoc",
-			"--descriptor_set_out="+tmpFile,
-			// include also files from the original dir + our proto file
-			"-I"+absPath, filepath.Join(absPath, fileName))
+			parseInclude("--descriptor_set_out="+tmpFile, "-I"+absPath, include, filepath.Join(absPath, fileName))...,
+		)
 
 		// redirect messages from the command
 		// user should see an error if any
@@ -315,4 +315,22 @@ func registerProtoFile(protofiles []string, log *zap.Logger) error {
 	}
 
 	return nil
+}
+
+// parse include parses user provided paths and forms string like:
+// --descriptor_set_out=foo -Ifile -Ifile2 file.proto
+func parseInclude(descriptorCmd, firstInclude string, userIncludes []string, proto string) []string {
+	const I string = "-I"
+
+	res := make([]string, 0, 10)
+	res = append(res, descriptorCmd)
+	res = append(res, firstInclude)
+
+	for i := 0; i < len(userIncludes); i++ {
+		res = append(res, fmt.Sprintf("%s%s", I, userIncludes[i]))
+	}
+
+	res = append(res, proto)
+
+	return res
 }
