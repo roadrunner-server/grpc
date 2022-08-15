@@ -14,7 +14,7 @@ require (
 	go.buf.build/protocolbuffers/go/roadrunner-server/api v1.3.11
 	go.uber.org/zap v1.22.0
 	golang.org/x/net v0.0.0-20220812174116-3211cb980234
-	google.golang.org/genproto v0.0.0-20220812140447-cec7f5303424
+	google.golang.org/genproto v0.0.0-20220815135757-37a418bb8959
 	google.golang.org/grpc v1.48.0
 	google.golang.org/protobuf v1.28.1
 )
