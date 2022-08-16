@@ -25,8 +25,7 @@ type Config struct {
 	Listen string   `mapstructure:"listen"`
 	Proto  []string `mapstructure:"proto"`
 
-	ReflectionServer *ReflectionServer `mapstructure:"reflection_server"`
-	TLS              *TLS              `mapstructure:"tls"`
+	TLS *TLS `mapstructure:"tls"`
 
 	// Env is environment variables passed to the http pool
 	Env map[string]string `mapstructure:"env"`
