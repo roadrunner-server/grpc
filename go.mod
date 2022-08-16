@@ -6,12 +6,12 @@ require (
 	github.com/emicklei/proto v1.11.0
 	github.com/goccy/go-json v0.9.10
 	github.com/prometheus/client_golang v1.13.0
-	github.com/roadrunner-server/api/v2 v2.20.1
+	github.com/roadrunner-server/api/v2 v2.21.0
 	github.com/roadrunner-server/errors v1.2.0
 	github.com/roadrunner-server/goridge/v3 v3.5.1
-	github.com/roadrunner-server/sdk/v2 v2.18.2
+	github.com/roadrunner-server/sdk/v2 v2.18.3
 	github.com/stretchr/testify v1.8.0
-	go.buf.build/protocolbuffers/go/roadrunner-server/api v1.3.11
+	go.buf.build/protocolbuffers/go/roadrunner-server/api v1.3.12
 	go.uber.org/zap v1.22.0
 	golang.org/x/net v0.0.0-20220812174116-3211cb980234
 	google.golang.org/genproto v0.0.0-20220815135757-37a418bb8959
