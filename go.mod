@@ -6,10 +6,10 @@ require (
 	github.com/emicklei/proto v1.11.0
 	github.com/goccy/go-json v0.9.11
 	github.com/prometheus/client_golang v1.13.0
-	github.com/roadrunner-server/api/v2 v2.21.2
+	github.com/roadrunner-server/api/v2 v2.22.2-rc.1
 	github.com/roadrunner-server/errors v1.2.0
 	github.com/roadrunner-server/goridge/v3 v3.5.2
-	github.com/roadrunner-server/sdk/v2 v2.18.5
+	github.com/roadrunner-server/sdk/v2 v2.19.0-rc.1
 	github.com/stretchr/testify v1.8.0
 	go.buf.build/protocolbuffers/go/roadrunner-server/api v1.3.12
 	go.uber.org/zap v1.23.0
@@ -39,7 +39,7 @@ require (
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/sync v0.0.0-20220819030929-7fc1605a5dde // indirect
-	golang.org/x/sys v0.0.0-20220906165534-d0df966e6959 // indirect
+	golang.org/x/sys v0.0.0-20220907062415-87db552b00fd // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

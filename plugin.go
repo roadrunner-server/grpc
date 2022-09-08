@@ -175,13 +175,13 @@ func (p *Plugin) Reset() error {
 	return nil
 }
 
-func (p *Plugin) Workers() []*process.State {
+func (p *Plugin) Workers() []process.State {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
 
 	workers := p.gPool.Workers()
 
-	ps := make([]*process.State, 0, len(workers))
+	ps := make([]process.State, 0, len(workers))
 	for i := 0; i < len(workers); i++ {
 		state, err := processImpl.WorkerProcessState(workers[i])
 		if err != nil {
