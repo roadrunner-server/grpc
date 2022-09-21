@@ -13,8 +13,8 @@ require (
 	github.com/stretchr/testify v1.8.0
 	go.buf.build/protocolbuffers/go/roadrunner-server/api v1.3.12
 	go.uber.org/zap v1.23.0
-	golang.org/x/net v0.0.0-20220919171627-f8f703f97925
-	google.golang.org/genproto v0.0.0-20220919141832-68c03719ef51
+	golang.org/x/net v0.0.0-20220920203100-d0c6ba3f52d9
+	google.golang.org/genproto v0.0.0-20220920201722-2b89144ce006
 	google.golang.org/grpc v1.49.0
 	google.golang.org/protobuf v1.28.1
 )
