@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -13,10 +14,8 @@ import (
 	"github.com/roadrunner-server/errors"
 	"github.com/roadrunner-server/goridge/v3/pkg/frame"
 	"github.com/roadrunner-server/grpc/v2/codec"
-	"github.com/roadrunner-server/sdk/v2/utils"
-	grpcv1 "go.buf.build/protocolbuffers/go/roadrunner-server/api/proto/grpc/v1"
 	"golang.org/x/net/context"
-	pbStatus "google.golang.org/genproto/googleapis/rpc/status"
+	spb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -185,23 +184,29 @@ func (p *Proxy) responseMetadata(resp *payload.Payload) (metadata.MD, error) {
 	if len(rpcMetadata) > 0 {
 		md = metadata.New(rpcMetadata)
 
-		// we have an error
-		// actually, if code is OK, status.ErrorProto will be nil
-		// but, we use this only in case of PHP exception happened
+		/*
+			[EXPERIMENTAL] !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+			we have an error
+			actually, if code is OK, status.ErrorProto will be nil
+			but, we use this only in case of PHP exception happened
+
+		*/
 		if len(md.Get(apiErr)) > 0 {
-			st := &grpcv1.Status{}
+			st := &spb.Status{}
 
 			// get an error
-			err = proto.Unmarshal(utils.AsBytes(md.Get(apiErr)[0]), st)
+			data, err := base64.StdEncoding.DecodeString(md.Get(apiErr)[0])
 			if err != nil {
 				return nil, err
 			}
 
-			return nil, status.ErrorProto(&pbStatus.Status{
-				Code:    st.GetCode(),
-				Message: st.GetMessage(),
-				Details: st.GetDetails(),
-			})
+			err = proto.Unmarshal(data, st)
+			if err != nil {
+				return nil, err
+			}
+
+			return nil, status.ErrorProto(st)
 		}
 	}
 
