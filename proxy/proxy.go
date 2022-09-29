@@ -206,7 +206,7 @@ func (p *Proxy) responseMetadata(resp *payload.Payload) (metadata.MD, error) {
 				return nil, err
 			}
 
-			return nil, status.ErrorProto(st)
+			return md, status.ErrorProto(st)
 		}
 	}
 
