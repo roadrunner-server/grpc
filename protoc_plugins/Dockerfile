@@ -1,7 +1,7 @@
 FROM golang as builder
 
+ARG APP_VERSION="0"
 ENV GOOS=linux GOARCH=amd64 CGO_ENABLED=0
-
 
 WORKDIR /src
 COPY protoc_plugins/ .
@@ -14,6 +14,7 @@ FROM scratch
 
 # Runtime dependencies
 LABEL "build.buf.plugins.runtime_library_versions.0.name"="github.com/roadrunner-server/grpc/v2/protoc_plugins"
+LABEL "build.buf.plugins.runtime_library_versions.0.version"="$APP_VERSION"
 LABEL "build.buf.plugins.runtime_library_versions.1.name"="google.golang.org/protobuf"
 LABEL "build.buf.plugins.runtime_library_versions.1.version"="v1.27.1"
 
