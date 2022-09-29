@@ -1,6 +1,6 @@
 FROM golang as builder
 
-ARG APP_VERSION="0"
+ARG APP_VERSION=""
 ENV GOOS=linux GOARCH=amd64 CGO_ENABLED=0
 
 WORKDIR /src
