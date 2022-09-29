@@ -11,7 +11,6 @@ require (
 	github.com/roadrunner-server/goridge/v3 v3.5.3
 	github.com/roadrunner-server/sdk/v2 v2.19.0
 	github.com/stretchr/testify v1.8.0
-	go.buf.build/protocolbuffers/go/roadrunner-server/api v1.3.12
 	go.uber.org/zap v1.23.0
 	golang.org/x/net v0.0.0-20220927171203-f486391704dc
 	google.golang.org/genproto v0.0.0-20220927151529-dcaddaf36704
