@@ -8,7 +8,7 @@ require (
 	github.com/prometheus/client_golang v1.13.0
 	github.com/roadrunner-server/api/v2 v2.23.0
 	github.com/roadrunner-server/errors v1.2.0
-	github.com/roadrunner-server/goridge/v3 v3.5.3
+	github.com/roadrunner-server/goridge/v3 v3.6.1
 	github.com/roadrunner-server/sdk/v2 v2.19.0
 	github.com/stretchr/testify v1.8.0
 	go.uber.org/zap v1.23.0
