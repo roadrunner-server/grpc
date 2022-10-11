@@ -2,9 +2,14 @@ package grpc
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/roadrunner-server/api/v2/plugins/informer"
-	"github.com/roadrunner-server/sdk/v2/metrics"
+	"github.com/roadrunner-server/sdk/v3/metrics"
+	"github.com/roadrunner-server/sdk/v3/state/process"
 )
+
+// Informer used to get workers from particular plugin or set of plugins
+type Informer interface {
+	Workers() []*process.State
+}
 
 func (p *Plugin) MetricsCollector() []prometheus.Collector {
 	// p - implements Exporter interface (workers)
@@ -16,7 +21,7 @@ const (
 	namespace = "rr_grpc"
 )
 
-func newStatsExporter(stats informer.Informer) *metrics.StatsExporter {
+func newStatsExporter(stats Informer) *metrics.StatsExporter {
 	return &metrics.StatsExporter{
 		TotalMemoryDesc:  prometheus.NewDesc(prometheus.BuildFQName(namespace, "", "workers_memory_bytes"), "Memory usage by workers", nil, nil),
 		StateDesc:        prometheus.NewDesc(prometheus.BuildFQName(namespace, "", "worker_state"), "Worker current state", []string{"state", "pid"}, nil),

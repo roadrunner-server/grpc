@@ -9,11 +9,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/roadrunner-server/api/v2/payload"
-	"github.com/roadrunner-server/api/v2/pool"
 	"github.com/roadrunner-server/errors"
 	"github.com/roadrunner-server/goridge/v3/pkg/frame"
-	"github.com/roadrunner-server/grpc/v2/codec"
+	"github.com/roadrunner-server/grpc/v3/codec"
+	"github.com/roadrunner-server/sdk/v3/payload"
+	"github.com/roadrunner-server/sdk/v3/worker"
 	"golang.org/x/net/context"
 	spb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc"
@@ -31,6 +31,20 @@ const (
 	delimiter    string = "|:|"
 	apiErr       string = "error"
 )
+
+type Pool interface {
+	// Workers returns worker list associated with the pool.
+	Workers() (workers []*worker.Process)
+
+	// Exec payload
+	Exec(ctx context.Context, p *payload.Payload) (*payload.Payload, error)
+
+	// Reset kill all workers inside the watcher and replaces with new
+	Reset(ctx context.Context) error
+
+	// Destroy all underlying stack (but let them complete the task).
+	Destroy(ctx context.Context)
+}
 
 // base interface for Proxy class
 type proxyService interface {
@@ -51,7 +65,7 @@ type rpcContext struct {
 // Proxy manages GRPC/RoadRunner bridge.
 type Proxy struct {
 	mu       *sync.RWMutex
-	grpcPool pool.Pool
+	grpcPool Pool
 	name     string
 	metadata string
 	methods  []string
@@ -60,7 +74,7 @@ type Proxy struct {
 }
 
 // NewProxy creates new service proxy object.
-func NewProxy(name string, metadata string, grpcPool pool.Pool, mu *sync.RWMutex) *Proxy {
+func NewProxy(name string, metadata string, grpcPool Pool, mu *sync.RWMutex) *Proxy {
 	return &Proxy{
 		mu:       mu,
 		grpcPool: grpcPool,
@@ -148,7 +162,7 @@ func (p *Proxy) invoke(ctx context.Context, method string, in *codec.RawMessage)
 	}
 
 	p.mu.RLock()
-	resp, err := p.grpcPool.Exec(pld)
+	resp, err := p.grpcPool.Exec(ctx, pld)
 	p.mu.RUnlock()
 
 	if err != nil {

@@ -5,17 +5,16 @@ import (
 	stderr "errors"
 	"sync"
 
-	"github.com/roadrunner-server/api/v2/plugins/config"
-	"github.com/roadrunner-server/api/v2/plugins/server"
-	"github.com/roadrunner-server/api/v2/pool"
-	"github.com/roadrunner-server/api/v2/state/process"
 	"github.com/roadrunner-server/errors"
-	"github.com/roadrunner-server/grpc/v2/codec"
-	"github.com/roadrunner-server/grpc/v2/proxy"
-	"github.com/roadrunner-server/sdk/v2/metrics"
-	poolImpl "github.com/roadrunner-server/sdk/v2/pool"
-	processImpl "github.com/roadrunner-server/sdk/v2/state/process"
-	"github.com/roadrunner-server/sdk/v2/utils"
+	"github.com/roadrunner-server/grpc/v3/codec"
+	"github.com/roadrunner-server/grpc/v3/proxy"
+	"github.com/roadrunner-server/sdk/v3/metrics"
+	"github.com/roadrunner-server/sdk/v3/payload"
+	"github.com/roadrunner-server/sdk/v3/pool"
+	staticPool "github.com/roadrunner-server/sdk/v3/pool/static_pool"
+	"github.com/roadrunner-server/sdk/v3/state/process"
+	"github.com/roadrunner-server/sdk/v3/utils"
+	"github.com/roadrunner-server/sdk/v3/worker"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/encoding"
@@ -30,13 +29,39 @@ const (
 	RrMode     string = "RR_MODE"
 )
 
+type Configurer interface {
+	// UnmarshalKey takes a single key and unmarshal it into a Struct.
+	UnmarshalKey(name string, out any) error
+	// Has checks if config section exists.
+	Has(name string) bool
+}
+
+type Pool interface {
+	// Workers returns worker list associated with the pool.
+	Workers() (workers []*worker.Process)
+
+	// Exec payload
+	Exec(ctx context.Context, p *payload.Payload) (*payload.Payload, error)
+
+	// Reset kill all workers inside the watcher and replaces with new
+	Reset(ctx context.Context) error
+
+	// Destroy all underlying stack (but let them complete the task).
+	Destroy(ctx context.Context)
+}
+
+// Server creates workers for the application.
+type Server interface {
+	NewPool(ctx context.Context, cfg *pool.Config, env map[string]string, _ *zap.Logger) (*staticPool.Pool, error)
+}
+
 type Plugin struct {
 	mu            *sync.RWMutex
 	config        *Config
-	gPool         pool.Pool
+	gPool         Pool
 	opts          []grpc.ServerOption
 	server        *grpc.Server
-	rrServer      server.Server
+	rrServer      Server
 	proxyList     []*proxy.Proxy
 	healthServer  *HealthCheckServer
 	statsExporter *metrics.StatsExporter
@@ -44,7 +69,7 @@ type Plugin struct {
 	log *zap.Logger
 }
 
-func (p *Plugin) Init(cfg config.Configurer, log *zap.Logger, server server.Server) error {
+func (p *Plugin) Init(cfg Configurer, log *zap.Logger, server Server) error {
 	const op = errors.Op("grpc_plugin_init")
 
 	if !cfg.Has(pluginName) {
@@ -88,7 +113,7 @@ func (p *Plugin) Serve() chan error {
 	errCh := make(chan error, 1)
 
 	var err error
-	p.gPool, err = p.rrServer.NewWorkerPool(context.Background(), &poolImpl.Config{
+	p.gPool, err = p.rrServer.NewPool(context.Background(), &pool.Config{
 		Debug:           p.config.GrpcPool.Debug,
 		Command:         p.config.GrpcPool.Command,
 		NumWorkers:      p.config.GrpcPool.NumWorkers,
@@ -183,7 +208,7 @@ func (p *Plugin) Workers() []*process.State {
 
 	ps := make([]*process.State, 0, len(workers))
 	for i := 0; i < len(workers); i++ {
-		state, err := processImpl.WorkerProcessState(workers[i])
+		state, err := process.WorkerProcessState(workers[i])
 		if err != nil {
 			return nil
 		}

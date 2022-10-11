@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/roadrunner-server/errors"
-	"github.com/roadrunner-server/grpc/v2/parser"
-	"github.com/roadrunner-server/grpc/v2/proxy"
+	"github.com/roadrunner-server/grpc/v3/parser"
+	"github.com/roadrunner-server/grpc/v3/proxy"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
