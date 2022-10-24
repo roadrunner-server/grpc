@@ -9,10 +9,10 @@ require (
 	github.com/roadrunner-server/errors v1.2.0
 	github.com/roadrunner-server/goridge/v3 v3.6.1
 	github.com/roadrunner-server/sdk/v3 v3.0.0-beta.4
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	go.uber.org/zap v1.23.0
 	golang.org/x/net v0.1.0
-	google.golang.org/genproto v0.0.0-20221018160656-63c7b68cfc55
+	google.golang.org/genproto v0.0.0-20221024153911-1573dae28c9c
 	google.golang.org/grpc v1.50.1
 	google.golang.org/protobuf v1.28.1
 )
