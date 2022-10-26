@@ -41,11 +41,6 @@ type Config struct {
 	Timeout               time.Duration `mapstructure:"timeout"`
 }
 
-// ReflectionServer options
-type ReflectionServer struct {
-	Include []string `mapstructure:"include"`
-}
-
 type TLS struct {
 	Key      string         `mapstructure:"key"`
 	Cert     string         `mapstructure:"cert"`
