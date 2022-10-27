@@ -20,7 +20,7 @@ on:
 
 jobs:
   golang:
-    name: Build (Go ${{ matrix.go }}, OS ${{matrix.os}})
+    name: Build-and-test (Go ${{ matrix.go }}, OS ${{matrix.os}})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:

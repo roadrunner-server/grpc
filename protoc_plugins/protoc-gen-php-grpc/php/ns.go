@@ -46,7 +46,7 @@ type ns struct {
 // newNamespace creates new work namespace.
 func newNamespace(req *plugin.CodeGeneratorRequest, file *desc.FileDescriptorProto, service *desc.ServiceDescriptorProto) *ns {
 	ns := &ns{
-		Package:           *file.Package,
+		Package:           deref(file.Package),
 		Namespace:         namespace(file.Package, "\\"),
 		MessageNamespaces: make(map[string]string),
 	}
@@ -84,7 +84,7 @@ func (ns *ns) registerMessageNamespace(req *plugin.CodeGeneratorRequest, msg *st
 	}
 
 	for _, f := range req.ProtoFile {
-		if pkg == "."+*f.Package {
+		if pkg == "."+deref(f.Package) {
 			if f.Options != nil && f.Options.PhpNamespace != nil {
 				// custom message namespace
 				ns.MessageNamespaces[pkg] = *f.Options.PhpNamespace
@@ -121,4 +121,11 @@ func (ns *ns) resolve(msg *string) string {
 
 	// fully clarified name (fallback)
 	return "\\" + namespace(msg, "\\")
+}
+
+func deref(val *string) string {
+	if val == nil {
+		return ""
+	}
+	return *val
 }

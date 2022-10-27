@@ -165,6 +165,26 @@ func Test_UseOfGoogleEmptyMessage(t *testing.T) {
 	assert.NoError(t, os.RemoveAll("plugin"))
 }
 
+func Test_NoPackage(t *testing.T) {
+	tmpdir, err := os.MkdirTemp("", "proto-test")
+	require.NoError(t, err)
+
+	require.NoError(t, build())
+
+	defer func() {
+		assert.NoError(t, os.RemoveAll(tmpdir))
+	}()
+
+	args := []string{
+		"-Itestdata",
+		"--php-grpc_out=" + tmpdir,
+		"NoPackage/nopackage.proto",
+	}
+	protoc(t, args)
+
+	assert.NoError(t, os.RemoveAll("plugin"))
+}
+
 func assertEqualFiles(t *testing.T, original, generated string) {
 	assert.FileExists(t, generated)
 

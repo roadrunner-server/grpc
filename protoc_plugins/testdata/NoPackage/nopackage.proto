@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+
+option php_namespace = "Test\\CustomImport";
+
+service Service {
+  rpc SimpleMethod (Message) returns (Message) {
+  }
+}
+
+message Message {
+  int64 id = 1;
+}
