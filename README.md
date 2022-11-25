@@ -1,1 +1,1 @@
-# Docs: [link](https://roadrunner.dev/docs/plugins-grpc/2.x/en)
+# Docs: [link](https://roadrunner.dev/docs/app-server-grpc/2.x/en)
