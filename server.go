@@ -100,36 +100,37 @@ func (p *Plugin) serverOptions() ([]grpc.ServerOption, error) {
 				return nil, errors.E(op, errors.Str("could not append Certs from PEM"))
 			}
 
-			tcreds = credentials.NewTLS(&tls.Config{
+			opts = append(opts, grpc.Creds(credentials.NewTLS(&tls.Config{
 				MinVersion:   tls.VersionTLS12,
 				ClientAuth:   p.config.TLS.auth,
 				Certificates: []tls.Certificate{cert},
 				ClientCAs:    certPool,
-			})
+			})))
 		} else {
+			// regular TLS from the cert+key
 			tcreds, err = credentials.NewServerTLSFromFile(p.config.TLS.Cert, p.config.TLS.Key)
 			if err != nil {
 				return nil, err
 			}
-		}
 
-		serverOptions := []grpc.ServerOption{
-			grpc.MaxSendMsgSize(int(p.config.MaxSendMsgSize)),
-			grpc.MaxRecvMsgSize(int(p.config.MaxRecvMsgSize)),
-			grpc.KeepaliveParams(keepalive.ServerParameters{
-				MaxConnectionIdle:     p.config.MaxConnectionIdle,
-				MaxConnectionAge:      p.config.MaxConnectionAge,
-				MaxConnectionAgeGrace: p.config.MaxConnectionAge,
-				Time:                  p.config.PingTime,
-				Timeout:               p.config.Timeout,
-			}),
-			grpc.MaxConcurrentStreams(uint32(p.config.MaxConcurrentStreams)),
+			opts = append(opts, grpc.Creds(tcreds))
 		}
-
-		opts = append(opts, grpc.Creds(tcreds))
-		opts = append(opts, serverOptions...)
 	}
 
+	serverOptions := []grpc.ServerOption{
+		grpc.MaxSendMsgSize(int(p.config.MaxSendMsgSize)),
+		grpc.MaxRecvMsgSize(int(p.config.MaxRecvMsgSize)),
+		grpc.KeepaliveParams(keepalive.ServerParameters{
+			MaxConnectionIdle:     p.config.MaxConnectionIdle,
+			MaxConnectionAge:      p.config.MaxConnectionAge,
+			MaxConnectionAgeGrace: p.config.MaxConnectionAge,
+			Time:                  p.config.PingTime,
+			Timeout:               p.config.Timeout,
+		}),
+		grpc.MaxConcurrentStreams(uint32(p.config.MaxConcurrentStreams)),
+	}
+
+	opts = append(opts, serverOptions...)
 	opts = append(opts, p.opts...)
 
 	// custom codec is required to bypass protobuf, common interceptor used for debug and stats
