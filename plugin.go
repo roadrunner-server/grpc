@@ -5,6 +5,8 @@ import (
 	stderr "errors"
 	"sync"
 
+	"github.com/prometheus/client_golang/prometheus"
+
 	"github.com/roadrunner-server/errors"
 	"github.com/roadrunner-server/grpc/v3/codec"
 	"github.com/roadrunner-server/grpc/v3/proxy"
@@ -66,6 +68,10 @@ type Plugin struct {
 	healthServer  *HealthCheckServer
 	statsExporter *metrics.StatsExporter
 
+	queueSize       prometheus.Gauge
+	requestCounter  *prometheus.CounterVec
+	requestDuration *prometheus.HistogramVec
+
 	log *zap.Logger
 }
 
@@ -104,6 +110,28 @@ func (p *Plugin) Init(cfg Configurer, log *zap.Logger, server Server) error {
 	*p.log = *log
 	p.mu = &sync.RWMutex{}
 	p.statsExporter = newStatsExporter(p)
+
+	// metrics
+	p.queueSize = prometheus.NewGauge(prometheus.GaugeOpts{
+		Namespace: namespace,
+		Name:      "requests_queue",
+		Help:      "Total number of queued requests.",
+	})
+
+	p.requestCounter = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Name:      "request_total",
+		Help:      "Total number of handled GRPC requests after server restart.",
+	}, []string{"grpc_method"})
+
+	p.requestDuration = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Namespace: namespace,
+			Name:      "request_duration_seconds",
+			Help:      "GRPC request duration.",
+		},
+		[]string{"grpc_method"},
+	)
 
 	return nil
 }

@@ -54,7 +54,15 @@ func (p *Plugin) createGRPCserver() (*grpc.Server, error) {
 
 func (p *Plugin) interceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
 	start := time.Now()
+
+	p.queueSize.Inc()
+
 	resp, err := handler(ctx, req)
+
+	defer p.requestCounter.WithLabelValues(info.FullMethod).Inc()
+	defer p.requestDuration.WithLabelValues(info.FullMethod).Observe(time.Since(start).Seconds())
+	defer p.queueSize.Dec()
+
 	if err != nil {
 		p.log.Error("method call was finished with error", zap.Error(err), zap.String("method", info.FullMethod), zap.Time("start", start), zap.Duration("elapsed", time.Since(start)))
 
