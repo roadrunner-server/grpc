@@ -14,7 +14,7 @@ type Informer interface {
 func (p *Plugin) MetricsCollector() []prometheus.Collector {
 	// p - implements Exporter interface (workers)
 	// other - request duration and count
-	return []prometheus.Collector{p.statsExporter}
+	return []prometheus.Collector{p.statsExporter, p.requestCounter, p.requestDuration, p.queueSize}
 }
 
 const (
