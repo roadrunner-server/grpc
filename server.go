@@ -16,6 +16,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/keepalive"
+	"google.golang.org/grpc/reflection"
 )
 
 func (p *Plugin) createGRPCserver() (*grpc.Server, error) {
@@ -26,6 +27,9 @@ func (p *Plugin) createGRPCserver() (*grpc.Server, error) {
 	}
 
 	server := grpc.NewServer(opts...)
+	if p.config.Reflection {
+		reflection.Register(server)
+	}
 
 	for i := 0; i < len(p.config.Proto); i++ {
 		if p.config.Proto[i] == "" {

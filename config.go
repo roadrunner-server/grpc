@@ -39,6 +39,7 @@ type Config struct {
 	MaxConcurrentStreams  int64         `mapstructure:"max_concurrent_streams"`
 	PingTime              time.Duration `mapstructure:"ping_time"`
 	Timeout               time.Duration `mapstructure:"timeout"`
+	Reflection            bool          `mapstructure:"reflection"`
 }
 
 type TLS struct {
