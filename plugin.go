@@ -41,15 +41,16 @@ type Configurer interface {
 type Pool interface {
 	// Workers returns worker list associated with the pool.
 	Workers() (workers []*worker.Process)
-
 	// Exec payload
 	Exec(ctx context.Context, p *payload.Payload) (*payload.Payload, error)
-
 	// Reset kill all workers inside the watcher and replaces with new
 	Reset(ctx context.Context) error
-
 	// Destroy all underlying stack (but let them complete the task).
 	Destroy(ctx context.Context)
+}
+
+type Logger interface {
+	NamedLogger(name string) *zap.Logger
 }
 
 // Server creates workers for the application.
@@ -75,7 +76,7 @@ type Plugin struct {
 	log *zap.Logger
 }
 
-func (p *Plugin) Init(cfg Configurer, log *zap.Logger, server Server) error {
+func (p *Plugin) Init(cfg Configurer, log Logger, server Server) error {
 	const op = errors.Op("grpc_plugin_init")
 
 	if !cfg.Has(pluginName) {
@@ -106,8 +107,7 @@ func (p *Plugin) Init(cfg Configurer, log *zap.Logger, server Server) error {
 	}
 	p.config.Env[RrMode] = pluginName
 
-	p.log = new(zap.Logger)
-	*p.log = *log
+	p.log = log.NamedLogger(pluginName)
 	p.mu = &sync.RWMutex{}
 	p.statsExporter = newStatsExporter(p)
 
@@ -191,18 +191,28 @@ func (p *Plugin) Serve() chan error {
 	return errCh
 }
 
-func (p *Plugin) Stop() error {
-	p.mu.Lock()
-	defer p.mu.Unlock()
+func (p *Plugin) Stop(ctx context.Context) error {
+	finCh := make(chan struct{}, 1)
+	go func() {
+		p.mu.Lock()
+		defer p.mu.Unlock()
 
-	p.healthServer.SetServingStatus(grpc_health_v1.HealthCheckResponse_NOT_SERVING)
+		p.healthServer.SetServingStatus(grpc_health_v1.HealthCheckResponse_NOT_SERVING)
 
-	if p.server != nil {
-		p.server.Stop()
+		if p.server != nil {
+			p.server.Stop()
+		}
+
+		p.healthServer.Shutdown()
+		finCh <- struct{}{}
+	}()
+
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-finCh:
+		return nil
 	}
-
-	p.healthServer.Shutdown()
-	return nil
 }
 
 func (p *Plugin) Name() string {
