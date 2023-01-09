@@ -41,6 +41,7 @@ jobs:
         uses: arduino/setup-protoc@v1
         with:
           version: "3.x"
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Init Go modules Cache # Docs: <https://git.io/JfAKn#go---modules>
         uses: actions/cache@v3
