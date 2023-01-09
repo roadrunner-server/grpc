@@ -11,9 +11,9 @@ import (
 
 	"github.com/roadrunner-server/errors"
 	"github.com/roadrunner-server/goridge/v3/pkg/frame"
-	"github.com/roadrunner-server/grpc/v3/codec"
-	"github.com/roadrunner-server/sdk/v3/payload"
-	"github.com/roadrunner-server/sdk/v3/worker"
+	"github.com/roadrunner-server/grpc/v4/codec"
+	"github.com/roadrunner-server/sdk/v4/payload"
+	"github.com/roadrunner-server/sdk/v4/worker"
 	"golang.org/x/net/context"
 	spb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc"

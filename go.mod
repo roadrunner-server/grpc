@@ -1,4 +1,4 @@
-module github.com/roadrunner-server/grpc/v3
+module github.com/roadrunner-server/grpc/v4
 
 go 1.19
 
@@ -8,11 +8,11 @@ require (
 	github.com/prometheus/client_golang v1.14.0
 	github.com/roadrunner-server/errors v1.2.0
 	github.com/roadrunner-server/goridge/v3 v3.6.2
-	github.com/roadrunner-server/sdk/v3 v3.1.0
+	github.com/roadrunner-server/sdk/v4 v4.0.0
 	github.com/stretchr/testify v1.8.1
 	go.uber.org/zap v1.24.0
 	golang.org/x/net v0.5.0
-	google.golang.org/genproto v0.0.0-20230104163317-caabf589fcbf
+	google.golang.org/genproto v0.0.0-20230106154932-a12b697841d9
 	google.golang.org/grpc v1.51.0
 	google.golang.org/protobuf v1.28.1
 )

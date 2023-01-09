@@ -14,7 +14,7 @@ FROM scratch
 ARG APP_VERSION=""
 
 # Runtime dependencies
-LABEL "build.buf.plugins.runtime_library_versions.0.name"="github.com/roadrunner-server/grpc/v3/protoc_plugins"
+LABEL "build.buf.plugins.runtime_library_versions.0.name"="github.com/roadrunner-server/grpc/v4/protoc_plugins"
 LABEL "build.buf.plugins.runtime_library_versions.0.version"="$APP_VERSION"
 LABEL "build.buf.plugins.runtime_library_versions.1.name"="google.golang.org/protobuf"
 LABEL "build.buf.plugins.runtime_library_versions.1.version"="v1.27.1"
