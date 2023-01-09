@@ -2,8 +2,8 @@ package grpc
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/roadrunner-server/sdk/v3/metrics"
-	"github.com/roadrunner-server/sdk/v3/state/process"
+	"github.com/roadrunner-server/sdk/v4/metrics"
+	"github.com/roadrunner-server/sdk/v4/state/process"
 )
 
 // Informer used to get workers from particular plugin or set of plugins
