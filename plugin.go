@@ -78,7 +78,7 @@ type Plugin struct {
 	log *zap.Logger
 
 	// middlewares to chain
-	mdwr map[string]common.Middleware
+	mdwr map[string]common.UnaryInterceptor
 }
 
 func (p *Plugin) Init(cfg Configurer, log Logger, server Server) error {
@@ -138,7 +138,7 @@ func (p *Plugin) Init(cfg Configurer, log Logger, server Server) error {
 		[]string{"grpc_method"},
 	)
 
-	p.mdwr = make(map[string]common.Middleware)
+	p.mdwr = make(map[string]common.UnaryInterceptor)
 
 	return nil
 }
@@ -263,15 +263,15 @@ func (p *Plugin) Workers() []*process.State {
 	return ps
 }
 
-// Collects collecting grpc middlewares
+// Collects collecting grpc interceptors
 func (p *Plugin) Collects() []*dep.In {
 	return []*dep.In{
 		dep.Fits(func(pp any) {
-			mdw := pp.(common.Middleware)
+			mdw := pp.(common.UnaryInterceptor)
 			// just to be safe
 			p.mu.Lock()
 			p.mdwr[mdw.Name()] = mdw
 			p.mu.Unlock()
-		}, (*common.Middleware)(nil)),
+		}, (*common.UnaryInterceptor)(nil)),
 	}
 }

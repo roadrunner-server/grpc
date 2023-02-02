@@ -4,7 +4,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-type Middleware interface {
-	Middleware() grpc.UnaryServerInterceptor
+type UnaryInterceptor interface {
+	Interceptor() grpc.UnaryServerInterceptor
 	Name() string
 }
