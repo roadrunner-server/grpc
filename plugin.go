@@ -7,8 +7,10 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
+	"github.com/roadrunner-server/endure/v2/dep"
 	"github.com/roadrunner-server/errors"
 	"github.com/roadrunner-server/grpc/v4/codec"
+	"github.com/roadrunner-server/grpc/v4/common"
 	"github.com/roadrunner-server/grpc/v4/proxy"
 	"github.com/roadrunner-server/sdk/v4/metrics"
 	"github.com/roadrunner-server/sdk/v4/payload"
@@ -74,6 +76,9 @@ type Plugin struct {
 	requestDuration *prometheus.HistogramVec
 
 	log *zap.Logger
+
+	// middlewares to chain
+	mdwr map[string]common.Middleware
 }
 
 func (p *Plugin) Init(cfg Configurer, log Logger, server Server) error {
@@ -133,6 +138,8 @@ func (p *Plugin) Init(cfg Configurer, log Logger, server Server) error {
 		[]string{"grpc_method"},
 	)
 
+	p.mdwr = make(map[string]common.Middleware)
+
 	return nil
 }
 
@@ -155,7 +162,7 @@ func (p *Plugin) Serve() chan error {
 		return errCh
 	}
 
-	p.server, err = p.createGRPCserver()
+	p.server, err = p.createGRPCserver(p.mdwr)
 	if err != nil {
 		errCh <- errors.E(op, err)
 		return errCh
@@ -254,4 +261,17 @@ func (p *Plugin) Workers() []*process.State {
 	}
 
 	return ps
+}
+
+// Collects collecting grpc middlewares
+func (p *Plugin) Collects() []*dep.In {
+	return []*dep.In{
+		dep.Fits(func(pp any) {
+			mdw := pp.(common.Middleware)
+			// just to be safe
+			p.mu.Lock()
+			p.mdwr[mdw.Name()] = mdw
+			p.mu.Unlock()
+		}, (*common.Middleware)(nil)),
+	}
 }
