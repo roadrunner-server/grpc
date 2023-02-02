@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/roadrunner-server/errors"
+	"github.com/roadrunner-server/grpc/v4/common"
 	"github.com/roadrunner-server/grpc/v4/parser"
 	"github.com/roadrunner-server/grpc/v4/proxy"
 	"go.uber.org/zap"
@@ -18,12 +19,27 @@ import (
 	"google.golang.org/grpc/keepalive"
 )
 
-func (p *Plugin) createGRPCserver() (*grpc.Server, error) {
+func (p *Plugin) createGRPCserver(mdwr map[string]common.UnaryInterceptor) (*grpc.Server, error) {
 	const op = errors.Op("grpc_plugin_create_server")
 	opts, err := p.serverOptions()
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
+
+	interceptors := []grpc.UnaryServerInterceptor{grpc.UnaryServerInterceptor(p.interceptor)}
+	for _, interceptor := range mdwr {
+		interceptors = append(
+			interceptors,
+			interceptor.Interceptor(),
+		)
+	}
+
+	opts = append(
+		opts,
+		grpc.ChainUnaryInterceptor(
+			interceptors...,
+		),
+	)
 
 	server := grpc.NewServer(opts...)
 
@@ -144,8 +160,5 @@ func (p *Plugin) serverOptions() ([]grpc.ServerOption, error) {
 	opts = append(opts, p.opts...)
 
 	// custom codec is required to bypass protobuf, common interceptor used for debug and stats
-	return append(
-		opts,
-		grpc.UnaryInterceptor(p.interceptor),
-	), nil
+	return opts, nil
 }
