@@ -6,7 +6,7 @@ require (
 	github.com/emicklei/proto v1.11.1
 	github.com/goccy/go-json v0.10.0
 	github.com/prometheus/client_golang v1.14.0
-	github.com/roadrunner-server/endure/v2 v2.0.1
+	github.com/roadrunner-server/endure/v2 v2.1.0
 	github.com/roadrunner-server/errors v1.2.0
 	github.com/roadrunner-server/goridge/v3 v3.6.2
 	github.com/roadrunner-server/sdk/v4 v4.0.0
