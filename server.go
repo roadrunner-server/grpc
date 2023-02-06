@@ -33,7 +33,7 @@ func (p *Plugin) createGRPCserver(interceptors map[string]common.Interceptor) (*
 	for _, interceptor := range interceptors {
 		unaryInterceptors = append(
 			unaryInterceptors,
-			interceptor.UnaryInterceptor(),
+			interceptor.UnaryServerInterceptor(),
 		)
 	}
 

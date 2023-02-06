@@ -12,7 +12,7 @@ import (
 )
 
 type Interceptor interface {
-	UnaryInterceptor() grpc.UnaryServerInterceptor
+	UnaryServerInterceptor() grpc.UnaryServerInterceptor
 	Name() string
 }
 
