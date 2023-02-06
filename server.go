@@ -19,25 +19,28 @@ import (
 	"google.golang.org/grpc/keepalive"
 )
 
-func (p *Plugin) createGRPCserver(mdwr map[string]common.UnaryInterceptor) (*grpc.Server, error) {
+func (p *Plugin) createGRPCserver(interceptors map[string]common.Interceptor) (*grpc.Server, error) {
 	const op = errors.Op("grpc_plugin_create_server")
 	opts, err := p.serverOptions()
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
 
-	interceptors := []grpc.UnaryServerInterceptor{grpc.UnaryServerInterceptor(p.interceptor)}
-	for _, interceptor := range mdwr {
-		interceptors = append(
-			interceptors,
-			interceptor.Interceptor(),
+	unaryInterceptors := []grpc.UnaryServerInterceptor{
+		grpc.UnaryServerInterceptor(p.interceptor),
+	}
+
+	for _, interceptor := range interceptors {
+		unaryInterceptors = append(
+			unaryInterceptors,
+			interceptor.UnaryInterceptor(),
 		)
 	}
 
 	opts = append(
 		opts,
 		grpc.ChainUnaryInterceptor(
-			interceptors...,
+			unaryInterceptors...,
 		),
 	)
 

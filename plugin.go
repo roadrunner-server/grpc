@@ -13,12 +13,9 @@ import (
 	"github.com/roadrunner-server/grpc/v4/common"
 	"github.com/roadrunner-server/grpc/v4/proxy"
 	"github.com/roadrunner-server/sdk/v4/metrics"
-	"github.com/roadrunner-server/sdk/v4/payload"
 	"github.com/roadrunner-server/sdk/v4/pool"
-	staticPool "github.com/roadrunner-server/sdk/v4/pool/static_pool"
 	"github.com/roadrunner-server/sdk/v4/state/process"
 	"github.com/roadrunner-server/sdk/v4/utils"
-	"github.com/roadrunner-server/sdk/v4/worker"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/encoding"
@@ -33,40 +30,13 @@ const (
 	RrMode     string = "RR_MODE"
 )
 
-type Configurer interface {
-	// UnmarshalKey takes a single key and unmarshal it into a Struct.
-	UnmarshalKey(name string, out any) error
-	// Has checks if config section exists.
-	Has(name string) bool
-}
-
-type Pool interface {
-	// Workers returns worker list associated with the pool.
-	Workers() (workers []*worker.Process)
-	// Exec payload
-	Exec(ctx context.Context, p *payload.Payload) (*payload.Payload, error)
-	// Reset kill all workers inside the watcher and replaces with new
-	Reset(ctx context.Context) error
-	// Destroy all underlying stack (but let them complete the task).
-	Destroy(ctx context.Context)
-}
-
-type Logger interface {
-	NamedLogger(name string) *zap.Logger
-}
-
-// Server creates workers for the application.
-type Server interface {
-	NewPool(ctx context.Context, cfg *pool.Config, env map[string]string, _ *zap.Logger) (*staticPool.Pool, error)
-}
-
 type Plugin struct {
 	mu            *sync.RWMutex
 	config        *Config
-	gPool         Pool
+	gPool         common.Pool
 	opts          []grpc.ServerOption
 	server        *grpc.Server
-	rrServer      Server
+	rrServer      common.Server
 	proxyList     []*proxy.Proxy
 	healthServer  *HealthCheckServer
 	statsExporter *metrics.StatsExporter
@@ -77,11 +47,11 @@ type Plugin struct {
 
 	log *zap.Logger
 
-	// middlewares to chain
-	mdwr map[string]common.UnaryInterceptor
+	// interceptors to chain
+	interceptors map[string]common.Interceptor
 }
 
-func (p *Plugin) Init(cfg Configurer, log Logger, server Server) error {
+func (p *Plugin) Init(cfg common.Configurer, log common.Logger, server common.Server) error {
 	const op = errors.Op("grpc_plugin_init")
 
 	if !cfg.Has(pluginName) {
@@ -138,7 +108,7 @@ func (p *Plugin) Init(cfg Configurer, log Logger, server Server) error {
 		[]string{"grpc_method"},
 	)
 
-	p.mdwr = make(map[string]common.UnaryInterceptor)
+	p.interceptors = make(map[string]common.Interceptor)
 
 	return nil
 }
@@ -162,7 +132,7 @@ func (p *Plugin) Serve() chan error {
 		return errCh
 	}
 
-	p.server, err = p.createGRPCserver(p.mdwr)
+	p.server, err = p.createGRPCserver(p.interceptors)
 	if err != nil {
 		errCh <- errors.E(op, err)
 		return errCh
@@ -267,11 +237,11 @@ func (p *Plugin) Workers() []*process.State {
 func (p *Plugin) Collects() []*dep.In {
 	return []*dep.In{
 		dep.Fits(func(pp any) {
-			mdw := pp.(common.UnaryInterceptor)
+			interceptor := pp.(common.Interceptor)
 			// just to be safe
 			p.mu.Lock()
-			p.mdwr[mdw.Name()] = mdw
+			p.interceptors[interceptor.Name()] = interceptor
 			p.mu.Unlock()
-		}, (*common.UnaryInterceptor)(nil)),
+		}, (*common.Interceptor)(nil)),
 	}
 }
