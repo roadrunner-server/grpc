@@ -31,7 +31,7 @@ require (
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.39.0 // indirect
 	github.com/prometheus/procfs v0.9.0 // indirect
-	github.com/roadrunner-server/tcplisten v1.2.1 // indirect
+	github.com/roadrunner-server/tcplisten v1.3.0 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/tklauser/go-sysconf v0.3.11 // indirect
