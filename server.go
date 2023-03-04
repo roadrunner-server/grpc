@@ -15,8 +15,10 @@ import (
 	"github.com/roadrunner-server/grpc/v4/proxy"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/keepalive"
+	"google.golang.org/grpc/status"
 )
 
 func (p *Plugin) createGRPCserver(interceptors map[string]common.Interceptor) (*grpc.Server, error) {
@@ -78,8 +80,16 @@ func (p *Plugin) interceptor(ctx context.Context, req any, info *grpc.UnaryServe
 
 	resp, err := handler(ctx, req)
 
+	s, ok := status.FromError(err)
+	var statusCode codes.Code
+	if ok {
+		statusCode = s.Code()
+	} else {
+		statusCode = status.New(codes.Unknown, err.Error()).Code()
+	}
+
 	defer func() {
-		p.requestCounter.WithLabelValues(info.FullMethod).Inc()
+		p.requestCounter.WithLabelValues(info.FullMethod, statusCode.String()).Inc()
 		p.requestDuration.WithLabelValues(info.FullMethod).Observe(time.Since(start).Seconds())
 		p.queueSize.Dec()
 	}()
