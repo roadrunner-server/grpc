@@ -97,7 +97,7 @@ func (p *Plugin) Init(cfg common.Configurer, log common.Logger, server common.Se
 		Namespace: namespace,
 		Name:      "request_total",
 		Help:      "Total number of handled GRPC requests after server restart.",
-	}, []string{"grpc_method"})
+	}, []string{"grpc_method", "grpc_code"})
 
 	p.requestDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
