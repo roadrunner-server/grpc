@@ -96,8 +96,8 @@ func (p *Plugin) Init(cfg common.Configurer, log common.Logger, server common.Se
 	p.requestCounter = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Namespace: namespace,
 		Name:      "request_total",
-		Help:      "Total number of handled GRPC requests after server restart.",
-	}, []string{"grpc_method", "grpc_code"})
+		Help:      "Total number of GRPC requests processed after the server restarted, including their status codes.",
+	}, []string{"grpc_method", "status_code"})
 
 	p.requestDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
