@@ -117,6 +117,9 @@ func (p *Plugin) Serve() chan error {
 	const op = errors.Op("grpc_plugin_serve")
 	errCh := make(chan error, 1)
 
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
 	var err error
 	p.gPool, err = p.rrServer.NewPool(context.Background(), &pool.Config{
 		Debug:           p.config.GrpcPool.Debug,
