@@ -3,7 +3,7 @@ module github.com/roadrunner-server/grpc/v4
 go 1.20
 
 require (
-	github.com/emicklei/proto v1.11.1
+	github.com/emicklei/proto v1.11.2
 	github.com/goccy/go-json v0.10.2
 	github.com/prometheus/client_golang v1.15.0
 	github.com/roadrunner-server/endure/v2 v2.2.0
