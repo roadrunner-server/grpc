@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"math"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -62,19 +63,31 @@ func (c *Config) InitDefaults() error { //nolint:gocyclo,gocognit
 		return errors.E(op, errors.Errorf("malformed grpc address, provided: %s", c.Listen))
 	}
 
-	for i := 0; i < len(c.Proto); i++ {
-		if c.Proto[i] == "" {
+	protos := make([]string, 0, len(c.Proto))
+	for _, path := range c.Proto {
+		if path == "" {
 			continue
 		}
 
-		if _, err := os.Stat(c.Proto[i]); err != nil {
+		if strings.ContainsAny(path, "*?[") {
+			files, err := filepath.Glob(path)
+			if err != nil {
+				return errors.E(op, err)
+			}
+			protos = append(protos, files...)
+			continue
+		}
+
+		if _, err := os.Stat(path); err != nil {
 			if os.IsNotExist(err) {
-				return errors.E(op, errors.Errorf("proto file '%s' does not exists", c.Proto[i]))
+				return errors.E(op, errors.Errorf("proto file '%s' does not exists", path))
 			}
 
 			return errors.E(op, err)
 		}
+		protos = append(protos, path)
 	}
+	c.Proto = protos
 
 	if c.EnableTLS() {
 		if _, err := os.Stat(c.TLS.Key); err != nil {
