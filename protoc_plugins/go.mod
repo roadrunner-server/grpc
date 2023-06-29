@@ -1,10 +1,10 @@
 module github.com/roadrunner-server/grpc/protoc_plugins/v2
 
-go 1.19
+go 1.20
 
 require (
-	github.com/stretchr/testify v1.8.1
-	google.golang.org/protobuf v1.28.1
+	github.com/stretchr/testify v1.8.4
+	google.golang.org/protobuf v1.31.0
 )
 
 require (
