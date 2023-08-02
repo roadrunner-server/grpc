@@ -11,7 +11,7 @@ require (
 	github.com/roadrunner-server/goridge/v3 v3.6.3
 	github.com/roadrunner-server/sdk/v4 v4.3.1
 	github.com/stretchr/testify v1.8.4
-	go.uber.org/zap v1.24.0
+	go.uber.org/zap v1.25.0
 	golang.org/x/net v0.12.0
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230720185612-659f7aaaa771
 	google.golang.org/grpc v1.56.2
@@ -35,7 +35,6 @@ require (
 	github.com/tklauser/go-sysconf v0.3.11 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
-	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect
