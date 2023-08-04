@@ -13,6 +13,7 @@ import (
 	"github.com/roadrunner-server/goridge/v3/pkg/frame"
 	"github.com/roadrunner-server/grpc/v4/codec"
 	"github.com/roadrunner-server/sdk/v4/payload"
+	"github.com/roadrunner-server/sdk/v4/pool/static_pool"
 	"github.com/roadrunner-server/sdk/v4/worker"
 	"golang.org/x/net/context"
 	spb "google.golang.org/genproto/googleapis/rpc/status"
@@ -35,13 +36,10 @@ const (
 type Pool interface {
 	// Workers returns worker list associated with the pool.
 	Workers() (workers []*worker.Process)
-
 	// Exec payload
-	Exec(ctx context.Context, p *payload.Payload) (*payload.Payload, error)
-
+	Exec(ctx context.Context, p *payload.Payload, stopCh chan struct{}) (chan *static_pool.PExec, error)
 	// Reset kill all workers inside the watcher and replaces with new
 	Reset(ctx context.Context) error
-
 	// Destroy all underlying stack (but let them complete the task).
 	Destroy(ctx context.Context)
 }
@@ -162,14 +160,20 @@ func (p *Proxy) invoke(ctx context.Context, method string, in *codec.RawMessage)
 	}
 
 	p.mu.RLock()
-	resp, err := p.grpcPool.Exec(ctx, pld)
+	sc := make(chan struct{}, 1)
+	re, err := p.grpcPool.Exec(ctx, pld, sc)
 	p.mu.RUnlock()
-
 	if err != nil {
 		return nil, wrapError(err)
 	}
 
-	md, err := p.responseMetadata(resp)
+	resp := <-re
+	if resp.Payload().IsStream {
+		sc <- struct{}{}
+		return nil, status.Error(codes.Internal, "streaming is not supported")
+	}
+
+	md, err := p.responseMetadata(resp.Payload())
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +183,7 @@ func (p *Proxy) invoke(ctx context.Context, method string, in *codec.RawMessage)
 		return nil, err
 	}
 
-	return codec.RawMessage(resp.Body), nil
+	return codec.RawMessage(resp.Body()), nil
 }
 
 // responseMetadata extracts metadata from roadrunner response Payload.Context and converts it to metadata.MD
@@ -199,8 +203,6 @@ func (p *Proxy) responseMetadata(resp *payload.Payload) (metadata.MD, error) {
 		md = metadata.New(rpcMetadata)
 
 		/*
-			[EXPERIMENTAL] !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 			we have an error
 			actually, if code is OK, status.ErrorProto will be nil
 			but, we use this only in case of PHP exception happened

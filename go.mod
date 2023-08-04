@@ -6,15 +6,15 @@ require (
 	github.com/emicklei/proto v1.12.1
 	github.com/goccy/go-json v0.10.2
 	github.com/prometheus/client_golang v1.16.0
-	github.com/roadrunner-server/endure/v2 v2.3.0
+	github.com/roadrunner-server/endure/v2 v2.3.1
 	github.com/roadrunner-server/errors v1.2.0
 	github.com/roadrunner-server/goridge/v3 v3.6.3
-	github.com/roadrunner-server/sdk/v4 v4.3.1
+	github.com/roadrunner-server/sdk/v4 v4.4.0-beta.3
 	github.com/stretchr/testify v1.8.4
-	go.uber.org/zap v1.24.0
-	golang.org/x/net v0.12.0
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230720185612-659f7aaaa771
-	google.golang.org/grpc v1.56.2
+	go.uber.org/zap v1.25.0
+	golang.org/x/net v0.13.0
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20230803162519-f966b187b2e5
+	google.golang.org/grpc v1.57.0
 	google.golang.org/protobuf v1.31.0
 )
 
@@ -29,16 +29,15 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.4.0 // indirect
 	github.com/prometheus/common v0.44.0 // indirect
-	github.com/prometheus/procfs v0.11.0 // indirect
+	github.com/prometheus/procfs v0.11.1 // indirect
 	github.com/roadrunner-server/tcplisten v1.3.0 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/tklauser/go-sysconf v0.3.11 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
-	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/sys v0.10.0 // indirect
-	golang.org/x/text v0.11.0 // indirect
+	golang.org/x/sys v0.11.0 // indirect
+	golang.org/x/text v0.12.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
