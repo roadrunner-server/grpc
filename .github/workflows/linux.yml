@@ -1,22 +1,6 @@
 name: Linux
 
-on:
-  push:
-    branches:
-      - master
-      - beta
-      - stable
-    tags-ignore:
-      - "**"
-    paths-ignore:
-      - "**.md"
-      - "**.yaml"
-      - "**.yml"
-  pull_request:
-    paths-ignore:
-      - "**.md"
-      - "**.yaml"
-      - "**.yml"
+on: [push, pull_request]
 
 jobs:
   golang:
