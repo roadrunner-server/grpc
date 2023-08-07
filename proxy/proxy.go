@@ -160,20 +160,31 @@ func (p *Proxy) invoke(ctx context.Context, method string, in *codec.RawMessage)
 	}
 
 	p.mu.RLock()
-	sc := make(chan struct{}, 1)
-	re, err := p.grpcPool.Exec(ctx, pld, sc)
+	re, err := p.grpcPool.Exec(ctx, pld, nil)
 	p.mu.RUnlock()
 	if err != nil {
 		return nil, wrapError(err)
 	}
 
-	resp := <-re
-	if resp.Payload().IsStream {
-		sc <- struct{}{}
-		return nil, status.Error(codes.Internal, "streaming is not supported")
+	var r *payload.Payload
+
+	select {
+	case pld := <-re:
+		if pld.Error() != nil {
+			return nil, err
+		}
+		// streaming is not supported
+		if pld.Payload().IsStream {
+			return nil, errors.Str("streaming is not supported")
+		}
+
+		// assign the payload
+		r = pld.Payload()
+	default:
+		return nil, errors.Str("worker empty response")
 	}
 
-	md, err := p.responseMetadata(resp.Payload())
+	md, err := p.responseMetadata(r)
 	if err != nil {
 		return nil, err
 	}
@@ -183,7 +194,7 @@ func (p *Proxy) invoke(ctx context.Context, method string, in *codec.RawMessage)
 		return nil, err
 	}
 
-	return codec.RawMessage(resp.Body()), nil
+	return codec.RawMessage(r.Body), nil
 }
 
 // responseMetadata extracts metadata from roadrunner response Payload.Context and converts it to metadata.MD
