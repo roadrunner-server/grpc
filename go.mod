@@ -8,14 +8,14 @@ require (
 	github.com/emicklei/proto v1.12.1
 	github.com/goccy/go-json v0.10.2
 	github.com/prometheus/client_golang v1.16.0
-	github.com/roadrunner-server/endure/v2 v2.4.1
+	github.com/roadrunner-server/endure/v2 v2.4.2
 	github.com/roadrunner-server/errors v1.3.0
 	github.com/roadrunner-server/goridge/v3 v3.7.0
 	github.com/roadrunner-server/sdk/v4 v4.4.0-beta.5
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.25.0
 	golang.org/x/net v0.14.0
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230814215434-ca7cfce7776a
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20230815205213-6bfd019c3878
 	google.golang.org/grpc v1.57.0
 	google.golang.org/protobuf v1.31.0
 )
@@ -24,7 +24,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/go-ole/go-ole v1.2.6 // indirect
+	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
