@@ -10,7 +10,7 @@ require (
 	github.com/prometheus/client_golang v1.16.0
 	github.com/roadrunner-server/endure/v2 v2.4.2
 	github.com/roadrunner-server/errors v1.3.0
-	github.com/roadrunner-server/goridge/v3 v3.7.0
+	github.com/roadrunner-server/goridge/v3 v3.8.0
 	github.com/roadrunner-server/sdk/v4 v4.4.0-beta.5
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.25.0
