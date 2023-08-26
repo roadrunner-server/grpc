@@ -3,6 +3,7 @@ package proxy
 import (
 	"encoding/base64"
 	"encoding/json"
+	stderr "errors"
 	"fmt"
 	"math"
 	"strconv"
@@ -169,17 +170,17 @@ func (p *Proxy) invoke(ctx context.Context, method string, in *codec.RawMessage)
 	var r *payload.Payload
 
 	select {
-	case pld := <-re:
-		if pld.Error() != nil {
+	case pl := <-re:
+		if pl.Error() != nil {
 			return nil, err
 		}
 		// streaming is not supported
-		if pld.Payload().IsStream {
+		if pl.Payload().Flags&frame.STREAM != 0 {
 			return nil, errors.Str("streaming is not supported")
 		}
 
 		// assign the payload
-		r = pld.Payload()
+		r = pl.Payload()
 	default:
 		return nil, errors.Str("worker empty response")
 	}
@@ -282,7 +283,8 @@ func (p *Proxy) getPld() *payload.Payload {
 }
 
 func GetOriginalErr(err error) string {
-	e, ok := err.(*errors.Error) //nolint:errorlint
+	var e *errors.Error
+	ok := stderr.As(err, &e)
 	if !ok {
 		return err.Error()
 	}
