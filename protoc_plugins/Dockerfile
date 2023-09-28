@@ -1,6 +1,6 @@
-FROM golang as builder
+FROM --platform=${TARGETPLATFORM:-linux/amd64} golang:1.21-alpine as builder
 
-ENV GOOS=linux GOARCH=amd64 CGO_ENABLED=0
+ENV CGO_ENABLED=0
 
 WORKDIR /src
 COPY protoc_plugins/ .
@@ -14,10 +14,14 @@ FROM scratch
 ARG APP_VERSION=""
 
 # Runtime dependencies
-LABEL "build.buf.plugins.runtime_library_versions.0.name"="github.com/roadrunner-server/grpc/v4/protoc_plugins"
-LABEL "build.buf.plugins.runtime_library_versions.0.version"="$APP_VERSION"
-LABEL "build.buf.plugins.runtime_library_versions.1.name"="google.golang.org/protobuf"
-LABEL "build.buf.plugins.runtime_library_versions.1.version"="v1.27.1"
+LABEL org.opencontainers.image.title="protoc-gen-php-grpc"
+LABEL org.opencontainers.image.description="protoc plugin for generating PHP gRPC service stubs"
+LABEL org.opencontainers.image.url="https://roadrunner.dev"
+LABEL org.opencontainers.image.source="https://github.com/roadrunner-server/grpc"
+LABEL org.opencontainers.image.vendor="SpiralScout"
+LABEL org.opencontainers.image.version="$APP_VERSION"
+LABEL org.opencontainers.image.created="$BUILD_TIME"
+LABEL org.opencontainers.image.licenses="MIT"
 
 COPY --from=builder /src/protoc-gen-php-grpc-plugin /
 
