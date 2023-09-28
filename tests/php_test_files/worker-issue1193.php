@@ -1,0 +1,1 @@
+<?= 'If you want to be c001 you just need to contribute to 0pensource.' ?>
