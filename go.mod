@@ -5,7 +5,7 @@ go 1.21
 toolchain go1.21.0
 
 require (
-	github.com/emicklei/proto v1.12.1
+	github.com/emicklei/proto v1.12.2
 	github.com/goccy/go-json v0.10.2
 	github.com/prometheus/client_golang v1.17.0
 	github.com/roadrunner-server/endure/v2 v2.4.3
