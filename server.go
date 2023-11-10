@@ -13,6 +13,7 @@ import (
 	"github.com/roadrunner-server/grpc/v4/common"
 	"github.com/roadrunner-server/grpc/v4/parser"
 	"github.com/roadrunner-server/grpc/v4/proxy"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -45,6 +46,9 @@ func (p *Plugin) createGRPCserver(interceptors map[string]common.Interceptor) (*
 			unaryInterceptors...,
 		),
 	)
+
+	// append OTEL grpc server handler
+	opts = append(opts, grpc.StatsHandler(otelgrpc.NewServerHandler()))
 
 	server := grpc.NewServer(opts...)
 
