@@ -14,7 +14,7 @@ require (
 	github.com/roadrunner-server/otel/v4 v4.3.6
 	github.com/roadrunner-server/resetter/v4 v4.0.15
 	github.com/roadrunner-server/rpc/v4 v4.2.9
-	github.com/roadrunner-server/server/v4 v4.5.0
+	github.com/roadrunner-server/server/v4 v4.5.1
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.26.0
 	google.golang.org/grpc v1.59.0
@@ -92,7 +92,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.20.0 // indirect
 	go.opentelemetry.io/otel/trace v1.20.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.0.0 // indirect
-	go.temporal.io/api v1.25.0 // indirect
+	go.temporal.io/api v1.26.0 // indirect
 	go.temporal.io/sdk v1.25.1 // indirect
 	go.temporal.io/sdk/contrib/opentelemetry v0.3.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
