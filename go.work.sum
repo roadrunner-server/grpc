@@ -1191,6 +1191,7 @@ github.com/roadrunner-server/status/v4 v4.4.1/go.mod h1:fbvrKtCgYG56M4TeumIgl8jK
 github.com/roadrunner-server/tcp/v4 v4.3.0-beta.1 h1:BYZQCTrY0knk0kaEPmnHhRK/Z+FpKLKfIn7OcNextjA=
 github.com/roadrunner-server/tcp/v4 v4.3.0-beta.1/go.mod h1:MfU0Ezx2ZttdzKeFOnCrpMXffsym0ek+SK3WKis+g20=
 github.com/rogpeppe/fastuuid v1.2.0 h1:Ppwyp6VYCF1nvBTXL3trRso7mXMlRrw9ooo375wvi2s=
+github.com/rogpeppe/go-internal v1.11.0/go.mod h1:ddIwULY96R17DhadqLgMfk9H9tvdUzkipdSkR5nkCZA=
 github.com/rs/cors v1.10.0 h1:62NOS1h+r8p1mW6FM0FSB0exioXLhd/sh15KpjWBZ+8=
 github.com/rs/cors v1.10.0/go.mod h1:XyqrcTp5zjWr1wsJ8PIRZssZ8b/WMcMf71DJnit4EMU=
 github.com/ruudk/golang-pdf417 v0.0.0-20201230142125-a7e3863a1245 h1:K1Xf3bKttbF+koVGaX5xngRIZ5bVjbmPnaxE/dR08uY=
