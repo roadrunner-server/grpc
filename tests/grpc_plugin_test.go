@@ -25,6 +25,7 @@ import (
 	"github.com/roadrunner-server/otel/v4"
 	"github.com/roadrunner-server/resetter/v4"
 	"github.com/roadrunner-server/server/v4"
+	"github.com/roadrunner-server/status/v4"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health/grpc_health_v1"
@@ -46,7 +47,7 @@ func TestGrpcInit(t *testing.T) {
 	cont := endure.New(slog.LevelDebug)
 
 	cfg := &config.Plugin{
-		Version: "2.9.0",
+		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-init.yaml",
 		Prefix:  "rr",
 	}
@@ -108,12 +109,107 @@ func TestGrpcInit(t *testing.T) {
 	wg.Wait()
 }
 
+func TestGrpcCheckStatus(t *testing.T) {
+	cont := endure.New(slog.LevelDebug)
+
+	cfg := &config.Plugin{
+		Version: "2023.3.0",
+		Path:    "configs/.rr-grpc-status.yaml",
+		Prefix:  "rr",
+	}
+
+	err := cont.RegisterAll(
+		cfg,
+		&grpcPlugin.Plugin{},
+		&status.Plugin{},
+		&rpcPlugin.Plugin{},
+		&logger.Plugin{},
+		&server.Plugin{},
+	)
+	assert.NoError(t, err)
+
+	err = cont.Init()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ch, err := cont.Serve()
+	assert.NoError(t, err)
+
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+
+	stopCh := make(chan struct{}, 1)
+
+	go func() {
+		defer wg.Done()
+		for {
+			select {
+			case e := <-ch:
+				assert.Fail(t, "error", e.Error.Error())
+				err = cont.Stop()
+				if err != nil {
+					assert.FailNow(t, "error", err.Error())
+				}
+			case <-sig:
+				err = cont.Stop()
+				if err != nil {
+					assert.FailNow(t, "error", err.Error())
+				}
+				return
+			case <-stopCh:
+				err = cont.Stop()
+				if err != nil {
+					assert.FailNow(t, "error", err.Error())
+				}
+				return
+			}
+		}
+	}()
+
+	time.Sleep(time.Second)
+
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+	req, err := http.NewRequest("GET", "http://127.0.0.1:35544/health?plugin=grpc", nil)
+	require.NoError(t, err)
+
+	resp, err := client.Do(req)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	body, _ := io.ReadAll(resp.Body)
+	assert.Equal(t, "plugin: grpc, status: 200\n", string(body))
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	_ = resp.Body.Close()
+
+	req, err = http.NewRequest("GET", "http://127.0.0.1:35544/ready?plugin=grpc", nil)
+	require.NoError(t, err)
+
+	resp, err = client.Do(req)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	body, _ = io.ReadAll(resp.Body)
+	assert.Equal(t, "plugin: grpc, status: 200\n", string(body))
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	_ = resp.Body.Close()
+
+	stopCh <- struct{}{}
+
+	wg.Wait()
+}
+
 // different services, same methods inside
 func TestGrpcInitDup2(t *testing.T) {
 	cont := endure.New(slog.LevelDebug)
 
 	cfg := &config.Plugin{
-		Version: "2.9.0",
+		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-init-duplicate-2.yaml",
 		Prefix:  "rr",
 	}
@@ -180,7 +276,7 @@ func TestGrpcInitMultiple(t *testing.T) {
 	cont := endure.New(slog.LevelDebug)
 
 	cfg := &config.Plugin{
-		Version: "2.9.0",
+		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-init-multiple.yaml",
 		Prefix:  "rr",
 	}
@@ -258,7 +354,7 @@ func TestGrpcRqRs(t *testing.T) {
 	cont := endure.New(slog.LevelDebug)
 
 	cfg := &config.Plugin{
-		Version: "2.9.0",
+		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-rq.yaml",
 		Prefix:  "rr",
 	}
@@ -363,7 +459,7 @@ func TestGrpcRqRsException(t *testing.T) {
 	cont := endure.New(slog.LevelDebug)
 
 	cfg := &config.Plugin{
-		Version: "2.9.0",
+		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-rq-exception.yaml",
 		Prefix:  "rr",
 	}
@@ -441,7 +537,7 @@ func TestGrpcRqRsMultiple(t *testing.T) {
 	cont := endure.New(slog.LevelDebug)
 
 	cfg := &config.Plugin{
-		Version: "2.9.0",
+		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-rq-multiple.yaml",
 		Prefix:  "rr",
 	}
@@ -535,7 +631,7 @@ func TestGrpcRqRsTLS(t *testing.T) {
 	cont := endure.New(slog.LevelDebug)
 
 	cfg := &config.Plugin{
-		Version: "2.9.0",
+		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-rq-tls.yaml",
 		Prefix:  "rr",
 	}
@@ -620,7 +716,7 @@ func TestGrpcRqRsTLSRootCA(t *testing.T) {
 	cont := endure.New(slog.LevelDebug)
 
 	cfg := &config.Plugin{
-		Version: "2.9.0",
+		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-rq-tls-rootca.yaml",
 		Prefix:  "rr",
 	}
@@ -705,7 +801,7 @@ func TestGrpcRqRsTLS_WithReset(t *testing.T) {
 	cont := endure.New(slog.LevelDebug)
 
 	cfg := &config.Plugin{
-		Version: "2.9.0",
+		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-rq-tls.yaml",
 		Prefix:  "rr",
 	}
@@ -797,7 +893,7 @@ func TestGRPCMetrics(t *testing.T) {
 	cont := endure.New(slog.LevelDebug)
 
 	cfg := &config.Plugin{
-		Version: "2.9.0",
+		Version: "2023.3.0",
 		Prefix:  "rr",
 		Path:    "configs/.rr-grpc-metrics.yaml",
 	}
@@ -932,7 +1028,7 @@ func Test_GrpcRqOtlp(t *testing.T) {
 	cont := endure.New(slog.LevelDebug)
 
 	cfg := &config.Plugin{
-		Version: "2.9.0",
+		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-rq-otlp.yaml",
 		Prefix:  "rr",
 	}

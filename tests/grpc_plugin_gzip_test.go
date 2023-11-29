@@ -33,7 +33,7 @@ func TestGrpcRqRsGzip(t *testing.T) {
 	cont := endure.New(slog.LevelDebug)
 
 	cfg := &config.Plugin{
-		Version: "2.9.0",
+		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-rq.yaml",
 		Prefix:  "rr",
 	}
@@ -110,7 +110,7 @@ func TestGrpcRqRsMultipleGzip(t *testing.T) {
 	cont := endure.New(slog.LevelDebug)
 
 	cfg := &config.Plugin{
-		Version: "2.9.0",
+		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-rq-multiple.yaml",
 		Prefix:  "rr",
 	}
@@ -204,7 +204,7 @@ func TestGrpcRqRsTLSGzip(t *testing.T) {
 	cont := endure.New(slog.LevelDebug)
 
 	cfg := &config.Plugin{
-		Version: "2.9.0",
+		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-rq-tls.yaml",
 		Prefix:  "rr",
 	}
@@ -289,7 +289,7 @@ func TestGrpcRqRsTLSRootCAGzip(t *testing.T) {
 	cont := endure.New(slog.LevelDebug)
 
 	cfg := &config.Plugin{
-		Version: "2.9.0",
+		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-rq-tls-rootca.yaml",
 		Prefix:  "rr",
 	}
@@ -374,7 +374,7 @@ func TestGrpcRqRsTLS_WithResetGzip(t *testing.T) {
 	cont := endure.New(slog.LevelDebug)
 
 	cfg := &config.Plugin{
-		Version: "2.9.0",
+		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-rq-tls.yaml",
 		Prefix:  "rr",
 	}

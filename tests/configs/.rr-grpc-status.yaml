@@ -1,0 +1,30 @@
+version: '3'
+
+rpc:
+  listen: "tcp://127.0.0.1:6111"
+
+server:
+  command: "php php_test_files/worker-grpc.php"
+  relay: "pipes"
+  relay_timeout: "20s"
+
+status:
+  address: "127.0.0.1:35544"
+
+# GRPC service configuration
+grpc:
+  listen: "tcp://127.0.0.1:9111"
+  proto:
+    - "proto/test/test.proto"
+  max_send_msg_size: 50
+  max_recv_msg_size: 50
+  max_connection_idle: 0s
+  max_connection_age: 0s
+  max_connection_age_grace: 0s
+  max_concurrent_streams: 10
+  ping_time: 1s
+  timeout: 200s
+  pool:
+    num_workers: 1
+    allocate_timeout: 60s
+    destroy_timeout: 5s

@@ -15,6 +15,7 @@ require (
 	github.com/roadrunner-server/resetter/v4 v4.0.16
 	github.com/roadrunner-server/rpc/v4 v4.2.10
 	github.com/roadrunner-server/server/v4 v4.5.2
+	github.com/roadrunner-server/status/v4 v4.4.8
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.26.0
 	google.golang.org/grpc v1.59.0
@@ -61,6 +62,7 @@ require (
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.45.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
+	github.com/roadrunner-server/api/v4 v4.9.0 // indirect
 	github.com/roadrunner-server/errors v1.3.0 // indirect
 	github.com/roadrunner-server/sdk/v4 v4.5.3 // indirect
 	github.com/roadrunner-server/tcplisten v1.4.0 // indirect
