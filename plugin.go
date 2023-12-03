@@ -7,6 +7,8 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+
 	"github.com/roadrunner-server/endure/v2/dep"
 	"github.com/roadrunner-server/errors"
 	"github.com/roadrunner-server/grpc/v4/codec"
@@ -30,16 +32,24 @@ const (
 	RrMode     string = "RR_MODE"
 )
 
+type Tracer interface {
+	Tracer() *sdktrace.TracerProvider
+}
+
 type Plugin struct {
-	mu            *sync.RWMutex
-	config        *Config
-	gPool         common.Pool
-	opts          []grpc.ServerOption
-	server        *grpc.Server
-	rrServer      common.Server
-	proxyList     []*proxy.Proxy
-	healthServer  *HealthCheckServer
+	mu           *sync.RWMutex
+	config       *Config
+	gPool        common.Pool
+	opts         []grpc.ServerOption
+	server       *grpc.Server
+	rrServer     common.Server
+	proxyList    []*proxy.Proxy
+	healthServer *HealthCheckServer
+
+	experimental bool
+
 	statsExporter *metrics.StatsExporter
+	tracer        *sdktrace.TracerProvider
 
 	queueSize       prometheus.Gauge
 	requestCounter  *prometheus.CounterVec
@@ -108,6 +118,8 @@ func (p *Plugin) Init(cfg common.Configurer, log common.Logger, server common.Se
 		[]string{"grpc_method"},
 	)
 
+	p.tracer = sdktrace.NewTracerProvider()
+	p.experimental = cfg.Experimental()
 	p.interceptors = make(map[string]common.Interceptor)
 
 	return nil
@@ -246,5 +258,8 @@ func (p *Plugin) Collects() []*dep.In {
 			p.interceptors[interceptor.Name()] = interceptor
 			p.mu.Unlock()
 		}, (*common.Interceptor)(nil)),
+		dep.Fits(func(pp any) {
+			p.tracer = pp.(Tracer).Tracer()
+		}, (*Tracer)(nil)),
 	}
 }

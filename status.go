@@ -35,8 +35,8 @@ func (p *Plugin) Ready() (*status.Status, error) {
 	workers := p.gPool.Workers()
 
 	for i := 0; i < len(workers); i++ {
-		// If state of the worker is ready (at least 1)
-		// we assume, that plugin's worker pool is ready
+		// If the state of the worker is ready (at least 1)
+		// we assume that plugin's worker pool is ready
 		if workers[i].State().Compare(fsm.StateReady) {
 			return &status.Status{
 				Code: http.StatusOK,

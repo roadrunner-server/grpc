@@ -10,9 +10,9 @@ server:
 
 # GRPC service configuration
 grpc:
-  listen: "tcp://127.0.0.1:9001"
+  listen: "tcp://127.0.0.1:9091"
   proto:
-    - "proto/test/test.proto"
+    - "proto/service/service.proto"
   max_send_msg_size: 50
   max_recv_msg_size: 50
   max_connection_idle: 0s

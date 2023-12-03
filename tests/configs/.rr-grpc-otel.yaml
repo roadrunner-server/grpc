@@ -1,0 +1,29 @@
+version: '3'
+
+rpc:
+  listen: "tcp://127.0.0.1:6001"
+
+server:
+  command: "php php_test_files/worker-grpc.php"
+  relay: "pipes"
+  relay_timeout: "20s"
+
+grpc:
+  listen: "tcp://127.0.0.1:9092"
+  proto:
+    - "proto/service/service.proto"
+  ping_time: 1s
+  timeout: 200s
+  pool:
+    num_workers: 2
+    allocate_timeout: 60s
+    destroy_timeout: 60
+
+otel:
+  resource:
+    service_name: "rr_test_grpc"
+    service_version: "1.0.0"
+    service_namespace: "RR-gRPC"
+    service_instance_id: "UUID-super-long-unique-id"
+  insecure: false
+  exporter: stderr

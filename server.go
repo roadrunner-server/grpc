@@ -48,7 +48,9 @@ func (p *Plugin) createGRPCserver(interceptors map[string]common.Interceptor) (*
 	)
 
 	// append OTEL grpc server handler
-	opts = append(opts, grpc.StatsHandler(otelgrpc.NewServerHandler()))
+	if p.experimental {
+		opts = append(opts, grpc.StatsHandler(otelgrpc.NewServerHandler(otelgrpc.WithTracerProvider(p.tracer))))
+	}
 
 	server := grpc.NewServer(opts...)
 
