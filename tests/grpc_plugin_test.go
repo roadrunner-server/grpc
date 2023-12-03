@@ -103,10 +103,109 @@ func TestGrpcInit(t *testing.T) {
 		}
 	}()
 
-	time.Sleep(time.Second * 1)
+	time.Sleep(time.Second)
+
+	conn, err := grpc.Dial("127.0.0.1:9091", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	require.NoError(t, err)
+	require.NotNil(t, conn)
+
+	client := service.NewEchoClient(conn)
+	resp, err := client.Ping(context.Background(), &service.Message{Msg: "TOST"})
+	require.NoError(t, err)
+	require.Equal(t, "TOST", resp.Msg)
+
 	stopCh <- struct{}{}
 
 	wg.Wait()
+}
+
+func TestGrpcOtel(t *testing.T) {
+	// TODO(rustatian) use the: https://pkg.go.dev/go.opentelemetry.io/otel/sdk/trace/tracetest"
+	cont := endure.New(slog.LevelDebug)
+
+	cfg := &config.Plugin{
+		Version:              "2023.3.0",
+		ExperimentalFeatures: true,
+		Path:                 "configs/.rr-grpc-otel.yaml",
+		Prefix:               "rr",
+	}
+
+	err := cont.RegisterAll(
+		cfg,
+		&grpcPlugin.Plugin{},
+		&rpcPlugin.Plugin{},
+		&logger.Plugin{},
+		&otel.Plugin{},
+		&server.Plugin{},
+	)
+	assert.NoError(t, err)
+
+	err = cont.Init()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ch, err := cont.Serve()
+	assert.NoError(t, err)
+
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+
+	stopCh := make(chan struct{}, 1)
+
+	go func() {
+		defer wg.Done()
+		for {
+			select {
+			case e := <-ch:
+				assert.Fail(t, "error", e.Error.Error())
+				err = cont.Stop()
+				assert.NoError(t, err)
+			case <-sig:
+				err = cont.Stop()
+				assert.NoError(t, err)
+				return
+			case <-stopCh:
+				err = cont.Stop()
+				assert.NoError(t, err)
+				return
+			}
+		}
+	}()
+
+	time.Sleep(time.Second)
+
+	conn, err := grpc.Dial("127.0.0.1:9092", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	require.NoError(t, err)
+	require.NotNil(t, conn)
+
+	client := service.NewEchoClient(conn)
+	resp, err := client.Ping(context.Background(), &service.Message{Msg: "TOST"})
+	require.NoError(t, err)
+	require.Equal(t, "TOST", resp.Msg)
+
+	stopCh <- struct{}{}
+	wg.Wait()
+	time.Sleep(time.Second * 3)
+
+	req2, err := http.NewRequest(http.MethodGet, "http://127.0.0.1:16686/api/traces?service=rr_test_grpc&lookback=20m", nil)
+	require.NoError(t, err)
+	require.NotNil(t, req2)
+	resp2, err := http.DefaultClient.Do(req2)
+	require.NoError(t, err)
+	require.NotNil(t, resp2)
+	require.NotNil(t, resp2.Body)
+	require.Equal(t, http.StatusOK, resp2.StatusCode)
+
+	bd, err := io.ReadAll(resp2.Body)
+	// contains spans
+	assert.Contains(t, string(bd), "service.Echo/Ping")
+	assert.Contains(t, string(bd), "RR-gRPC")
+	assert.Contains(t, string(bd), "2023.3.0")
+	_ = resp2.Body.Close()
 }
 
 func TestGrpcCheckStatus(t *testing.T) {
@@ -1028,9 +1127,10 @@ func Test_GrpcRqOtlp(t *testing.T) {
 	cont := endure.New(slog.LevelDebug)
 
 	cfg := &config.Plugin{
-		Version: "2023.3.0",
-		Path:    "configs/.rr-grpc-rq-otlp.yaml",
-		Prefix:  "rr",
+		Version:              "2023.3.0",
+		ExperimentalFeatures: true,
+		Path:                 "configs/.rr-grpc-rq-otlp.yaml",
+		Prefix:               "rr",
 	}
 
 	err = cont.RegisterAll(
@@ -1100,7 +1200,7 @@ func Test_GrpcRqOtlp(t *testing.T) {
 	stopCh <- struct{}{}
 	wg.Wait()
 
-	time.Sleep(time.Second)
+	time.Sleep(time.Second * 2)
 	_ = wr.Close()
 	buf := new(bytes.Buffer)
 	_, err = io.Copy(buf, rd)

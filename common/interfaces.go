@@ -21,6 +21,8 @@ type Configurer interface {
 	UnmarshalKey(name string, out any) error
 	// Has checks if a config section exists.
 	Has(name string) bool
+	// Experimental returns true if experimental mode is enabled.
+	Experimental() bool
 }
 
 type Pool interface {

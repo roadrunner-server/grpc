@@ -48,7 +48,9 @@ func (p *Plugin) createGRPCserver(interceptors map[string]common.Interceptor) (*
 	)
 
 	// append OTEL grpc server handler
-	opts = append(opts, grpc.StatsHandler(otelgrpc.NewServerHandler()))
+	if p.experimental {
+		opts = append(opts, grpc.StatsHandler(otelgrpc.NewServerHandler(otelgrpc.WithTracerProvider(p.tracer))))
+	}
 
 	server := grpc.NewServer(opts...)
 
@@ -64,7 +66,7 @@ func (p *Plugin) createGRPCserver(interceptors map[string]common.Interceptor) (*
 		}
 
 		for _, service := range services {
-			px := proxy.NewProxy(fmt.Sprintf("%s.%s", service.Package, service.Name), p.config.Proto[i], p.gPool, p.mu)
+			px := proxy.NewProxy(fmt.Sprintf("%s.%s", service.Package, service.Name), p.config.Proto[i], p.gPool, p.mu, p.prop)
 			for _, m := range service.Methods {
 				px.RegisterMethod(m.Name)
 			}
