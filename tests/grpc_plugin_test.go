@@ -121,10 +121,6 @@ func TestGrpcInit(t *testing.T) {
 
 func TestGrpcOtel(t *testing.T) {
 	// TODO(rustatian) use the: https://pkg.go.dev/go.opentelemetry.io/otel/sdk/trace/tracetest"
-	rd, wr, err := os.Pipe()
-	assert.NoError(t, err)
-	os.Stderr = wr
-
 	cont := endure.New(slog.LevelDebug)
 
 	cfg := &config.Plugin{
@@ -134,7 +130,7 @@ func TestGrpcOtel(t *testing.T) {
 		Prefix:               "rr",
 	}
 
-	err = cont.RegisterAll(
+	err := cont.RegisterAll(
 		cfg,
 		&grpcPlugin.Plugin{},
 		&rpcPlugin.Plugin{},
@@ -191,21 +187,25 @@ func TestGrpcOtel(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "TOST", resp.Msg)
 
-	time.Sleep(time.Second * 3)
 	stopCh <- struct{}{}
 	wg.Wait()
-
 	time.Sleep(time.Second * 3)
 
-	_ = wr.Close()
-	buf := new(bytes.Buffer)
-	_, err = io.Copy(buf, rd)
-	assert.NoError(t, err)
+	req2, err := http.NewRequest(http.MethodGet, "http://127.0.0.1:16686/api/traces?service=rr_test_grpc&lookback=20m", nil)
+	require.NoError(t, err)
+	require.NotNil(t, req2)
+	resp2, err := http.DefaultClient.Do(req2)
+	require.NoError(t, err)
+	require.NotNil(t, resp2)
+	require.NotNil(t, resp2.Body)
+	require.Equal(t, http.StatusOK, resp2.StatusCode)
 
+	bd, err := io.ReadAll(resp2.Body)
 	// contains spans
-	assert.Contains(t, buf.String(), "service.Echo/Ping")
-	assert.Contains(t, buf.String(), "RR-gRPC")
-	assert.Contains(t, buf.String(), "2023.3.0")
+	assert.Contains(t, string(bd), "service.Echo/Ping")
+	assert.Contains(t, string(bd), "RR-gRPC")
+	assert.Contains(t, string(bd), "2023.3.0")
+	_ = resp2.Body.Close()
 }
 
 func TestGrpcCheckStatus(t *testing.T) {
