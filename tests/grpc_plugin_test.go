@@ -1127,9 +1127,10 @@ func Test_GrpcRqOtlp(t *testing.T) {
 	cont := endure.New(slog.LevelDebug)
 
 	cfg := &config.Plugin{
-		Version: "2023.3.0",
-		Path:    "configs/.rr-grpc-rq-otlp.yaml",
-		Prefix:  "rr",
+		Version:              "2023.3.0",
+		ExperimentalFeatures: true,
+		Path:                 "configs/.rr-grpc-rq-otlp.yaml",
+		Prefix:               "rr",
 	}
 
 	err = cont.RegisterAll(
@@ -1199,7 +1200,7 @@ func Test_GrpcRqOtlp(t *testing.T) {
 	stopCh <- struct{}{}
 	wg.Wait()
 
-	time.Sleep(time.Second)
+	time.Sleep(time.Second * 2)
 	_ = wr.Close()
 	buf := new(bytes.Buffer)
 	_, err = io.Copy(buf, rd)
