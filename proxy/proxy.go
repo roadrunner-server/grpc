@@ -16,6 +16,7 @@ import (
 	"github.com/roadrunner-server/sdk/v4/payload"
 	"github.com/roadrunner-server/sdk/v4/pool/static_pool"
 	"github.com/roadrunner-server/sdk/v4/worker"
+	"go.opentelemetry.io/otel/propagation"
 	"golang.org/x/net/context"
 	spb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc"
@@ -64,6 +65,7 @@ type rpcContext struct {
 // Proxy manages GRPC/RoadRunner bridge.
 type Proxy struct {
 	mu       *sync.RWMutex
+	prop     propagation.TextMapPropagator
 	grpcPool Pool
 	name     string
 	metadata string
@@ -73,9 +75,10 @@ type Proxy struct {
 }
 
 // NewProxy creates new service proxy object.
-func NewProxy(name string, metadata string, grpcPool Pool, mu *sync.RWMutex) *Proxy {
+func NewProxy(name string, metadata string, grpcPool Pool, mu *sync.RWMutex, prop propagation.TextMapPropagator) *Proxy {
 	return &Proxy{
 		mu:       mu,
+		prop:     prop,
 		grpcPool: grpcPool,
 		name:     name,
 		metadata: metadata,
@@ -245,6 +248,7 @@ func (p *Proxy) responseMetadata(resp *payload.Payload) (metadata.MD, error) {
 func (p *Proxy) makePayload(ctx context.Context, method string, body *codec.RawMessage, pld *payload.Payload) error {
 	ctxMD := make(map[string][]string)
 
+	p.prop.Inject(ctx, propagation.HeaderCarrier(ctxMD))
 	if md, ok := metadata.FromIncomingContext(ctx); ok {
 		for k, v := range md {
 			ctxMD[k] = v

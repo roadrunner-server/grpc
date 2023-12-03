@@ -6,7 +6,9 @@ import (
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"go.opentelemetry.io/otel/propagation"
 
+	jprop "go.opentelemetry.io/contrib/propagators/jaeger"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
 	"github.com/roadrunner-server/endure/v2/dep"
@@ -49,6 +51,7 @@ type Plugin struct {
 	experimental bool
 
 	statsExporter *metrics.StatsExporter
+	prop          propagation.TextMapPropagator
 	tracer        *sdktrace.TracerProvider
 
 	queueSize       prometheus.Gauge
@@ -118,6 +121,7 @@ func (p *Plugin) Init(cfg common.Configurer, log common.Logger, server common.Se
 		[]string{"grpc_method"},
 	)
 
+	p.prop = propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}, jprop.Jaeger{})
 	p.tracer = sdktrace.NewTracerProvider()
 	p.experimental = cfg.Experimental()
 	p.interceptors = make(map[string]common.Interceptor)

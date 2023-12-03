@@ -194,7 +194,7 @@ func TestGrpcOtel(t *testing.T) {
 	stopCh <- struct{}{}
 	wg.Wait()
 
-	time.Sleep(time.Second)
+	time.Sleep(time.Second * 3)
 
 	_ = wr.Close()
 	buf := new(bytes.Buffer)
