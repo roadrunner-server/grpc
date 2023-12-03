@@ -191,6 +191,7 @@ func TestGrpcOtel(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "TOST", resp.Msg)
 
+	time.Sleep(time.Second * 3)
 	stopCh <- struct{}{}
 	wg.Wait()
 
