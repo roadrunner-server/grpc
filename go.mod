@@ -8,7 +8,7 @@ require (
 	github.com/emicklei/proto v1.13.0
 	github.com/goccy/go-json v0.10.2
 	github.com/prometheus/client_golang v1.17.0
-	github.com/roadrunner-server/api/v4 v4.9.0
+	github.com/roadrunner-server/api/v4 v4.10.0
 	github.com/roadrunner-server/endure/v2 v2.4.3
 	github.com/roadrunner-server/errors v1.3.0
 	github.com/roadrunner-server/goridge/v3 v3.8.1
@@ -21,7 +21,7 @@ require (
 	go.uber.org/zap v1.26.0
 	golang.org/x/net v0.19.0
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231212172506-995d672761c0
-	google.golang.org/grpc v1.60.0
+	google.golang.org/grpc v1.60.1
 	google.golang.org/protobuf v1.31.0
 )
 
