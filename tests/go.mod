@@ -2,7 +2,7 @@ module tests
 
 go 1.21
 
-toolchain go1.22rc1
+toolchain go1.21.5
 
 require (
 	github.com/roadrunner-server/config/v4 v4.6.6
@@ -23,6 +23,8 @@ require (
 )
 
 replace github.com/roadrunner-server/grpc/v4 => ../
+
+exclude go.temporal.io/api v1.26.1
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -45,6 +47,7 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/uuid v1.5.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0 // indirect
+	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
@@ -93,7 +96,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.22.0 // indirect
 	go.opentelemetry.io/otel/trace v1.22.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.1.0 // indirect
-	go.temporal.io/api v1.26.1 // indirect
+	go.temporal.io/api v1.26.0 // indirect
 	go.temporal.io/sdk v1.25.1 // indirect
 	go.temporal.io/sdk/contrib/opentelemetry v0.4.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect

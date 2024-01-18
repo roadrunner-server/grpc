@@ -1,4 +1,4 @@
-# Docs: [link](https://roadrunner.dev/docs/plugins-grpc)
+# Docs: [link](https://docs.roadrunner.dev/plugins/grpc)
 
 
 ### Tags for the buf releases:
