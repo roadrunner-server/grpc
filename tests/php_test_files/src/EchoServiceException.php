@@ -15,6 +15,5 @@ class EchoServiceException implements EchoInterface
             'FOOOOOOOOOOOO',
                 \Spiral\RoadRunner\GRPC\StatusCode::INTERNAL
          );
-        return $out->setMsg(strtoupper($in->getMsg()));
     }
 }
