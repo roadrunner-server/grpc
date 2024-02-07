@@ -2,7 +2,7 @@ module tests
 
 go 1.21
 
-toolchain go1.22rc2
+toolchain go1.22.0
 
 require (
 	github.com/roadrunner-server/config/v4 v4.6.7
