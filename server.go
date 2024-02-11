@@ -102,12 +102,12 @@ func (p *Plugin) interceptor(ctx context.Context, req any, info *grpc.UnaryServe
 	}()
 
 	if err != nil {
-		p.log.Error("method call was finished with error", zap.Error(err), zap.String("method", info.FullMethod), zap.Time("start", start), zap.Int("elapsed", time.Since(start).Milliseconds()))
+		p.log.Error("method call was finished with error", zap.Error(err), zap.String("method", info.FullMethod), zap.Time("start", start), zap.Int64("elapsed", time.Since(start).Milliseconds()))
 
 		return nil, err
 	}
 
-	p.log.Debug("method was called successfully", zap.String("method", info.FullMethod), zap.Time("start", start), zap.Int("elapsed", time.Since(start).Milliseconds()))
+	p.log.Debug("method was called successfully", zap.String("method", info.FullMethod), zap.Time("start", start), zap.Int64("elapsed", time.Since(start).Milliseconds()))
 	return resp, nil
 }
 
