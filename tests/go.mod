@@ -12,7 +12,7 @@ require (
 	github.com/roadrunner-server/logger/v4 v4.2.14
 	github.com/roadrunner-server/metrics/v4 v4.1.16
 	github.com/roadrunner-server/otel/v4 v4.3.13
-	github.com/roadrunner-server/resetter/v4 v4.0.21
+	github.com/roadrunner-server/resetter/v4 v4.1.0
 	github.com/roadrunner-server/rpc/v4 v4.2.15
 	github.com/roadrunner-server/server/v4 v4.5.7
 	github.com/roadrunner-server/status/v4 v4.4.13
@@ -58,7 +58,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_golang v1.18.0 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
-	github.com/prometheus/common v0.46.0 // indirect
+	github.com/prometheus/common v0.47.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/roadrunner-server/api/v4 v4.10.0 // indirect
 	github.com/roadrunner-server/errors v1.4.0 // indirect
