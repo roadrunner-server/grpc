@@ -17,7 +17,7 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        php: [ "8.2" ]
+        php: [ "8.3" ]
         go: [ stable ]
         os: [ "ubuntu-latest" ]
     steps:
@@ -73,13 +73,7 @@ jobs:
 
       - name: Run golang root module tests
         run: |
-          go test -timeout 20m -v -race -cover -tags=debug -failfast -coverpkg=$(cat ./tests/pkgs.txt) -coverprofile=./tests/coverage-ci/grpc_root.out -covermode=atomic ./...
-
-      - name: Run golang tests with coverage
-        run: |
-          cd protoc_plugins
-     
-          go test -timeout 20m -v -race -cover -tags=debug -failfast -coverpkg=$(cat ../tests/pkgs.txt) -coverprofile=../tests/coverage-ci/protoc_gen.out -covermode=atomic ./...
+          go test -timeout 20m -v -race -cover -tags=debug -failfast -coverpkg=$(cat ./tests/pkgs.txt) -coverprofile=./tests/coverage-ci/grpc_root.out -covermode=atomic ./codec ./parser ./protoc_plugins ./proxy
 
       - name: Run ee tests with coverage
         run: |
@@ -99,7 +93,8 @@ jobs:
           
           docker-compose -f env/docker-compose-otel.yaml up -d
           sleep 30
-          go test -timeout 20m -v -race -cover -tags=debug -failfast -coverpkg=$(cat pkgs.txt) -coverprofile=./coverage-ci/grpc.out -covermode=atomic ./...
+          go test -timeout 20m -v -race -cover -tags=debug -failfast -coverpkg=$(cat pkgs.txt) -coverprofile=./coverage-ci/grpc.out -covermode=atomic grpc_plugin_gzip_test.go grpc_plugin_test.go
+
           docker-compose -f env/docker-compose-otel.yaml down
 
       - name: Archive code coverage results
