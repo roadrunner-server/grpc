@@ -1,14 +1,12 @@
 module github.com/roadrunner-server/grpc/v4
 
-go 1.22
-
-toolchain go1.22.0
+go 1.22.0
 
 require (
 	github.com/emicklei/proto v1.13.2
 	github.com/goccy/go-json v0.10.2
 	github.com/prometheus/client_golang v1.18.0
-	github.com/roadrunner-server/api/v4 v4.10.0
+	github.com/roadrunner-server/api/v4 v4.11.0
 	github.com/roadrunner-server/endure/v2 v2.4.3
 	github.com/roadrunner-server/errors v1.4.0
 	github.com/roadrunner-server/goridge/v3 v3.8.1
@@ -36,7 +34,7 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/prometheus/client_model v0.5.0 // indirect
+	github.com/prometheus/client_model v0.6.0 // indirect
 	github.com/prometheus/common v0.47.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/roadrunner-server/tcplisten v1.4.0 // indirect
