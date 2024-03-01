@@ -3,18 +3,18 @@ module tests
 go 1.22.0
 
 require (
-	github.com/roadrunner-server/config/v4 v4.6.8
+	github.com/roadrunner-server/config/v4 v4.6.9
 	github.com/roadrunner-server/endure/v2 v2.4.3
 	github.com/roadrunner-server/goridge/v3 v3.8.1
-	github.com/roadrunner-server/grpc/v4 v4.6.6
-	github.com/roadrunner-server/logger/v4 v4.2.15
-	github.com/roadrunner-server/metrics/v4 v4.1.17
-	github.com/roadrunner-server/otel/v4 v4.3.14
-	github.com/roadrunner-server/resetter/v4 v4.1.1
-	github.com/roadrunner-server/rpc/v4 v4.2.16
-	github.com/roadrunner-server/server/v4 v4.5.8
-	github.com/roadrunner-server/status/v4 v4.4.14
-	github.com/stretchr/testify v1.8.4
+	github.com/roadrunner-server/grpc/v4 v4.6.7
+	github.com/roadrunner-server/logger/v4 v4.2.16
+	github.com/roadrunner-server/metrics/v4 v4.1.18
+	github.com/roadrunner-server/otel/v4 v4.3.15
+	github.com/roadrunner-server/resetter/v4 v4.1.2
+	github.com/roadrunner-server/rpc/v4 v4.2.17
+	github.com/roadrunner-server/server/v4 v4.5.9
+	github.com/roadrunner-server/status/v4 v4.4.15
+	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.62.0
 	google.golang.org/protobuf v1.32.0
