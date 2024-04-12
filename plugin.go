@@ -48,8 +48,6 @@ type Plugin struct {
 	proxyList    []*proxy.Proxy
 	healthServer *HealthCheckServer
 
-	experimental bool
-
 	statsExporter *metrics.StatsExporter
 	prop          propagation.TextMapPropagator
 	tracer        *sdktrace.TracerProvider
@@ -123,7 +121,6 @@ func (p *Plugin) Init(cfg common.Configurer, log common.Logger, server common.Se
 
 	p.prop = propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}, jprop.Jaeger{})
 	p.tracer = sdktrace.NewTracerProvider()
-	p.experimental = cfg.Experimental()
 	p.interceptors = make(map[string]common.Interceptor)
 
 	return nil
