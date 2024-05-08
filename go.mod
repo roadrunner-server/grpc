@@ -1,6 +1,6 @@
 module github.com/roadrunner-server/grpc/v4
 
-go 1.22.2
+go 1.22.3
 
 require (
 	github.com/emicklei/proto v1.13.2
