@@ -34,7 +34,8 @@ func protoc(t *testing.T, args []string) {
 }
 
 func Test_Simple(t *testing.T) {
-	workdir, _ := os.Getwd()
+	workdir, err := os.Getwd()
+	require.NoError(t, err)
 	tmpdir, err := os.MkdirTemp("", "proto-test")
 	require.NoError(t, err)
 
@@ -61,7 +62,8 @@ func Test_Simple(t *testing.T) {
 }
 
 func Test_PhpNamespaceOption(t *testing.T) {
-	workdir, _ := os.Getwd()
+	workdir, err := os.Getwd()
+	require.NoError(t, err)
 	tmpdir, err := os.MkdirTemp("", "proto-test")
 	require.NoError(t, err)
 
@@ -87,7 +89,8 @@ func Test_PhpNamespaceOption(t *testing.T) {
 }
 
 func Test_UseImportedMessage(t *testing.T) {
-	workdir, _ := os.Getwd()
+	workdir, err := os.Getwd()
+	require.NoError(t, err)
 	tmpdir, err := os.MkdirTemp("", "proto-test")
 	require.NoError(t, err)
 
@@ -113,7 +116,8 @@ func Test_UseImportedMessage(t *testing.T) {
 }
 
 func Test_PhpNamespaceOptionInUse(t *testing.T) {
-	workdir, _ := os.Getwd()
+	workdir, err := os.Getwd()
+	require.NoError(t, err)
 	tmpdir, err := os.MkdirTemp("", "proto-test")
 	require.NoError(t, err)
 
@@ -139,7 +143,8 @@ func Test_PhpNamespaceOptionInUse(t *testing.T) {
 }
 
 func Test_UseOfGoogleEmptyMessage(t *testing.T) {
-	workdir, _ := os.Getwd()
+	workdir, err := os.Getwd()
+	require.NoError(t, err)
 	tmpdir, err := os.MkdirTemp("", "proto-test")
 	require.NoError(t, err)
 
@@ -166,7 +171,8 @@ func Test_UseOfGoogleEmptyMessage(t *testing.T) {
 }
 
 func Test_NoPackage(t *testing.T) {
-	workdir, _ := os.Getwd()
+	workdir, err := os.Getwd()
+	require.NoError(t, err)
 	tmpdir, err := os.MkdirTemp("", "proto-test")
 	require.NoError(t, err)
 

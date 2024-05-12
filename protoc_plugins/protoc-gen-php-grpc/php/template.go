@@ -44,7 +44,7 @@ use Spiral\RoadRunner\GRPC;
 interface {{ .Service.Name | interface }} extends GRPC\ServiceInterface
 {
     // GRPC specific service name.
-    public const NAME = "{{ .File.Package }}.{{ .Service.Name }}";{{ "\n" }}
+    public const NAME = "{{ resolve_name_const .File.Package .Service.Name }}";{{ "\n" }}
 {{- range $m := .Service.Method}}
 {{- $inName := name $ns $m.InputType }}
 {{- $outName := name $ns $m.OutputType }}
@@ -93,6 +93,15 @@ func body(req *plugin.CodeGeneratorRequest, file *desc.FileDescriptorProto, serv
 		},
 		"strip_slashes": func(name string) string {
 			return strings.ReplaceAll(name, "\\\\", "\\")
+		},
+		"resolve_name_const": func(packagePath, serviceName *string) string {
+
+			if packagePath == nil || *packagePath == "" {
+				return *serviceName
+			}
+
+			return *packagePath + "." + *serviceName
+
 		},
 	}).Parse(phpBody))
 
