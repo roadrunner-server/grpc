@@ -96,11 +96,11 @@ func body(req *plugin.CodeGeneratorRequest, file *desc.FileDescriptorProto, serv
 		},
 		"resolve_name_const": func(packagePath, serviceName *string) string {
 
-			if packagePath == nil || *packagePath == "" {
-				return *serviceName
+			if defaultOrVal(packagePath) == "" {
+				return defaultOrVal(serviceName)
 			}
 
-			return *packagePath + "." + *serviceName
+			return *packagePath + "." + defaultOrVal(serviceName)
 
 		},
 	}).Parse(phpBody))
@@ -111,4 +111,13 @@ func body(req *plugin.CodeGeneratorRequest, file *desc.FileDescriptorProto, serv
 	}
 
 	return out.String()
+}
+
+func defaultOrVal[T any](val *T) T {
+	if val != nil {
+		return *val
+	}
+
+	var def T
+	return def
 }
