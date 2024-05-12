@@ -166,6 +166,7 @@ func Test_UseOfGoogleEmptyMessage(t *testing.T) {
 }
 
 func Test_NoPackage(t *testing.T) {
+	workdir, _ := os.Getwd()
 	tmpdir, err := os.MkdirTemp("", "proto-test")
 	require.NoError(t, err)
 
@@ -182,6 +183,11 @@ func Test_NoPackage(t *testing.T) {
 	}
 	protoc(t, args)
 
+	assertEqualFiles(
+		t,
+		workdir+"/testdata/NoPackage/Test/CustomImport/ServiceInterface.php",
+		tmpdir+"/Test/CustomImport/ServiceInterface.php",
+	)
 	assert.NoError(t, os.RemoveAll("plugin"))
 }
 

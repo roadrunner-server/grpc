@@ -46,14 +46,16 @@ interface {{ .Service.Name | interface }} extends GRPC\ServiceInterface
     // GRPC specific service name.
     public const NAME = "{{ .File.Package }}.{{ .Service.Name }}";{{ "\n" }}
 {{- range $m := .Service.Method}}
+{{- $inName := name $ns $m.InputType }}
+{{- $outName := name $ns $m.OutputType }}
     /**
     * @param GRPC\ContextInterface $ctx
-    * @param {{ name $ns $m.InputType }} $in
-    * @return {{ name $ns $m.OutputType }}
+    * @param {{ strip_slashes $inName }} $in
+    * @return {{ strip_slashes $outName }}
     *
     * @throws GRPC\Exception\InvokeException
     */
-    public function {{ $m.Name }}(GRPC\ContextInterface $ctx, {{ name $ns $m.InputType }} $in): {{ name $ns $m.OutputType }};
+    public function {{ $m.Name }}(GRPC\ContextInterface $ctx, {{ strip_slashes $inName }} $in): {{ strip_slashes $outName }};
 {{end -}}
 }
 `
@@ -88,6 +90,9 @@ func body(req *plugin.CodeGeneratorRequest, file *desc.FileDescriptorProto, serv
 		},
 		"name": func(ns *ns, name *string) string {
 			return ns.resolve(name)
+		},
+		"strip_slashes": func(name string) string {
+			return strings.ReplaceAll(name, "\\\\", "\\")
 		},
 	}).Parse(phpBody))
 
