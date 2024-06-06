@@ -1,6 +1,6 @@
 module github.com/roadrunner-server/grpc/v4
 
-go 1.22.3
+go 1.22.4
 
 require (
 	github.com/emicklei/proto v1.13.2
@@ -18,7 +18,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.27.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.26.0
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240528184218-531527333157
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240604185151-ef581f913117
 	google.golang.org/grpc v1.64.0
 	google.golang.org/protobuf v1.34.1
 )
