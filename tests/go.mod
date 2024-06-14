@@ -3,17 +3,17 @@ module tests
 go 1.22.4
 
 require (
-	github.com/roadrunner-server/config/v4 v4.9.1
+	github.com/roadrunner-server/config/v4 v4.9.2
 	github.com/roadrunner-server/endure/v2 v2.4.5
 	github.com/roadrunner-server/goridge/v3 v3.8.2
 	github.com/roadrunner-server/grpc/v4 v4.6.7
-	github.com/roadrunner-server/logger/v4 v4.4.3
-	github.com/roadrunner-server/metrics/v4 v4.3.3
-	github.com/roadrunner-server/otel/v4 v4.5.3
-	github.com/roadrunner-server/resetter/v4 v4.3.3
-	github.com/roadrunner-server/rpc/v4 v4.4.3
-	github.com/roadrunner-server/server/v4 v4.8.3
-	github.com/roadrunner-server/status/v4 v4.6.3
+	github.com/roadrunner-server/logger/v4 v4.4.4
+	github.com/roadrunner-server/metrics/v4 v4.3.4
+	github.com/roadrunner-server/otel/v4 v4.5.4
+	github.com/roadrunner-server/resetter/v4 v4.3.4
+	github.com/roadrunner-server/rpc/v4 v4.4.4
+	github.com/roadrunner-server/server/v4 v4.8.4
+	github.com/roadrunner-server/status/v4 v4.6.4
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.64.0
@@ -91,10 +91,10 @@ require (
 	go.opentelemetry.io/otel/trace v1.27.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.3.1 // indirect
 	go.temporal.io/api v1.34.0 // indirect
-	go.temporal.io/sdk v1.26.1 // indirect
-	go.temporal.io/sdk/contrib/opentelemetry v0.5.0 // indirect
+	go.temporal.io/sdk v1.27.0 // indirect
+	go.temporal.io/sdk/contrib/opentelemetry v0.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/exp v0.0.0-20240604190554-fc45aab8b7f8 // indirect
+	golang.org/x/exp v0.0.0-20240613232115-7f521ea00fb8 // indirect
 	golang.org/x/net v0.26.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.21.0 // indirect
