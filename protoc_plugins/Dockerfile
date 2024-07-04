@@ -1,4 +1,4 @@
-FROM --platform=${TARGETPLATFORM:-linux/amd64} golang:1.21-alpine as builder
+FROM --platform=${TARGETPLATFORM:-linux/amd64} golang:1.22-alpine as builder
 
 ENV CGO_ENABLED=0
 
