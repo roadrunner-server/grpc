@@ -12,10 +12,10 @@ import (
 
 	"github.com/roadrunner-server/errors"
 	"github.com/roadrunner-server/goridge/v3/pkg/frame"
-	"github.com/roadrunner-server/grpc/v4/codec"
-	"github.com/roadrunner-server/sdk/v4/payload"
-	"github.com/roadrunner-server/sdk/v4/pool/static_pool"
-	"github.com/roadrunner-server/sdk/v4/worker"
+	"github.com/roadrunner-server/grpc/v5/codec"
+	"github.com/roadrunner-server/pool/payload"
+	"github.com/roadrunner-server/pool/pool/static_pool"
+	"github.com/roadrunner-server/pool/worker"
 	"go.opentelemetry.io/otel/propagation"
 	"golang.org/x/net/context"
 	spb "google.golang.org/genproto/googleapis/rpc/status"
@@ -36,26 +36,26 @@ const (
 )
 
 type Pool interface {
-	// Workers returns worker list associated with the pool.
+	// Workers return a worker list associated with the pool.
 	Workers() (workers []*worker.Process)
 	// Exec payload
 	Exec(ctx context.Context, p *payload.Payload, stopCh chan struct{}) (chan *static_pool.PExec, error)
-	// Reset kill all workers inside the watcher and replaces with new
+	// Reset kills all workers inside the watcher and replaces with new
 	Reset(ctx context.Context) error
-	// Destroy all underlying stack (but let them complete the task).
+	// Destroy all underlying stacks (but let them complete the task).
 	Destroy(ctx context.Context)
 }
 
 // base interface for Proxy class
 type proxyService interface {
-	// RegisterMethod registers new RPC method.
+	// RegisterMethod registers a new RPC method.
 	RegisterMethod(method string)
 
-	// ServiceDesc returns service description for the proxy.
+	// ServiceDesc returns a service description for the proxy.
 	ServiceDesc() *grpc.ServiceDesc
 }
 
-// carry details about service, method and RPC context to PHP process
+// carry details about service, method and RPC context to a PHP process
 type rpcContext struct {
 	Service string              `json:"service"`
 	Method  string              `json:"method"`
@@ -74,7 +74,7 @@ type Proxy struct {
 	pldPool sync.Pool
 }
 
-// NewProxy creates new service proxy object.
+// NewProxy creates a new service proxy object.
 func NewProxy(name string, metadata string, grpcPool Pool, mu *sync.RWMutex, prop propagation.TextMapPropagator) *Proxy {
 	return &Proxy{
 		mu:       mu,

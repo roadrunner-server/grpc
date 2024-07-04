@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/roadrunner-server/tcplisten"
 	"go.opentelemetry.io/otel/propagation"
 
 	jprop "go.opentelemetry.io/contrib/propagators/jaeger"
@@ -13,13 +14,11 @@ import (
 
 	"github.com/roadrunner-server/endure/v2/dep"
 	"github.com/roadrunner-server/errors"
-	"github.com/roadrunner-server/grpc/v4/codec"
-	"github.com/roadrunner-server/grpc/v4/common"
-	"github.com/roadrunner-server/grpc/v4/proxy"
-	"github.com/roadrunner-server/sdk/v4/metrics"
-	"github.com/roadrunner-server/sdk/v4/pool"
-	"github.com/roadrunner-server/sdk/v4/state/process"
-	"github.com/roadrunner-server/sdk/v4/utils"
+	"github.com/roadrunner-server/grpc/v5/codec"
+	"github.com/roadrunner-server/grpc/v5/common"
+	"github.com/roadrunner-server/grpc/v5/proxy"
+	"github.com/roadrunner-server/pool/pool"
+	"github.com/roadrunner-server/pool/state/process"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/encoding"
@@ -48,7 +47,7 @@ type Plugin struct {
 	proxyList    []*proxy.Proxy
 	healthServer *HealthCheckServer
 
-	statsExporter *metrics.StatsExporter
+	statsExporter *StatsExporter
 	prop          propagation.TextMapPropagator
 	tracer        *sdktrace.TracerProvider
 
@@ -154,7 +153,7 @@ func (p *Plugin) Serve() chan error {
 		return errCh
 	}
 
-	l, err := utils.CreateListener(p.config.Listen)
+	l, err := tcplisten.CreateListener(p.config.Listen)
 	if err != nil {
 		errCh <- errors.E(op, err)
 		return errCh
