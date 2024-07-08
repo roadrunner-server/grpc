@@ -814,6 +814,7 @@ func TestGrpcRqRsTLSRootCA(t *testing.T) {
 		&rpcPlugin.Plugin{},
 		&logger.Plugin{},
 		&server.Plugin{},
+		&metrics.Plugin{},
 	)
 	assert.NoError(t, err)
 
