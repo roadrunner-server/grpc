@@ -3,17 +3,19 @@ module tests
 go 1.22.5
 
 require (
-	github.com/roadrunner-server/config/v4 v4.9.3
+	github.com/roadrunner-server/config/v5 v5.0.0
 	github.com/roadrunner-server/endure/v2 v2.4.5
 	github.com/roadrunner-server/goridge/v3 v3.8.2
 	github.com/roadrunner-server/grpc/v5 v5.0.0
-	github.com/roadrunner-server/logger/v4 v4.4.5
-	github.com/roadrunner-server/metrics/v4 v4.3.5
-	github.com/roadrunner-server/otel/v4 v4.5.5
-	github.com/roadrunner-server/resetter/v4 v4.3.5
+	github.com/roadrunner-server/logger/v5 v5.0.0
+	github.com/roadrunner-server/metrics/v5 v5.0.0
+	github.com/roadrunner-server/otel/v5 v5.0.0
+	github.com/roadrunner-server/resetter/v5 v5.0.0
 	github.com/roadrunner-server/rpc/v4 v4.4.5
+	github.com/roadrunner-server/rpc/v5 v5.0.0
 	github.com/roadrunner-server/server/v4 v4.8.5
-	github.com/roadrunner-server/status/v4 v4.6.5
+	github.com/roadrunner-server/server/v5 v5.0.0
+	github.com/roadrunner-server/status/v5 v5.0.0
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.65.0
@@ -59,6 +61,7 @@ require (
 	github.com/prometheus/common v0.55.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/roadrunner-server/api/v4 v4.15.0 // indirect
+	github.com/roadrunner-server/context v1.0.0 // indirect
 	github.com/roadrunner-server/errors v1.4.0 // indirect
 	github.com/roadrunner-server/events v1.0.0 // indirect
 	github.com/roadrunner-server/pool v1.0.0 // indirect
@@ -97,10 +100,10 @@ require (
 	go.temporal.io/sdk v1.27.0 // indirect
 	go.temporal.io/sdk/contrib/opentelemetry v0.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/exp v0.0.0-20240613232115-7f521ea00fb8 // indirect
-	golang.org/x/net v0.26.0 // indirect
+	golang.org/x/exp v0.0.0-20240707233637-46b078467d37 // indirect
+	golang.org/x/net v0.27.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
-	golang.org/x/sys v0.21.0 // indirect
+	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240701130421-f6361c86f094 // indirect

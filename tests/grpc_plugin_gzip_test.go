@@ -11,10 +11,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/roadrunner-server/config/v4"
+	"github.com/roadrunner-server/config/v5"
 	"github.com/roadrunner-server/endure/v2"
-	"github.com/roadrunner-server/logger/v4"
-	"github.com/roadrunner-server/resetter/v4"
+	"github.com/roadrunner-server/logger/v5"
+	"github.com/roadrunner-server/resetter/v5"
 	"github.com/roadrunner-server/server/v4"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health/grpc_health_v1"
