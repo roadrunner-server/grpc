@@ -826,6 +826,8 @@ func TestGrpcRqRsTLSRootCA(t *testing.T) {
 	assert.NoError(t, err)
 
 	wg := &sync.WaitGroup{}
+	wg.Add(1)
+
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
