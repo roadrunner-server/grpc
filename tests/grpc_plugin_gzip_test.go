@@ -15,14 +15,14 @@ import (
 	"github.com/roadrunner-server/endure/v2"
 	"github.com/roadrunner-server/logger/v5"
 	"github.com/roadrunner-server/resetter/v5"
-	"github.com/roadrunner-server/server/v4"
+	"github.com/roadrunner-server/server/v5"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health/grpc_health_v1"
 
 	"tests/proto/service"
 
 	grpcPlugin "github.com/roadrunner-server/grpc/v5"
-	rpcPlugin "github.com/roadrunner-server/rpc/v4"
+	rpcPlugin "github.com/roadrunner-server/rpc/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"

@@ -11,9 +11,7 @@ require (
 	github.com/roadrunner-server/metrics/v5 v5.0.0
 	github.com/roadrunner-server/otel/v5 v5.0.0
 	github.com/roadrunner-server/resetter/v5 v5.0.0
-	github.com/roadrunner-server/rpc/v4 v4.4.5
 	github.com/roadrunner-server/rpc/v5 v5.0.0
-	github.com/roadrunner-server/server/v4 v4.8.5
 	github.com/roadrunner-server/server/v5 v5.0.0
 	github.com/roadrunner-server/status/v5 v5.0.0
 	github.com/stretchr/testify v1.9.0
@@ -65,7 +63,6 @@ require (
 	github.com/roadrunner-server/errors v1.4.0 // indirect
 	github.com/roadrunner-server/events v1.0.0 // indirect
 	github.com/roadrunner-server/pool v1.0.0 // indirect
-	github.com/roadrunner-server/sdk/v4 v4.8.0 // indirect
 	github.com/roadrunner-server/tcplisten v1.5.0 // indirect
 	github.com/robfig/cron v1.2.0 // indirect
 	github.com/sagikazarmark/locafero v0.6.0 // indirect
