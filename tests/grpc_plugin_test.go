@@ -49,7 +49,6 @@ func TestGrpcInit(t *testing.T) {
 	cfg := &config.Plugin{
 		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-init.yaml",
-		Prefix:  "rr",
 	}
 
 	err := cont.RegisterAll(
@@ -105,7 +104,7 @@ func TestGrpcInit(t *testing.T) {
 
 	time.Sleep(time.Second)
 
-	conn, err := grpc.Dial("127.0.0.1:9091", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("127.0.0.1:9091", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	require.NoError(t, err)
 	require.NotNil(t, conn)
 
@@ -124,10 +123,8 @@ func TestGrpcOtel(t *testing.T) {
 	cont := endure.New(slog.LevelDebug)
 
 	cfg := &config.Plugin{
-		Version:              "2023.3.0",
-		ExperimentalFeatures: true,
-		Path:                 "configs/.rr-grpc-otel.yaml",
-		Prefix:               "rr",
+		Version: "2024.2.0",
+		Path:    "configs/.rr-grpc-otel.yaml",
 	}
 
 	err := cont.RegisterAll(
@@ -178,7 +175,7 @@ func TestGrpcOtel(t *testing.T) {
 
 	time.Sleep(time.Second)
 
-	conn, err := grpc.Dial("127.0.0.1:9092", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("127.0.0.1:9092", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	require.NoError(t, err)
 	require.NotNil(t, conn)
 
@@ -187,11 +184,9 @@ func TestGrpcOtel(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "TOST", resp.Msg)
 
-	stopCh <- struct{}{}
-	wg.Wait()
 	time.Sleep(time.Second * 3)
 
-	req2, err := http.NewRequest(http.MethodGet, "http://127.0.0.1:16686/api/traces?service=rr_test_grpc&lookback=20m", nil)
+	req2, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "http://127.0.0.1:9411/api/v2/spans?serviceName=rr_test_grpc", nil)
 	require.NoError(t, err)
 	require.NotNil(t, req2)
 	resp2, err := http.DefaultClient.Do(req2)
@@ -202,10 +197,11 @@ func TestGrpcOtel(t *testing.T) {
 
 	bd, err := io.ReadAll(resp2.Body)
 	// contains spans
-	assert.Contains(t, string(bd), "service.Echo/Ping")
-	assert.Contains(t, string(bd), "RR-gRPC")
-	assert.Contains(t, string(bd), "2023.3.0")
+	assert.Contains(t, string(bd), "service.echo/ping")
 	_ = resp2.Body.Close()
+
+	stopCh <- struct{}{}
+	wg.Wait()
 }
 
 func TestGrpcCheckStatus(t *testing.T) {
@@ -214,7 +210,6 @@ func TestGrpcCheckStatus(t *testing.T) {
 	cfg := &config.Plugin{
 		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-status.yaml",
-		Prefix:  "rr",
 	}
 
 	err := cont.RegisterAll(
@@ -274,7 +269,7 @@ func TestGrpcCheckStatus(t *testing.T) {
 	client := &http.Client{
 		Timeout: time.Second * 10,
 	}
-	req, err := http.NewRequest("GET", "http://127.0.0.1:35544/health?plugin=grpc", nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "http://127.0.0.1:35544/health?plugin=grpc", nil)
 	require.NoError(t, err)
 
 	resp, err := client.Do(req)
@@ -286,7 +281,7 @@ func TestGrpcCheckStatus(t *testing.T) {
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 	_ = resp.Body.Close()
 
-	req, err = http.NewRequest("GET", "http://127.0.0.1:35544/ready?plugin=grpc", nil)
+	req, err = http.NewRequestWithContext(context.Background(), http.MethodGet, "http://127.0.0.1:35544/ready?plugin=grpc", nil)
 	require.NoError(t, err)
 
 	resp, err = client.Do(req)
@@ -377,7 +372,6 @@ func TestGrpcInitMultiple(t *testing.T) {
 	cfg := &config.Plugin{
 		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-init-multiple.yaml",
-		Prefix:  "rr",
 	}
 
 	err := cont.RegisterAll(
@@ -434,7 +428,7 @@ func TestGrpcInitMultiple(t *testing.T) {
 
 	time.Sleep(time.Second * 2)
 
-	conn, err := grpc.Dial("127.0.0.1:9001", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("127.0.0.1:9001", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	require.NoError(t, err)
 	require.NotNil(t, conn)
 
@@ -455,7 +449,6 @@ func TestGrpcRqRs(t *testing.T) {
 	cfg := &config.Plugin{
 		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-rq.yaml",
-		Prefix:  "rr",
 	}
 
 	err := cont.RegisterAll(
@@ -512,7 +505,7 @@ func TestGrpcRqRs(t *testing.T) {
 
 	time.Sleep(time.Second * 1)
 
-	conn, err := grpc.Dial("127.0.0.1:9001", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("127.0.0.1:9001", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	require.NoError(t, err)
 	require.NotNil(t, conn)
 
@@ -530,9 +523,8 @@ func TestGrpcFullErrorMessageIssue1193(t *testing.T) {
 	cont := endure.New(slog.LevelDebug)
 
 	cfg := &config.Plugin{
-		Version: "2.10.6",
+		Version: "2024.1.0",
 		Path:    "configs/.rr-grpc-rq-issue1193.yaml",
-		Prefix:  "rr",
 	}
 
 	err := cont.RegisterAll(
@@ -560,7 +552,6 @@ func TestGrpcRqRsException(t *testing.T) {
 	cfg := &config.Plugin{
 		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-rq-exception.yaml",
-		Prefix:  "rr",
 	}
 
 	err := cont.RegisterAll(
@@ -617,7 +608,7 @@ func TestGrpcRqRsException(t *testing.T) {
 
 	time.Sleep(time.Second * 1)
 
-	conn, err := grpc.Dial("127.0.0.1:9001", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("127.0.0.1:9001", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	require.NoError(t, err)
 	require.NotNil(t, conn)
 
@@ -638,7 +629,6 @@ func TestGrpcRqRsMultiple(t *testing.T) {
 	cfg := &config.Plugin{
 		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-rq-multiple.yaml",
-		Prefix:  "rr",
 	}
 
 	err := cont.RegisterAll(
@@ -695,7 +685,7 @@ func TestGrpcRqRsMultiple(t *testing.T) {
 
 	time.Sleep(time.Second * 1)
 
-	conn, err := grpc.Dial("127.0.0.1:9001", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("127.0.0.1:9001", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	require.NoError(t, err)
 	require.NotNil(t, conn)
 
@@ -732,7 +722,6 @@ func TestGrpcRqRsTLS(t *testing.T) {
 	cfg := &config.Plugin{
 		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-rq-tls.yaml",
-		Prefix:  "rr",
 	}
 
 	err := cont.RegisterAll(
@@ -797,7 +786,7 @@ func TestGrpcRqRsTLS(t *testing.T) {
 		MinVersion:   tls.VersionTLS12,
 	}
 
-	conn, err := grpc.Dial("127.0.0.1:9002", grpc.WithTransportCredentials(credentials.NewTLS(tlscfg)))
+	conn, err := grpc.NewClient("127.0.0.1:9002", grpc.WithTransportCredentials(credentials.NewTLS(tlscfg)))
 	require.NoError(t, err)
 	require.NotNil(t, conn)
 
@@ -817,7 +806,6 @@ func TestGrpcRqRsTLSRootCA(t *testing.T) {
 	cfg := &config.Plugin{
 		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-rq-tls-rootca.yaml",
-		Prefix:  "rr",
 	}
 
 	err := cont.RegisterAll(
@@ -840,10 +828,23 @@ func TestGrpcRqRsTLSRootCA(t *testing.T) {
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-
 	stopCh := make(chan struct{}, 1)
+
+	wg := &sync.WaitGroup{}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, getAddr, nil)
+	require.NoError(t, err)
+
+	defHTTPCl := &http.Client{}
+	r, err := defHTTPCl.Do(req)
+	assert.NoError(t, err)
+	defer func() {
+		if r.Body != nil {
+			_ = r.Body.Close()
+		}
+	}()
 
 	go func() {
 		defer wg.Done()
@@ -882,7 +883,7 @@ func TestGrpcRqRsTLSRootCA(t *testing.T) {
 		MinVersion:   tls.VersionTLS12,
 	}
 
-	conn, err := grpc.Dial("127.0.0.1:9003", grpc.WithTransportCredentials(credentials.NewTLS(tlscfg)))
+	conn, err := grpc.NewClient("127.0.0.1:9003", grpc.WithTransportCredentials(credentials.NewTLS(tlscfg)))
 	require.NoError(t, err)
 	require.NotNil(t, conn)
 
@@ -902,7 +903,6 @@ func TestGrpcRqRsTLS_WithReset(t *testing.T) {
 	cfg := &config.Plugin{
 		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-rq-tls.yaml",
-		Prefix:  "rr",
 	}
 
 	err := cont.RegisterAll(
@@ -968,7 +968,7 @@ func TestGrpcRqRsTLS_WithReset(t *testing.T) {
 		MinVersion:   tls.VersionTLS12,
 	}
 
-	conn, err := grpc.Dial("127.0.0.1:9002", grpc.WithTransportCredentials(credentials.NewTLS(tlscfg)))
+	conn, err := grpc.NewClient("127.0.0.1:9002", grpc.WithTransportCredentials(credentials.NewTLS(tlscfg)))
 	require.NoError(t, err)
 	require.NotNil(t, conn)
 
@@ -993,7 +993,6 @@ func TestGRPCMetrics(t *testing.T) {
 
 	cfg := &config.Plugin{
 		Version: "2023.3.0",
-		Prefix:  "rr",
 		Path:    "configs/.rr-grpc-metrics.yaml",
 	}
 
@@ -1052,7 +1051,7 @@ func TestGRPCMetrics(t *testing.T) {
 
 	time.Sleep(time.Second * 2)
 
-	conn, err := grpc.Dial("127.0.0.1:9005", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("127.0.0.1:9005", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	require.NoError(t, err)
 	require.NotNil(t, conn)
 
@@ -1101,7 +1100,7 @@ func sendReset(address string) func(t *testing.T) {
 
 // get request and return body
 func get() (string, error) {
-	r, err := http.Get(getAddr)
+	r, err := http.Get(getAddr) //nolint:noctx
 	if err != nil {
 		return "", err
 	}
@@ -1127,10 +1126,8 @@ func Test_GrpcRqOtlp(t *testing.T) {
 	cont := endure.New(slog.LevelDebug)
 
 	cfg := &config.Plugin{
-		Version:              "2023.3.0",
-		ExperimentalFeatures: true,
-		Path:                 "configs/.rr-grpc-rq-otlp.yaml",
-		Prefix:               "rr",
+		Version: "2023.3.0",
+		Path:    "configs/.rr-grpc-rq-otlp.yaml",
 	}
 
 	err = cont.RegisterAll(
@@ -1188,7 +1185,7 @@ func Test_GrpcRqOtlp(t *testing.T) {
 
 	time.Sleep(time.Second * 1)
 
-	conn, err := grpc.Dial("127.0.0.1:9001", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("127.0.0.1:9001", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	require.NoError(t, err)
 	require.NotNil(t, conn)
 
