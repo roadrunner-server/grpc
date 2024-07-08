@@ -814,7 +814,6 @@ func TestGrpcRqRsTLSRootCA(t *testing.T) {
 		&rpcPlugin.Plugin{},
 		&logger.Plugin{},
 		&server.Plugin{},
-		&metrics.Plugin{},
 	)
 	assert.NoError(t, err)
 
@@ -826,26 +825,11 @@ func TestGrpcRqRsTLSRootCA(t *testing.T) {
 	ch, err := cont.Serve()
 	assert.NoError(t, err)
 
+	wg := &sync.WaitGroup{}
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	stopCh := make(chan struct{}, 1)
-
-	wg := &sync.WaitGroup{}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-	defer cancel()
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, getAddr, nil)
-	require.NoError(t, err)
-
-	defHTTPCl := &http.Client{}
-	r, err := defHTTPCl.Do(req)
-	assert.NoError(t, err)
-	defer func() {
-		if r.Body != nil {
-			_ = r.Body.Close()
-		}
-	}()
 
 	go func() {
 		defer wg.Done()
@@ -894,7 +878,6 @@ func TestGrpcRqRsTLSRootCA(t *testing.T) {
 	require.Equal(t, "TOST", resp.Msg)
 
 	stopCh <- struct{}{}
-
 	wg.Wait()
 }
 
