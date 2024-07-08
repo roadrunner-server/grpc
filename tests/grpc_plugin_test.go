@@ -184,6 +184,9 @@ func TestGrpcOtel(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "TOST", resp.Msg)
 
+	stopCh <- struct{}{}
+	wg.Wait()
+
 	time.Sleep(time.Second * 3)
 
 	req2, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "http://127.0.0.1:9411/api/v2/spans?serviceName=rr_test_grpc", nil)
@@ -199,9 +202,6 @@ func TestGrpcOtel(t *testing.T) {
 	// contains spans
 	assert.Contains(t, string(bd), "service.echo/ping")
 	_ = resp2.Body.Close()
-
-	stopCh <- struct{}{}
-	wg.Wait()
 }
 
 func TestGrpcCheckStatus(t *testing.T) {
