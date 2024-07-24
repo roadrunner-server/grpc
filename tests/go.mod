@@ -1,19 +1,21 @@
 module tests
 
-go 1.22.5
+go 1.22
+
+toolchain go1.22.5
 
 require (
-	github.com/roadrunner-server/config/v5 v5.0.0
+	github.com/roadrunner-server/config/v5 v5.0.1
 	github.com/roadrunner-server/endure/v2 v2.4.6
 	github.com/roadrunner-server/goridge/v3 v3.8.3
 	github.com/roadrunner-server/grpc/v5 v5.0.0
-	github.com/roadrunner-server/logger/v5 v5.0.0
-	github.com/roadrunner-server/metrics/v5 v5.0.0
-	github.com/roadrunner-server/otel/v5 v5.0.0
-	github.com/roadrunner-server/resetter/v5 v5.0.0
-	github.com/roadrunner-server/rpc/v5 v5.0.0
-	github.com/roadrunner-server/server/v5 v5.0.0
-	github.com/roadrunner-server/status/v5 v5.0.0
+	github.com/roadrunner-server/logger/v5 v5.0.1
+	github.com/roadrunner-server/metrics/v5 v5.0.1
+	github.com/roadrunner-server/otel/v5 v5.0.1
+	github.com/roadrunner-server/resetter/v5 v5.0.1
+	github.com/roadrunner-server/rpc/v5 v5.0.1
+	github.com/roadrunner-server/server/v5 v5.0.1
+	github.com/roadrunner-server/status/v5 v5.0.1
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.65.0
@@ -50,6 +52,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
+	github.com/nexus-rpc/sdk-go v0.0.9 // indirect
 	github.com/openzipkin/zipkin-go v0.4.3 // indirect
 	github.com/pborman/uuid v1.2.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
@@ -59,7 +62,7 @@ require (
 	github.com/prometheus/common v0.55.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/roadrunner-server/api/v4 v4.16.0 // indirect
-	github.com/roadrunner-server/context v1.0.0 // indirect
+	github.com/roadrunner-server/context v1.0.1 // indirect
 	github.com/roadrunner-server/errors v1.4.1 // indirect
 	github.com/roadrunner-server/events v1.0.1 // indirect
 	github.com/roadrunner-server/pool v1.0.1 // indirect
@@ -94,16 +97,16 @@ require (
 	go.opentelemetry.io/otel/trace v1.28.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.3.1 // indirect
 	go.temporal.io/api v1.36.0 // indirect
-	go.temporal.io/sdk v1.27.0 // indirect
+	go.temporal.io/sdk v1.28.1 // indirect
 	go.temporal.io/sdk/contrib/opentelemetry v0.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/exp v0.0.0-20240707233637-46b078467d37 // indirect
+	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
 	golang.org/x/net v0.27.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20240722135656-d784300faade // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240723171418-e6d459c13d2a // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240723171418-e6d459c13d2a // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
