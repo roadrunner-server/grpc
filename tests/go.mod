@@ -3,17 +3,17 @@ module tests
 go 1.22.5
 
 require (
-	github.com/roadrunner-server/config/v5 v5.0.1
+	github.com/roadrunner-server/config/v5 v5.0.2
 	github.com/roadrunner-server/endure/v2 v2.4.6
 	github.com/roadrunner-server/goridge/v3 v3.8.3
 	github.com/roadrunner-server/grpc/v5 v5.0.0
-	github.com/roadrunner-server/logger/v5 v5.0.1
-	github.com/roadrunner-server/metrics/v5 v5.0.1
+	github.com/roadrunner-server/logger/v5 v5.0.2
+	github.com/roadrunner-server/metrics/v5 v5.0.2
 	github.com/roadrunner-server/otel/v5 v5.0.1
-	github.com/roadrunner-server/resetter/v5 v5.0.1
-	github.com/roadrunner-server/rpc/v5 v5.0.1
-	github.com/roadrunner-server/server/v5 v5.0.1
-	github.com/roadrunner-server/status/v5 v5.0.1
+	github.com/roadrunner-server/resetter/v5 v5.0.2
+	github.com/roadrunner-server/rpc/v5 v5.0.2
+	github.com/roadrunner-server/server/v5 v5.0.2
+	github.com/roadrunner-server/status/v5 v5.0.2
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.65.0
@@ -42,7 +42,7 @@ require (
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.21.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
@@ -104,8 +104,8 @@ require (
 	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20240723171418-e6d459c13d2a // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240723171418-e6d459c13d2a // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240725223205-93522f1f2a9f // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240725223205-93522f1f2a9f // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
