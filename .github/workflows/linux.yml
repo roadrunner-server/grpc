@@ -91,11 +91,11 @@ jobs:
           cp -r localhost+2-client-key.pem localhost+2-client.pem localhost+2-key.pem localhost+2.pem test-certs/
           cp -r $(mkcert -CAROOT)/rootCA.pem test-certs/
           
-          docker-compose -f env/docker-compose-otel.yaml up -d
+          docker compose -f env/docker-compose-otel.yaml up -d
           sleep 30
           go test -timeout 20m -v -race -cover -tags=debug -failfast -coverpkg=$(cat pkgs.txt) -coverprofile=./coverage-ci/grpc.out -covermode=atomic grpc_plugin_gzip_test.go grpc_plugin_test.go
 
-          docker-compose -f env/docker-compose-otel.yaml down
+          docker compose -f env/docker-compose-otel.yaml down
 
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
