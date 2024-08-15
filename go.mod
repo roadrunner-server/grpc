@@ -7,7 +7,7 @@ toolchain go1.22.5
 require (
 	github.com/emicklei/proto v1.13.2
 	github.com/goccy/go-json v0.10.3
-	github.com/prometheus/client_golang v1.19.1
+	github.com/prometheus/client_golang v1.20.0
 	github.com/roadrunner-server/api/v4 v4.16.0
 	github.com/roadrunner-server/endure/v2 v2.4.6
 	github.com/roadrunner-server/errors v1.4.1
@@ -21,7 +21,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.28.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.28.0
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240808171019-573a1156607a
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240814211410-ddb44dafa142
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.2
 )
