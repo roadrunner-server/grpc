@@ -95,12 +95,12 @@ func NewProxy(name string, metadata string, grpcPool Pool, mu *sync.RWMutex, pro
 	}
 }
 
-// RegisterMethod registers new RPC method.
+// RegisterMethod registers a new RPC method.
 func (p *Proxy) RegisterMethod(method string) {
 	p.methods = append(p.methods, method)
 }
 
-// ServiceDesc returns service description for the proxy.
+// ServiceDesc returns a service description for the proxy.
 func (p *Proxy) ServiceDesc() *grpc.ServiceDesc {
 	desc := &grpc.ServiceDesc{
 		ServiceName: p.name,
@@ -319,7 +319,7 @@ func wrapError(err error) error {
 		}
 
 		if phpCode > 0 && phpCode < math.MaxUint32 {
-			code = codes.Code(phpCode)
+			code = codes.Code(phpCode) //nolint:gosec
 		}
 
 		st := status.New(code, chunks[1]).Proto()

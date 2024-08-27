@@ -169,12 +169,12 @@ func (p *Plugin) serverOptions() ([]grpc.ServerOption, error) {
 			Time:                  p.config.PingTime,
 			Timeout:               p.config.Timeout,
 		}),
-		grpc.MaxConcurrentStreams(uint32(p.config.MaxConcurrentStreams)),
+		grpc.MaxConcurrentStreams(uint32(p.config.MaxConcurrentStreams)), //nolint:gosec
 	}
 
 	opts = append(opts, serverOptions...)
 	opts = append(opts, p.opts...)
 
-	// custom codec is required to bypass protobuf, common interceptor used for debug and stats
+	// custom codec is required to bypass protobuf, a common interceptor used for debug and stats
 	return opts, nil
 }

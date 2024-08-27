@@ -7,7 +7,7 @@ toolchain go1.23.0
 require (
 	github.com/emicklei/proto v1.13.2
 	github.com/goccy/go-json v0.10.3
-	github.com/prometheus/client_golang v1.20.0
+	github.com/prometheus/client_golang v1.20.2
 	github.com/roadrunner-server/api/v4 v4.16.0
 	github.com/roadrunner-server/endure/v2 v2.4.6
 	github.com/roadrunner-server/errors v1.4.1
@@ -15,13 +15,13 @@ require (
 	github.com/roadrunner-server/pool v1.0.1
 	github.com/roadrunner-server/tcplisten v1.5.1
 	github.com/stretchr/testify v1.9.0
-	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.53.0
-	go.opentelemetry.io/contrib/propagators/jaeger v1.28.0
-	go.opentelemetry.io/otel v1.28.0
-	go.opentelemetry.io/otel/sdk v1.28.0
+	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.54.0
+	go.opentelemetry.io/contrib/propagators/jaeger v1.29.0
+	go.opentelemetry.io/otel v1.29.0
+	go.opentelemetry.io/otel/sdk v1.29.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.28.0
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240814211410-ddb44dafa142
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240826202546-f6391c0de4c7
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.2
 )
@@ -45,8 +45,8 @@ require (
 	github.com/tklauser/go-sysconf v0.3.14 // indirect
 	github.com/tklauser/numcpus v0.8.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
-	go.opentelemetry.io/otel/metric v1.28.0 // indirect
-	go.opentelemetry.io/otel/trace v1.28.0 // indirect
+	go.opentelemetry.io/otel/metric v1.29.0 // indirect
+	go.opentelemetry.io/otel/trace v1.29.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.24.0 // indirect
