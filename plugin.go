@@ -68,6 +68,7 @@ func (p *Plugin) Init(cfg common.Configurer, log common.Logger, server common.Se
 		return errors.E(errors.Disabled)
 	}
 
+	encoding.RegisterCodecV2(encoding.GetCodecV2(codec.Name))
 	// register the codec
 	encoding.RegisterCodec(&codec.Codec{
 		Base: encoding.GetCodecV2(codec.Name),
