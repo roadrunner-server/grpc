@@ -40,14 +40,21 @@ func (c *Codec) Marshal(v any) ([]byte, error) {
 func (c *Codec) Unmarshal(data []byte, v any) error {
 	switch msg := v.(type) {
 	case *RawMessage:
+		if msg == nil {
+			return nil
+		}
+
+		// assign data to v
 		*msg = data
 		return nil
 	case proto.Message:
+		// for the regular proto message, just unmarshal it
 		err := proto.Unmarshal(data, msg)
 		if err != nil {
 			return err
 		}
 	default:
+		// otherwise, use the base codec to unmarshal
 		return c.Base.Unmarshal(mem.BufferSlice{mem.NewBuffer(&data, mem.DefaultBufferPool())}, v)
 	}
 
