@@ -99,6 +99,7 @@ func TestGrpcRqRsGzip(t *testing.T) {
 	resp, err := client.Ping(context.Background(), &service.Message{Msg: "TOST"})
 	require.NoError(t, err)
 	require.Equal(t, "TOST", resp.Msg)
+	_ = conn.Close()
 
 	stopCh <- struct{}{}
 
@@ -192,6 +193,7 @@ func TestGrpcRqRsMultipleGzip(t *testing.T) {
 
 	err = watch.CloseSend()
 	require.NoError(t, err)
+	_ = conn.Close()
 
 	stopCh <- struct{}{}
 
@@ -276,6 +278,7 @@ func TestGrpcRqRsTLSGzip(t *testing.T) {
 	resp, err := client.Ping(context.Background(), &service.Message{Msg: "TOST"})
 	require.NoError(t, err)
 	require.Equal(t, "TOST", resp.Msg)
+	_ = conn.Close()
 
 	stopCh <- struct{}{}
 
@@ -360,6 +363,7 @@ func TestGrpcRqRsTLSRootCAGzip(t *testing.T) {
 	resp, err := client.Ping(context.Background(), &service.Message{Msg: "TOST"})
 	require.NoError(t, err)
 	require.Equal(t, "TOST", resp.Msg)
+	_ = conn.Close()
 
 	stopCh <- struct{}{}
 
@@ -452,6 +456,7 @@ func TestGrpcRqRsTLS_WithResetGzip(t *testing.T) {
 	resp2, err2 := client.Ping(context.Background(), &service.Message{Msg: "TOST"})
 	require.NoError(t, err2)
 	require.Equal(t, "TOST", resp2.Msg)
+	_ = conn.Close()
 
 	stopCh <- struct{}{}
 	wg.Wait()
