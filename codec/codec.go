@@ -1,6 +1,10 @@
 package codec
 
-import "google.golang.org/grpc/encoding"
+import (
+	"google.golang.org/grpc/encoding"
+	"google.golang.org/grpc/mem"
+	"google.golang.org/protobuf/proto"
+)
 
 type RawMessage []byte
 
@@ -15,7 +19,7 @@ func (RawMessage) ProtoMessage()  {}
 func (RawMessage) String() string { return rm }
 
 type Codec struct {
-	Base encoding.Codec
+	Base encoding.CodecV2
 }
 
 // Marshal returns the wire format of v. rawMessages would be returned without encoding.
@@ -24,17 +28,30 @@ func (c *Codec) Marshal(v any) ([]byte, error) {
 		return raw, nil
 	}
 
-	return c.Base.Marshal(v)
+	data, err := c.Base.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+
+	return data.Materialize(), nil
 }
 
 // Unmarshal parses the wire format into v. rawMessages would not be unmarshalled.
 func (c *Codec) Unmarshal(data []byte, v any) error {
-	if raw, ok := v.(*RawMessage); ok {
-		*raw = data
+	switch msg := v.(type) {
+	case *RawMessage:
+		*msg = data
 		return nil
+	case proto.Message:
+		err := proto.Unmarshal(data, msg)
+		if err != nil {
+			return err
+		}
+	default:
+		return c.Base.Unmarshal(mem.BufferSlice{mem.NewBuffer(&data, mem.DefaultBufferPool())}, v)
 	}
 
-	return c.Base.Unmarshal(data, v)
+	return nil
 }
 
 func (c *Codec) Name() string {

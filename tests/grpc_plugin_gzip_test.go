@@ -35,7 +35,6 @@ func TestGrpcRqRsGzip(t *testing.T) {
 	cfg := &config.Plugin{
 		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-rq.yaml",
-		Prefix:  "rr",
 	}
 
 	err := cont.RegisterAll(
@@ -112,7 +111,6 @@ func TestGrpcRqRsMultipleGzip(t *testing.T) {
 	cfg := &config.Plugin{
 		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-rq-multiple.yaml",
-		Prefix:  "rr",
 	}
 
 	err := cont.RegisterAll(
@@ -206,7 +204,6 @@ func TestGrpcRqRsTLSGzip(t *testing.T) {
 	cfg := &config.Plugin{
 		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-rq-tls.yaml",
-		Prefix:  "rr",
 	}
 
 	err := cont.RegisterAll(
@@ -291,7 +288,6 @@ func TestGrpcRqRsTLSRootCAGzip(t *testing.T) {
 	cfg := &config.Plugin{
 		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-rq-tls-rootca.yaml",
-		Prefix:  "rr",
 	}
 
 	err := cont.RegisterAll(
@@ -356,7 +352,7 @@ func TestGrpcRqRsTLSRootCAGzip(t *testing.T) {
 		MinVersion:   tls.VersionTLS12,
 	}
 
-	conn, err := grpc.Dial("127.0.0.1:9003", grpc.WithTransportCredentials(credentials.NewTLS(tlscfg)), grpc.WithDefaultCallOptions(grpc.UseCompressor("gzip")))
+	conn, err := grpc.NewClient("127.0.0.1:9003", grpc.WithTransportCredentials(credentials.NewTLS(tlscfg)), grpc.WithDefaultCallOptions(grpc.UseCompressor("gzip")))
 	require.NoError(t, err)
 	require.NotNil(t, conn)
 
@@ -376,7 +372,6 @@ func TestGrpcRqRsTLS_WithResetGzip(t *testing.T) {
 	cfg := &config.Plugin{
 		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-rq-tls.yaml",
-		Prefix:  "rr",
 	}
 
 	err := cont.RegisterAll(
@@ -442,7 +437,7 @@ func TestGrpcRqRsTLS_WithResetGzip(t *testing.T) {
 		MinVersion:   tls.VersionTLS12,
 	}
 
-	conn, err := grpc.Dial("localhost:9002", grpc.WithTransportCredentials(credentials.NewTLS(tlscfg)), grpc.WithDefaultCallOptions(grpc.UseCompressor("gzip")))
+	conn, err := grpc.NewClient("localhost:9002", grpc.WithTransportCredentials(credentials.NewTLS(tlscfg)), grpc.WithDefaultCallOptions(grpc.UseCompressor("gzip")))
 	require.NoError(t, err)
 	require.NotNil(t, conn)
 
