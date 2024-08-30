@@ -689,7 +689,7 @@ func TestGrpcRqRsMultiple(t *testing.T) {
 
 	time.Sleep(time.Second * 1)
 
-	conn, err := grpc.NewClient("127.0.0.1:9001", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("127.0.0.1:9003", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	require.NoError(t, err)
 	require.NotNil(t, conn)
 
