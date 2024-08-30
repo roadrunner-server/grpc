@@ -102,7 +102,6 @@ func TestGrpcRqRsGzip(t *testing.T) {
 	_ = conn.Close()
 
 	stopCh <- struct{}{}
-
 	wg.Wait()
 }
 

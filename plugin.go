@@ -61,18 +61,19 @@ type Plugin struct {
 	interceptors map[string]common.Interceptor
 }
 
+// needed to register our codec only once. Double registration will cause panic.
+func init() {
+	encoding.RegisterCodec(&codec.Codec{
+		Base: encoding.GetCodecV2(codec.Name),
+	})
+}
+
 func (p *Plugin) Init(cfg common.Configurer, log common.Logger, server common.Server) error {
 	const op = errors.Op("grpc_plugin_init")
 
 	if !cfg.Has(pluginName) {
 		return errors.E(errors.Disabled)
 	}
-
-	encoding.RegisterCodecV2(encoding.GetCodecV2(codec.Name))
-	// register the codec
-	encoding.RegisterCodec(&codec.Codec{
-		Base: encoding.GetCodecV2(codec.Name),
-	})
 
 	err := cfg.UnmarshalKey(pluginName, &p.config)
 	if err != nil {
