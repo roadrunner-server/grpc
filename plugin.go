@@ -192,10 +192,15 @@ func (p *Plugin) Stop(ctx context.Context) error {
 		p.healthServer.SetServingStatus(grpc_health_v1.HealthCheckResponse_NOT_SERVING)
 
 		if p.server != nil {
-			p.server.Stop()
+			p.server.GracefulStop()
 		}
 
 		p.healthServer.Shutdown()
+
+		if p.gPool != nil {
+			p.gPool.Destroy(ctx)
+		}
+
 		finCh <- struct{}{}
 	}()
 

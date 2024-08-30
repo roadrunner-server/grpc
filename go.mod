@@ -21,8 +21,8 @@ require (
 	go.opentelemetry.io/otel/sdk v1.29.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.28.0
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240826202546-f6391c0de4c7
-	google.golang.org/grpc v1.65.0
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240827150818-7e3bb234dfed
+	google.golang.org/grpc v1.66.0
 	google.golang.org/protobuf v1.34.2
 )
 
@@ -37,7 +37,7 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
-	github.com/prometheus/common v0.55.0 // indirect
+	github.com/prometheus/common v0.57.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/roadrunner-server/events v1.0.1 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
