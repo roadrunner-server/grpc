@@ -118,7 +118,7 @@ func (p *Plugin) serverOptions() ([]grpc.ServerOption, error) {
 	var err error
 
 	if p.config.EnableTLS() {
-		// if client CA is not empty we combine it with Cert and Key
+		// if client CA is not empty, we combine it with Cert and Key
 		if p.config.TLS.RootCA != "" {
 			cert, err = tls.LoadX509KeyPair(p.config.TLS.Cert, p.config.TLS.Key)
 			if err != nil {

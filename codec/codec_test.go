@@ -1,20 +1,29 @@
 package codec
 
 import (
+	"encoding/json"
 	"testing"
 
-	json "github.com/goccy/go-json"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/grpc/mem"
 )
 
 type jsonCodec struct{}
 
-func (jsonCodec) Marshal(v any) ([]byte, error) {
-	return json.Marshal(v)
+func (jsonCodec) Marshal(v any) (mem.BufferSlice, error) {
+	data, err := json.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+
+	buf := mem.NewBuffer(&data, mem.DefaultBufferPool())
+	bs := mem.BufferSlice{buf}
+	return bs, nil
 }
 
-func (jsonCodec) Unmarshal(data []byte, v any) error {
-	return json.Unmarshal(data, v)
+func (jsonCodec) Unmarshal(data mem.BufferSlice, v any) error {
+	out := data.Materialize()
+	return json.Unmarshal(out, v)
 }
 
 func (jsonCodec) Name() string {

@@ -112,6 +112,7 @@ func TestGrpcInit(t *testing.T) {
 	resp, err := client.Ping(context.Background(), &service.Message{Msg: "TOST"})
 	require.NoError(t, err)
 	require.Equal(t, "TOST", resp.Msg)
+	_ = conn.Close()
 
 	stopCh <- struct{}{}
 
@@ -183,6 +184,7 @@ func TestGrpcOtel(t *testing.T) {
 	resp, err := client.Ping(context.Background(), &service.Message{Msg: "TOST"})
 	require.NoError(t, err)
 	require.Equal(t, "TOST", resp.Msg)
+	_ = conn.Close()
 
 	stopCh <- struct{}{}
 	wg.Wait()
@@ -305,7 +307,6 @@ func TestGrpcInitDup2(t *testing.T) {
 	cfg := &config.Plugin{
 		Version: "2023.3.0",
 		Path:    "configs/.rr-grpc-init-duplicate-2.yaml",
-		Prefix:  "rr",
 	}
 
 	err := cont.RegisterAll(
@@ -436,6 +437,7 @@ func TestGrpcInitMultiple(t *testing.T) {
 	resp, err := client.Ping(context.Background(), &service.Message{Msg: "TOST"})
 	require.NoError(t, err)
 	require.Equal(t, "TOST", resp.Msg)
+	_ = conn.Close()
 
 	time.Sleep(time.Second)
 	stopCh <- struct{}{}
@@ -513,6 +515,7 @@ func TestGrpcRqRs(t *testing.T) {
 	resp, err := client.Ping(context.Background(), &service.Message{Msg: "TOST"})
 	require.NoError(t, err)
 	require.Equal(t, "TOST", resp.Msg)
+	_ = conn.Close()
 
 	stopCh <- struct{}{}
 
@@ -617,6 +620,7 @@ func TestGrpcRqRsException(t *testing.T) {
 	require.Error(t, err)
 	require.Equal(t, "rpc error: code = Internal desc = FOOOOOOOOOOOO", err.Error())
 	require.Nil(t, resp)
+	_ = conn.Close()
 
 	stopCh <- struct{}{}
 
@@ -685,7 +689,7 @@ func TestGrpcRqRsMultiple(t *testing.T) {
 
 	time.Sleep(time.Second * 1)
 
-	conn, err := grpc.NewClient("127.0.0.1:9001", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("127.0.0.1:9003", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	require.NoError(t, err)
 	require.NotNil(t, conn)
 
@@ -710,6 +714,7 @@ func TestGrpcRqRsMultiple(t *testing.T) {
 
 	err = watch.CloseSend()
 	require.NoError(t, err)
+	_ = conn.Close()
 
 	stopCh <- struct{}{}
 
@@ -794,6 +799,7 @@ func TestGrpcRqRsTLS(t *testing.T) {
 	resp, err := client.Ping(context.Background(), &service.Message{Msg: "TOST"})
 	require.NoError(t, err)
 	require.Equal(t, "TOST", resp.Msg)
+	_ = conn.Close()
 
 	stopCh <- struct{}{}
 
@@ -878,6 +884,7 @@ func TestGrpcRqRsTLSRootCA(t *testing.T) {
 	resp, err := client.Ping(context.Background(), &service.Message{Msg: "TOST"})
 	require.NoError(t, err)
 	require.Equal(t, "TOST", resp.Msg)
+	_ = conn.Close()
 
 	stopCh <- struct{}{}
 	wg.Wait()
@@ -969,6 +976,7 @@ func TestGrpcRqRsTLS_WithReset(t *testing.T) {
 	resp2, err2 := client.Ping(context.Background(), &service.Message{Msg: "TOST"})
 	require.NoError(t, err2)
 	require.Equal(t, "TOST", resp2.Msg)
+	_ = conn.Close()
 
 	stopCh <- struct{}{}
 	wg.Wait()
@@ -1056,6 +1064,7 @@ func TestGRPCMetrics(t *testing.T) {
 	assert.Contains(t, genericOut, `rr_grpc_request_total`)
 	assert.Contains(t, genericOut, `rr_grpc_requests_queue`)
 
+	_ = conn.Close()
 	close(sig)
 	wg.Wait()
 
@@ -1179,6 +1188,7 @@ func Test_GrpcRqOtlp(t *testing.T) {
 	resp, err := client.Ping(context.Background(), &service.Message{Msg: "TOST"})
 	require.NoError(t, err)
 	require.Equal(t, "TOST", resp.Msg)
+	_ = conn.Close()
 
 	stopCh <- struct{}{}
 	wg.Wait()
