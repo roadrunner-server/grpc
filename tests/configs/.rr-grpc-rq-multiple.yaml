@@ -15,7 +15,7 @@ logs:
 # GRPC service configuration
 grpc:
   # socket to listen
-  listen: "tcp://127.0.0.1:9002"
+  listen: "tcp://127.0.0.1:9003"
 
   # proto root file
   proto:
