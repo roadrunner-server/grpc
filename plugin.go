@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/roadrunner-server/pool/pool/static_pool"
 	"github.com/roadrunner-server/tcplisten"
 	"go.opentelemetry.io/otel/propagation"
 
@@ -201,7 +202,14 @@ func (p *Plugin) Stop(ctx context.Context) error {
 		p.healthServer.Shutdown()
 
 		if p.gPool != nil {
-			p.gPool.Destroy(ctx)
+			switch pp := p.gPool.(type) {
+			case *static_pool.Pool:
+				if pp != nil {
+					pp.Destroy(ctx)
+				}
+			default:
+				// pool is nil, nothing to do
+			}
 		}
 
 		finCh <- struct{}{}
