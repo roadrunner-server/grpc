@@ -221,10 +221,13 @@ func (p *Proxy) responseMetadata(resp *payload.Payload) (metadata.MD, error) {
 	}
 
 	if len(rpcMetadata) > 0 {
+		// new meta should be used
+		mdn := metadata.New(map[string]string{})
+		// old meta should not be used in response
 		md = metadata.New(rpcMetadata)
 
 		if len(md.Get(headers)) > 0 {
-			mdh := metadata.New(make(map[string]string))
+			mdh := make(map[string]any)
 			err = json.Unmarshal([]byte(md.Get(headers)[0]), &mdh)
 			if err != nil {
 				// we don't need to return this error, log it
@@ -232,8 +235,16 @@ func (p *Proxy) responseMetadata(resp *payload.Payload) (metadata.MD, error) {
 				goto api
 			}
 
-			// join with the main metadata
-			md = metadata.Join(md, mdh)
+			for k, v := range mdh {
+				switch tt := v.(type) {
+				case string:
+					mdn.Append(k, tt)
+				case int:
+					mdn.Append(k, strconv.Itoa(tt))
+				default:
+					p.log.Warn("skipping header with unsupported type", zap.String("key", k), zap.Any("value", v))
+				}
+			}
 		}
 
 		/*
@@ -249,15 +260,15 @@ func (p *Proxy) responseMetadata(resp *payload.Payload) (metadata.MD, error) {
 			// get an error
 			data, err := base64.StdEncoding.DecodeString(md.Get(apiErr)[0])
 			if err != nil {
-				return nil, err
+				return mdn, err
 			}
 
 			err = proto.Unmarshal(data, st)
 			if err != nil {
-				return nil, err
+				return mdn, err
 			}
 
-			return md, status.ErrorProto(st)
+			return mdn, status.ErrorProto(st)
 		}
 	}
 
