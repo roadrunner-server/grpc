@@ -194,6 +194,7 @@ func (p *Proxy) invoke(ctx context.Context, method string, in *codec.RawMessage)
 
 	md, err := p.responseMetadata(r)
 	if err != nil {
+		_ = grpc.SetHeader(ctx, md)
 		return nil, err
 	}
 
