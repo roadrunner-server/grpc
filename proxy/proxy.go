@@ -17,6 +17,7 @@ import (
 	"github.com/roadrunner-server/pool/pool/static_pool"
 	"github.com/roadrunner-server/pool/worker"
 	"go.opentelemetry.io/otel/propagation"
+	"go.uber.org/zap"
 	"golang.org/x/net/context"
 	spb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc"
@@ -33,6 +34,7 @@ const (
 	peerAuthType string = ":peer.auth-type"
 	delimiter    string = "|:|"
 	apiErr       string = "error"
+	headers      string = "headers"
 )
 
 type Pool interface {
@@ -65,6 +67,7 @@ type rpcContext struct {
 // Proxy manages GRPC/RoadRunner bridge.
 type Proxy struct {
 	mu       *sync.RWMutex
+	log      *zap.Logger
 	prop     propagation.TextMapPropagator
 	grpcPool Pool
 	name     string
@@ -75,8 +78,9 @@ type Proxy struct {
 }
 
 // NewProxy creates a new service proxy object.
-func NewProxy(name string, metadata string, grpcPool Pool, mu *sync.RWMutex, prop propagation.TextMapPropagator) *Proxy {
+func NewProxy(name string, metadata string, log *zap.Logger, grpcPool Pool, mu *sync.RWMutex, prop propagation.TextMapPropagator) *Proxy {
 	return &Proxy{
+		log:      log,
 		mu:       mu,
 		prop:     prop,
 		grpcPool: grpcPool,
@@ -192,6 +196,7 @@ func (p *Proxy) invoke(ctx context.Context, method string, in *codec.RawMessage)
 	if err != nil {
 		return nil, err
 	}
+
 	ctx = metadata.NewIncomingContext(ctx, md)
 	err = grpc.SetHeader(ctx, md)
 	if err != nil {
@@ -217,12 +222,26 @@ func (p *Proxy) responseMetadata(resp *payload.Payload) (metadata.MD, error) {
 	if len(rpcMetadata) > 0 {
 		md = metadata.New(rpcMetadata)
 
+		if len(md.Get(headers)) > 0 {
+			mdh := metadata.New(make(map[string]string))
+			err = json.Unmarshal([]byte(md.Get(headers)[0]), &mdh)
+			if err != nil {
+				// we don't need to return this error, log it
+				p.log.Error("error unmarshalling headers", zap.Error(err))
+				goto api
+			}
+
+			// join with the main metadata
+			md = metadata.Join(md, mdh)
+		}
+
 		/*
 			we have an error
-			actually, if code is OK, status.ErrorProto will be nil
+			actually if the code is OK, status.ErrorProto will be nil
 			but, we use this only in case of PHP exception happened
 
 		*/
+	api:
 		if len(md.Get(apiErr)) > 0 {
 			st := &spb.Status{}
 
