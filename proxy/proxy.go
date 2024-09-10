@@ -35,6 +35,7 @@ const (
 	delimiter    string = "|:|"
 	apiErr       string = "error"
 	headers      string = "headers"
+	trailers     string = "trailers"
 )
 
 type Pool interface {
@@ -151,7 +152,12 @@ func (p *Proxy) methodHandler(method string) func(srv any, ctx context.Context, 
 		}
 
 		handler := func(ctx context.Context, req any) (any, error) {
-			return p.invoke(ctx, method, req.(*codec.RawMessage))
+			switch r := req.(type) {
+			case *codec.RawMessage:
+				return p.invoke(ctx, method, r)
+			default:
+				return nil, errors.Errorf("unexpected request type %T", r)
+			}
 		}
 
 		return interceptor(ctx, in, info, handler)
@@ -161,6 +167,9 @@ func (p *Proxy) methodHandler(method string) func(srv any, ctx context.Context, 
 func (p *Proxy) invoke(ctx context.Context, method string, in *codec.RawMessage) (any, error) {
 	pld := p.getPld()
 	defer p.putPld(pld)
+
+	// experimental grpc API
+	st := grpc.ServerTransportStreamFromContext(ctx)
 
 	err := p.makePayload(ctx, method, in, pld)
 	if err != nil {
@@ -192,14 +201,7 @@ func (p *Proxy) invoke(ctx context.Context, method string, in *codec.RawMessage)
 		return nil, errors.Str("worker empty response")
 	}
 
-	md, err := p.responseMetadata(r)
-	if err != nil {
-		_ = grpc.SetHeader(ctx, md)
-		return nil, err
-	}
-
-	ctx = metadata.NewIncomingContext(ctx, md)
-	err = grpc.SetHeader(ctx, md)
+	err = p.responseMetadata(st, r)
 	if err != nil {
 		return nil, err
 	}
@@ -208,39 +210,64 @@ func (p *Proxy) invoke(ctx context.Context, method string, in *codec.RawMessage)
 }
 
 // responseMetadata extracts metadata from roadrunner response Payload.Context and converts it to metadata.MD
-func (p *Proxy) responseMetadata(resp *payload.Payload) (metadata.MD, error) {
-	var md metadata.MD
+func (p *Proxy) responseMetadata(st grpc.ServerTransportStream, resp *payload.Payload) error {
 	if resp == nil || len(resp.Context) == 0 {
-		return md, nil
+		return nil
 	}
 
 	var rpcMetadata map[string]string
 	err := json.Unmarshal(resp.Context, &rpcMetadata)
 	if err != nil {
-		return md, err
+		return err
 	}
 
 	if len(rpcMetadata) > 0 {
-		// new meta should be used
-		mdn := metadata.New(map[string]string{})
-		// old meta should not be used in response
-		md = metadata.New(rpcMetadata)
+		// old meta should not be used in response in new API
+		md := metadata.New(rpcMetadata)
 
+		// we assume that if there are no new headers and trailers, an old PHP-GRPC client is used
+		if len(md.Get(headers)) == 0 && len(md.Get(trailers)) == 0 {
+			// backward compatibility
+			_ = st.SetHeader(md)
+			goto parseErr
+		}
+
+		// New API headers
 		if len(md.Get(headers)) > 0 {
 			mdh := make(map[string]any)
 			err = json.Unmarshal([]byte(md.Get(headers)[0]), &mdh)
 			if err != nil {
 				// we don't need to return this error, log it
 				p.log.Error("error unmarshalling headers", zap.Error(err))
-				goto api
 			}
 
 			for k, v := range mdh {
 				switch tt := v.(type) {
 				case string:
-					mdn.Append(k, tt)
+					_ = st.SetHeader(metadata.Pairs(k, tt))
 				case int:
-					mdn.Append(k, strconv.Itoa(tt))
+					_ = st.SetHeader(metadata.Pairs(k, strconv.Itoa(tt)))
+				default:
+					p.log.Warn("skipping header with unsupported type", zap.String("key", k), zap.Any("value", v))
+				}
+			}
+		}
+
+		// New API trailers
+		if len(md.Get(trailers)) > 0 {
+			mdh := make(map[string]any)
+			err = json.Unmarshal([]byte(md.Get(trailers)[0]), &mdh)
+			if err != nil {
+				// we don't need to return this error, log it
+				p.log.Error("error unmarshalling trailers", zap.Error(err))
+			}
+
+			for k, v := range mdh {
+				switch tt := v.(type) {
+				case string:
+					_ = st.SetTrailer(metadata.Pairs(k, tt))
+				case int:
+					_ = st.SetTrailer(metadata.Pairs(k, strconv.Itoa(tt)))
 				default:
 					p.log.Warn("skipping header with unsupported type", zap.String("key", k), zap.Any("value", v))
 				}
@@ -253,26 +280,26 @@ func (p *Proxy) responseMetadata(resp *payload.Payload) (metadata.MD, error) {
 			but, we use this only in case of PHP exception happened
 
 		*/
-	api:
+	parseErr:
 		if len(md.Get(apiErr)) > 0 {
 			st := &spb.Status{}
 
 			// get an error
 			data, err := base64.StdEncoding.DecodeString(md.Get(apiErr)[0])
 			if err != nil {
-				return mdn, err
+				return err
 			}
 
 			err = proto.Unmarshal(data, st)
 			if err != nil {
-				return mdn, err
+				return err
 			}
 
-			return mdn, status.ErrorProto(st)
+			return status.ErrorProto(st)
 		}
 	}
 
-	return md, nil
+	return nil
 }
 
 // makePayload generates RoadRunner compatible payload based on GRPC message.
@@ -350,7 +377,7 @@ func wrapError(err error) error {
 		}
 
 		if phpCode > 0 && phpCode < math.MaxUint32 {
-			code = codes.Code(phpCode) //nolint:gosec
+			code = codes.Code(phpCode)
 		}
 
 		st := status.New(code, chunks[1]).Proto()
