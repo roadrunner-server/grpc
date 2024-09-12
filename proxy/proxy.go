@@ -319,7 +319,7 @@ func wrapError(err error) error {
 		}
 
 		if phpCode > 0 && phpCode < math.MaxUint32 {
-			code = codes.Code(phpCode) //nolint:gosec
+			code = codes.Code(phpCode)
 		}
 
 		st := status.New(code, chunks[1]).Proto()
