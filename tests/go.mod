@@ -5,20 +5,20 @@ go 1.23
 toolchain go1.23.1
 
 require (
-	github.com/roadrunner-server/config/v5 v5.0.3
+	github.com/roadrunner-server/config/v5 v5.0.4
 	github.com/roadrunner-server/endure/v2 v2.6.1
 	github.com/roadrunner-server/goridge/v3 v3.8.3
 	github.com/roadrunner-server/grpc/v5 v5.0.0
-	github.com/roadrunner-server/logger/v5 v5.0.3
-	github.com/roadrunner-server/metrics/v5 v5.0.3
-	github.com/roadrunner-server/otel/v5 v5.0.2
-	github.com/roadrunner-server/resetter/v5 v5.0.4
-	github.com/roadrunner-server/rpc/v5 v5.0.3
-	github.com/roadrunner-server/server/v5 v5.1.1
-	github.com/roadrunner-server/status/v5 v5.0.3
+	github.com/roadrunner-server/logger/v5 v5.0.4
+	github.com/roadrunner-server/metrics/v5 v5.0.4
+	github.com/roadrunner-server/otel/v5 v5.0.3
+	github.com/roadrunner-server/resetter/v5 v5.0.5
+	github.com/roadrunner-server/rpc/v5 v5.0.4
+	github.com/roadrunner-server/server/v5 v5.1.2
+	github.com/roadrunner-server/status/v5 v5.0.4
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.27.0
-	google.golang.org/grpc v1.66.2
+	google.golang.org/grpc v1.67.0
 	google.golang.org/protobuf v1.34.2
 )
 
@@ -48,7 +48,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.22.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
-	github.com/klauspost/compress v1.17.9 // indirect
+	github.com/klauspost/compress v1.17.10 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -59,7 +59,7 @@ require (
 	github.com/pborman/uuid v1.2.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/prometheus/client_golang v1.20.3 // indirect
+	github.com/prometheus/client_golang v1.20.4 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.59.1 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
