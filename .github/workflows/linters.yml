@@ -3,7 +3,7 @@ name: Linters
 on: [push, pull_request]
 
 jobs:
-  lint:
+  linters:
     name: Golang-CI (lint)
     runs-on: ubuntu-latest
     steps:
