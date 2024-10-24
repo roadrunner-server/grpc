@@ -93,7 +93,7 @@
   },
   "$defs": {
     "duration": {
-      "$ref": "https://raw.githubusercontent.com/roadrunner-server/roadrunner/refs/heads/master/schemas/config/3.0.schema.json#/$defs/duration"
+      "$ref": "https://raw.githubusercontent.com/roadrunner-server/roadrunner/refs/heads/master/schemas/config/3.0.schema.json#/definitions/Duration"
     }
   }
 }
