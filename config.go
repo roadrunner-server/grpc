@@ -178,7 +178,7 @@ func (c *Config) InitDefaults() error { //nolint:gocyclo,gocognit
 
 func (c *Config) EnableTLS() bool {
 	if c.TLS != nil {
-		return (c.TLS.RootCA != "" && c.TLS.Key != "" && c.TLS.Cert != "") || (c.TLS.Key != "" && c.TLS.Cert != "")
+		return c.TLS.Key != "" && c.TLS.Cert != ""
 	}
 	return false
 }
