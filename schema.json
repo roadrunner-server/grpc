@@ -6,17 +6,24 @@
   "title": "roadrunner-grpc",
   "additionalProperties": false,
   "required": [
-    "proto"
+    "proto",
+    "listen"
   ],
   "properties": {
     "listen": {
-      "description": "GRPC address to listen on.",
-      "$ref": "https://raw.githubusercontent.com/roadrunner-server/roadrunner/refs/heads/master/schemas/config/3.0.schema.json#/definitions/HostAndPortWithTCP"
+      "description": "gRPC address to listen on. Supports both TCP and Unix sockets.",
+      "type": "string",
+      "minLength": 1,
+      "examples": [
+        "tcp://127.0.0.1:443",
+        "${TCP:-tcp://127.0.0.1:443}",
+        "tcp://127.0.0.1:${TCP_PORT}"
+      ]
     },
     "proto": {
       "type": "array",
       "minItems": 1,
-      "description": "Proto file to use. Multiple files are supported. Wildcards are allowed in the proto field.",
+      "description": "Proto file(s) to use. Multiple files are supported. Wildcards are allowed in the proto field.",
       "items": {
         "type": "string",
         "minLength": 1,
@@ -73,7 +80,7 @@
       "$ref": "#/$defs/duration"
     },
     "max_concurrent_streams": {
-      "description": "The maximum number of concurrent streams. Empty or 0 means 10.",
+      "description": "The maximum number of concurrent streams. Empty or 0 defaults to 10.",
       "type": "integer",
       "default": 10
     },
