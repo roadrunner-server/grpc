@@ -18,7 +18,7 @@ require (
 	github.com/roadrunner-server/status/v5 v5.1.0
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/zap v1.27.0
-	google.golang.org/grpc v1.68.1
+	google.golang.org/grpc v1.69.0
 	google.golang.org/protobuf v1.35.2
 )
 
@@ -84,18 +84,19 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
-	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.57.0 // indirect
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.57.0 // indirect
-	go.opentelemetry.io/contrib/propagators/jaeger v1.32.0 // indirect
-	go.opentelemetry.io/otel v1.32.0 // indirect
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.32.0 // indirect
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.32.0 // indirect
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.32.0 // indirect
-	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.32.0 // indirect
-	go.opentelemetry.io/otel/exporters/zipkin v1.32.0 // indirect
-	go.opentelemetry.io/otel/metric v1.32.0 // indirect
-	go.opentelemetry.io/otel/sdk v1.32.0 // indirect
-	go.opentelemetry.io/otel/trace v1.32.0 // indirect
+	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.58.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.58.0 // indirect
+	go.opentelemetry.io/contrib/propagators/jaeger v1.33.0 // indirect
+	go.opentelemetry.io/otel v1.33.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.33.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.33.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.33.0 // indirect
+	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.33.0 // indirect
+	go.opentelemetry.io/otel/exporters/zipkin v1.33.0 // indirect
+	go.opentelemetry.io/otel/metric v1.33.0 // indirect
+	go.opentelemetry.io/otel/sdk v1.33.0 // indirect
+	go.opentelemetry.io/otel/trace v1.33.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.4.0 // indirect
 	go.temporal.io/api v1.43.0 // indirect
 	go.temporal.io/sdk v1.31.0 // indirect
