@@ -7,7 +7,7 @@ toolchain go1.23.4
 require (
 	github.com/emicklei/proto v1.14.0
 	github.com/prometheus/client_golang v1.20.5
-	github.com/roadrunner-server/api/v4 v4.16.0
+	github.com/roadrunner-server/api/v4 v4.17.0
 	github.com/roadrunner-server/endure/v2 v2.6.1
 	github.com/roadrunner-server/errors v1.4.1
 	github.com/roadrunner-server/goridge/v3 v3.8.3
