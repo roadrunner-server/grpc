@@ -98,7 +98,7 @@ jobs:
           docker compose -f env/docker-compose-otel.yaml down
 
       - name: Archive code coverage results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage
           path: ./tests/coverage-ci
@@ -113,7 +113,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Download code coverage results
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
       - run: |
           cd coverage
           echo 'mode: atomic' > summary.txt
