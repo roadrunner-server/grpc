@@ -348,6 +348,10 @@ func GetOriginalErr(err error) string {
 	var e *errors.Error
 	ok := stderr.As(err, &e)
 	if !ok {
+		if err == nil {
+			return ""
+		}
+
 		return err.Error()
 	}
 
