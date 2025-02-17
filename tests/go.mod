@@ -5,17 +5,17 @@ go 1.24
 toolchain go1.24.0
 
 require (
-	github.com/roadrunner-server/config/v5 v5.1.3
+	github.com/roadrunner-server/config/v5 v5.1.4
 	github.com/roadrunner-server/endure/v2 v2.6.1
 	github.com/roadrunner-server/goridge/v3 v3.8.3
 	github.com/roadrunner-server/grpc/v5 v5.0.0
-	github.com/roadrunner-server/logger/v5 v5.1.3
-	github.com/roadrunner-server/metrics/v5 v5.1.3
-	github.com/roadrunner-server/otel/v5 v5.1.3
-	github.com/roadrunner-server/resetter/v5 v5.1.3
-	github.com/roadrunner-server/rpc/v5 v5.1.3
-	github.com/roadrunner-server/server/v5 v5.2.4
-	github.com/roadrunner-server/status/v5 v5.1.3
+	github.com/roadrunner-server/logger/v5 v5.1.4
+	github.com/roadrunner-server/metrics/v5 v5.1.4
+	github.com/roadrunner-server/otel/v5 v5.1.4
+	github.com/roadrunner-server/resetter/v5 v5.1.4
+	github.com/roadrunner-server/rpc/v5 v5.1.4
+	github.com/roadrunner-server/server/v5 v5.2.5
+	github.com/roadrunner-server/status/v5 v5.1.4
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.70.0
@@ -102,7 +102,7 @@ require (
 	go.temporal.io/sdk v1.32.1 // indirect
 	go.temporal.io/sdk/contrib/opentelemetry v0.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/exp v0.0.0-20250210185358-939b2ce775ac // indirect
+	golang.org/x/exp v0.0.0-20250215185904-eff6e970281f // indirect
 	golang.org/x/net v0.35.0 // indirect
 	golang.org/x/sync v0.11.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
