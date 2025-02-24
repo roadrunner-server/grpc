@@ -20,7 +20,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.34.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.35.0
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250219182151-9fdb1cabc7b2
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250224174004-546df14abb99
 	google.golang.org/grpc v1.70.0
 	google.golang.org/protobuf v1.36.5
 )
