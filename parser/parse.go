@@ -20,21 +20,21 @@ type Service struct {
 	Methods []Method
 }
 
-// Method describes singular RPC method.
+// Method describes a singular RPC method.
 type Method struct {
-	// Name is method name.
+	// Name is a method name.
 	Name string
 
-	// StreamsRequest defines if method accept stream input.
+	// StreamsRequest defines if the method accepts stream input.
 	StreamsRequest bool
 
-	// RequestType defines message name (from the same package) of method input.
+	// RequestType defines the message name (from the same package) of method input.
 	RequestType string
 
 	// StreamsReturns defines if method streams result.
 	StreamsReturns bool
 
-	// ReturnsType defines message name (from the same package) of method return value.
+	// ReturnsType defines the message name (from the same package) of the method return value.
 	ReturnsType string
 }
 

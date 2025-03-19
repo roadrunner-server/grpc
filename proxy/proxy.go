@@ -276,13 +276,12 @@ func (p *Proxy) responseMetadata(st grpc.ServerTransportStream, resp *payload.Pa
 
 		/*
 			we have an error
-			actually if the code is OK, status.ErrorProto will be nil
-			but, we use this only in case of PHP exception happened
-
+			actually if the code is OK, status.ErrorProto will be nil,
+			but we use this only in case of PHP exception happened
 		*/
 	parseErr:
 		if len(md.Get(apiErr)) > 0 {
-			st := &spb.Status{}
+			sst := &spb.Status{}
 
 			// get an error
 			data, err := base64.StdEncoding.DecodeString(md.Get(apiErr)[0])
@@ -290,19 +289,19 @@ func (p *Proxy) responseMetadata(st grpc.ServerTransportStream, resp *payload.Pa
 				return err
 			}
 
-			err = proto.Unmarshal(data, st)
+			err = proto.Unmarshal(data, sst)
 			if err != nil {
 				return err
 			}
 
-			return status.ErrorProto(st)
+			return status.ErrorProto(sst)
 		}
 	}
 
 	return nil
 }
 
-// makePayload generates RoadRunner compatible payload based on GRPC message.
+// makePayload generates a RoadRunner compatible payload based on a GRPC message.
 func (p *Proxy) makePayload(ctx context.Context, method string, body *codec.RawMessage, pld *payload.Payload) error {
 	ctxMD := make(map[string][]string)
 
