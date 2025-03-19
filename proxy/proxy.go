@@ -10,6 +10,8 @@ import (
 	"strings"
 	"sync"
 
+	_ "google.golang.org/genproto/protobuf/ptype" //nolint:revive,nolintlint
+
 	"github.com/roadrunner-server/errors"
 	"github.com/roadrunner-server/goridge/v3/pkg/frame"
 	"github.com/roadrunner-server/grpc/v5/codec"
