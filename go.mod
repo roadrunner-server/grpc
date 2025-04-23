@@ -2,7 +2,7 @@ module github.com/roadrunner-server/grpc/v5
 
 go 1.24
 
-toolchain go1.24.2
+toolchain go1.24.0
 
 require (
 	github.com/emicklei/proto v1.14.0
