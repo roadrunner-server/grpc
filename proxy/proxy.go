@@ -12,6 +12,8 @@ import (
 
 	_ "google.golang.org/genproto/protobuf/ptype" //nolint:revive,nolintlint
 
+	"maps"
+
 	"github.com/roadrunner-server/errors"
 	"github.com/roadrunner-server/goridge/v3/pkg/frame"
 	"github.com/roadrunner-server/grpc/v5/codec"
@@ -309,9 +311,7 @@ func (p *Proxy) makePayload(ctx context.Context, method string, body *codec.RawM
 
 	p.prop.Inject(ctx, propagation.HeaderCarrier(ctxMD))
 	if md, ok := metadata.FromIncomingContext(ctx); ok {
-		for k, v := range md {
-			ctxMD[k] = v
-		}
+		maps.Copy(ctxMD, md)
 	}
 
 	if pr, ok := peer.FromContext(ctx); ok {

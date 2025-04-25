@@ -253,7 +253,7 @@ func (p *Plugin) Workers() []*process.State {
 	workers := p.gPool.Workers()
 
 	ps := make([]*process.State, 0, len(workers))
-	for i := 0; i < len(workers); i++ {
+	for i := range workers {
 		state, err := process.WorkerProcessState(workers[i])
 		if err != nil {
 			return nil
