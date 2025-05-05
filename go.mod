@@ -7,7 +7,7 @@ toolchain go1.24.0
 require (
 	github.com/emicklei/proto v1.14.1
 	github.com/prometheus/client_golang v1.22.0
-	github.com/roadrunner-server/api/v4 v4.19.0
+	github.com/roadrunner-server/api/v4 v4.20.0
 	github.com/roadrunner-server/endure/v2 v2.6.1
 	github.com/roadrunner-server/errors v1.4.1
 	github.com/roadrunner-server/goridge/v3 v3.8.3
@@ -20,8 +20,8 @@ require (
 	go.opentelemetry.io/otel/sdk v1.35.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.39.0
-	google.golang.org/genproto v0.0.0-20250428153025-10db94c68c34
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250428153025-10db94c68c34
+	google.golang.org/genproto v0.0.0-20250505191935-c3e32d0227f9
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250505191935-c3e32d0227f9
 	google.golang.org/grpc v1.72.0
 	google.golang.org/protobuf v1.36.6
 )
@@ -49,8 +49,8 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.35.0 // indirect
 	go.opentelemetry.io/otel/trace v1.35.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/sync v0.13.0 // indirect
-	golang.org/x/sys v0.32.0 // indirect
-	golang.org/x/text v0.24.0 // indirect
+	golang.org/x/sync v0.14.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/text v0.25.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
