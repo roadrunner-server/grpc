@@ -15,8 +15,8 @@ import (
 
 	"github.com/roadrunner-server/endure/v2/dep"
 	"github.com/roadrunner-server/errors"
+	"github.com/roadrunner-server/grpc/v5/api"
 	"github.com/roadrunner-server/grpc/v5/codec"
-	"github.com/roadrunner-server/grpc/v5/common"
 	"github.com/roadrunner-server/grpc/v5/proxy"
 	"github.com/roadrunner-server/pool/pool"
 	"github.com/roadrunner-server/pool/state/process"
@@ -41,10 +41,10 @@ type Tracer interface {
 type Plugin struct {
 	mu           *sync.RWMutex
 	config       *Config
-	gPool        common.Pool
+	gPool        api.Pool
 	opts         []grpc.ServerOption
 	server       *grpc.Server
-	rrServer     common.Server
+	rrServer     api.Server
 	proxyList    []*proxy.Proxy
 	healthServer *HealthCheckServer
 
@@ -59,7 +59,7 @@ type Plugin struct {
 	log *zap.Logger
 
 	// interceptors to chain
-	interceptors map[string]common.Interceptor
+	interceptors map[string]api.Interceptor
 }
 
 // needed to register our codec only once. Double registration will cause panic.
@@ -69,7 +69,7 @@ func init() {
 	})
 }
 
-func (p *Plugin) Init(cfg common.Configurer, log common.Logger, server common.Server) error {
+func (p *Plugin) Init(cfg api.Configurer, log api.Logger, server api.Server) error {
 	const op = errors.Op("grpc_plugin_init")
 
 	if !cfg.Has(pluginName) {
@@ -124,7 +124,7 @@ func (p *Plugin) Init(cfg common.Configurer, log common.Logger, server common.Se
 
 	p.prop = propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}, jprop.Jaeger{})
 	p.tracer = sdktrace.NewTracerProvider()
-	p.interceptors = make(map[string]common.Interceptor)
+	p.interceptors = make(map[string]api.Interceptor)
 
 	return nil
 }
@@ -268,12 +268,12 @@ func (p *Plugin) Workers() []*process.State {
 func (p *Plugin) Collects() []*dep.In {
 	return []*dep.In{
 		dep.Fits(func(pp any) {
-			interceptor := pp.(common.Interceptor)
+			interceptor := pp.(api.Interceptor)
 			// just to be safe
 			p.mu.Lock()
 			p.interceptors[interceptor.Name()] = interceptor
 			p.mu.Unlock()
-		}, (*common.Interceptor)(nil)),
+		}, (*api.Interceptor)(nil)),
 		dep.Fits(func(pp any) {
 			p.tracer = pp.(Tracer).Tracer()
 		}, (*Tracer)(nil)),

@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/roadrunner-server/errors"
-	"github.com/roadrunner-server/grpc/v5/common"
+	"github.com/roadrunner-server/grpc/v5/api"
 	"github.com/roadrunner-server/grpc/v5/parser"
 	"github.com/roadrunner-server/grpc/v5/proxy"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
@@ -22,7 +22,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (p *Plugin) createGRPCserver(interceptors map[string]common.Interceptor) (*grpc.Server, error) {
+func (p *Plugin) createGRPCserver(interceptors map[string]api.Interceptor) (*grpc.Server, error) {
 	const op = errors.Op("grpc_plugin_create_server")
 	opts, err := p.serverOptions()
 	if err != nil {
