@@ -5,17 +5,17 @@ go 1.25
 toolchain go1.25.1
 
 require (
-	github.com/roadrunner-server/config/v5 v5.1.8
+	github.com/roadrunner-server/config/v5 v5.1.9
 	github.com/roadrunner-server/endure/v2 v2.6.2
 	github.com/roadrunner-server/goridge/v3 v3.8.3
-	github.com/roadrunner-server/grpc/v5 v5.2.2
-	github.com/roadrunner-server/logger/v5 v5.1.8
-	github.com/roadrunner-server/metrics/v5 v5.1.8
-	github.com/roadrunner-server/otel/v5 v5.3.0
-	github.com/roadrunner-server/resetter/v5 v5.1.8
-	github.com/roadrunner-server/rpc/v5 v5.1.8
-	github.com/roadrunner-server/server/v5 v5.2.9
-	github.com/roadrunner-server/status/v5 v5.1.8
+	github.com/roadrunner-server/grpc/v5 v5.2.3
+	github.com/roadrunner-server/logger/v5 v5.1.9
+	github.com/roadrunner-server/metrics/v5 v5.1.9
+	github.com/roadrunner-server/otel/v5 v5.3.1
+	github.com/roadrunner-server/resetter/v5 v5.1.9
+	github.com/roadrunner-server/rpc/v5 v5.1.9
+	github.com/roadrunner-server/server/v5 v5.2.10
+	github.com/roadrunner-server/status/v5 v5.1.9
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.75.1
@@ -79,7 +79,7 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
-	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
+	go.opentelemetry.io/auto/sdk v1.2.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.63.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.63.0 // indirect
 	go.opentelemetry.io/contrib/propagators/jaeger v1.38.0 // indirect
