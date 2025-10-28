@@ -157,6 +157,14 @@ func (p *Plugin) Serve() chan error {
 		return errCh
 	}
 
+	for name, interceptor := range p.interceptors {
+		if registrar, ok := interceptor.(interface{ RegisterGRPCService(*grpc.Server) error }); ok {
+			if err := registrar.RegisterGRPCService(p.server); err != nil {
+				p.log.Warn("failed to register grpc service", zap.String("plugin", name), zap.Error(err))
+			}
+		}
+	}
+
 	l, err := tcplisten.CreateListener(p.config.Listen)
 	if err != nil {
 		errCh <- errors.E(op, err)
@@ -277,5 +285,11 @@ func (p *Plugin) Collects() []*dep.In {
 		dep.Fits(func(pp any) {
 			p.tracer = pp.(Tracer).Tracer()
 		}, (*Tracer)(nil)),
+	}
+}
+
+func (p *Plugin) RegisterServices(services ...func(*grpc.Server)) {
+	for _, register := range services {
+		register(p.server)
 	}
 }
