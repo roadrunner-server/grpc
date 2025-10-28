@@ -5,6 +5,7 @@ import (
 	stderr "errors"
 	"sync"
 
+	"github.com/Sinersis/grpc/v5/parser"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/roadrunner-server/pool/pool/static_pool"
 	"github.com/roadrunner-server/tcplisten"
@@ -166,6 +167,42 @@ func (p *Plugin) Serve() chan error {
 
 	p.healthServer = NewHeathServer(p, p.log)
 	p.healthServer.RegisterServer(p.server)
+
+	for i := 0; i < len(p.config.Proto); i++ {
+		// Парсим proto файл
+		services, err := parser.File(p.config.Proto[i], "")
+		if err != nil {
+			errCh <- errors.E(op, err)
+			return errCh
+		}
+
+		// Для каждого сервиса в proto файле
+		for _, service := range services {
+			// Создаем прокси
+			prx := proxy.NewProxy(
+				service.Name,
+				p.config.Proto[i],
+				p.log,
+				p.gPool,
+				p.mu,
+				p.prop,
+			)
+
+			// Регистрируем методы
+			for _, method := range service.Methods {
+				prx.RegisterMethod(method.Name)
+			}
+
+			// Регистрируем сервис в gRPC сервере
+			p.server.RegisterService(prx.ServiceDesc(), prx)
+
+			p.proxyList = append(p.proxyList, prx)
+			p.log.Info("proto service registered",
+				zap.String("service", service.Name),
+				zap.String("proto", p.config.Proto[i]),
+				zap.Int("methods", len(service.Methods)))
+		}
+	}
 
 	reflection.Register(p.server)
 	p.log.Info("grpc reflection is enabled")
