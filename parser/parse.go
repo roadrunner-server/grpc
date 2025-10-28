@@ -132,8 +132,7 @@ func parseNoImports(reader io.Reader) ([]Service, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	// Только сервисы из текущего файла, БЕЗ импортов
+	
 	services := make([]Service, 0)
 	pkg := parsePackage(proto)
 

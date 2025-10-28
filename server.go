@@ -8,10 +8,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/Sinersis/grpc/v5/api"
+	"github.com/Sinersis/grpc/v5/parser"
+	"github.com/Sinersis/grpc/v5/proxy"
 	"github.com/roadrunner-server/errors"
-	"github.com/roadrunner-server/grpc/v5/api"
-	"github.com/roadrunner-server/grpc/v5/parser"
-	"github.com/roadrunner-server/grpc/v5/proxy"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -57,7 +57,6 @@ func (p *Plugin) createGRPCserver(interceptors map[string]api.Interceptor) (*grp
 			continue
 		}
 
-		// Parse proto file without processing imports to avoid duplicates
 		services, errP := parser.FileNoImports(p.config.Proto[i])
 		if errP != nil {
 			return nil, errP
