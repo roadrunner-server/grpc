@@ -6,7 +6,6 @@ import (
 	"crypto/x509"
 	"fmt"
 	"os"
-	"path"
 	"time"
 
 	"github.com/roadrunner-server/errors"
@@ -50,25 +49,51 @@ func (p *Plugin) createGRPCserver(interceptors map[string]api.Interceptor) (*grp
 	opts = append(opts, grpc.StatsHandler(otelgrpc.NewServerHandler(otelgrpc.WithTracerProvider(p.tracer), otelgrpc.WithPropagators(p.prop))))
 	server := grpc.NewServer(opts...)
 
+	// Track registered services to avoid duplicates
+	registeredServices := make(map[string]bool)
+
 	for i := range p.config.Proto {
 		if p.config.Proto[i] == "" {
 			continue
 		}
 
-		// php proxy services
-		services, errP := parser.File(p.config.Proto[i], path.Dir(p.config.Proto[i]))
+		// Parse proto file without processing imports to avoid duplicates
+		services, errP := parser.FileNoImports(p.config.Proto[i])
 		if errP != nil {
 			return nil, errP
 		}
 
 		for _, service := range services {
-			px := proxy.NewProxy(fmt.Sprintf("%s.%s", service.Package, service.Name), p.config.Proto[i], p.log.Named(service.Name), p.gPool, p.mu, p.prop)
+			fullServiceName := fmt.Sprintf("%s.%s", service.Package, service.Name)
+
+			// Skip if already registered
+			if registeredServices[fullServiceName] {
+				p.log.Debug("service already registered, skipping",
+					zap.String("service", fullServiceName))
+				continue
+			}
+
+			px := proxy.NewProxy(
+				fullServiceName,
+				p.config.Proto[i],
+				p.log.Named(service.Name),
+				p.gPool,
+				p.mu,
+				p.prop,
+			)
+
 			for _, m := range service.Methods {
 				px.RegisterMethod(m.Name)
 			}
 
 			server.RegisterService(px.ServiceDesc(), px)
+			registeredServices[fullServiceName] = true
 			p.proxyList = append(p.proxyList, px)
+
+			p.log.Info("proto service registered",
+				zap.String("service", fullServiceName),
+				zap.String("proto", p.config.Proto[i]),
+				zap.Int("methods", len(service.Methods)))
 		}
 	}
 
