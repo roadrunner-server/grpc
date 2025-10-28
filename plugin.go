@@ -168,23 +168,27 @@ func (p *Plugin) Serve() chan error {
 	p.healthServer = NewHeathServer(p, p.log)
 	p.healthServer.RegisterServer(p.server)
 
+	registeredServices := make(map[string]bool)
+
 	for i := 0; i < len(p.config.Proto); i++ {
-		// Парсим proto файл
 		services, err := parser.File(p.config.Proto[i], "")
 		if err != nil {
 			errCh <- errors.E(op, err)
 			return errCh
 		}
 
-		// Для каждого сервиса в proto файле
 		for _, service := range services {
-			// Формируем полное имя сервиса
 			fullServiceName := service.Name
 			if service.Package != "" {
 				fullServiceName = service.Package + "." + service.Name
 			}
 
-			// Создаем прокси с полным именем
+			if registeredServices[fullServiceName] {
+				p.log.Debug("service already registered, skipping",
+					zap.String("service", fullServiceName))
+				continue
+			}
+
 			prx := proxy.NewProxy(
 				fullServiceName,
 				p.config.Proto[i],
@@ -194,13 +198,13 @@ func (p *Plugin) Serve() chan error {
 				p.prop,
 			)
 
-			// Регистрируем методы
 			for _, method := range service.Methods {
 				prx.RegisterMethod(method.Name)
 			}
 
-			// Регистрируем сервис в gRPC сервере
 			p.server.RegisterService(prx.ServiceDesc(), prx)
+			
+			registeredServices[fullServiceName] = true
 
 			p.proxyList = append(p.proxyList, prx)
 			p.log.Info("proto service registered",
