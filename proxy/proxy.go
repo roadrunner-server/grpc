@@ -16,7 +16,7 @@ import (
 
 	"github.com/roadrunner-server/errors"
 	"github.com/roadrunner-server/goridge/v3/pkg/frame"
-	"github.com/roadrunner-server/grpc/v5/codec"
+	"github.com/Sinersis/grpc/v5/codec"
 	"github.com/roadrunner-server/pool/payload"
 	"github.com/roadrunner-server/pool/pool/static_pool"
 	"github.com/roadrunner-server/pool/worker"

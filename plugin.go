@@ -16,9 +16,9 @@ import (
 
 	"github.com/roadrunner-server/endure/v2/dep"
 	"github.com/roadrunner-server/errors"
-	"github.com/roadrunner-server/grpc/v5/api"
-	"github.com/roadrunner-server/grpc/v5/codec"
-	"github.com/roadrunner-server/grpc/v5/proxy"
+	"github.com/Sinersis/grpc/v5/api"
+	"github.com/Sinersis/grpc/v5/codec"
+	"github.com/Sinersis/grpc/v5/proxy"
 	"github.com/roadrunner-server/pool/pool"
 	"github.com/roadrunner-server/pool/state/process"
 	"go.uber.org/zap"
