@@ -168,9 +168,14 @@ func (p *Plugin) Serve() chan error {
 	p.healthServer = NewHeathServer(p, p.log)
 	p.healthServer.RegisterServer(p.server)
 
+	p.log.Info("starting proto registration", zap.Strings("proto_files", p.config.Proto))
+
 	registeredServices := make(map[string]bool)
 
 	for i := 0; i < len(p.config.Proto); i++ {
+		p.log.Info("parsing proto file",
+			zap.String("file", p.config.Proto[i]),
+			zap.Int("file_index", i))
 
 		services, err := parser.FileNoImports(p.config.Proto[i])
 		if err != nil {
@@ -178,17 +183,31 @@ func (p *Plugin) Serve() chan error {
 			return errCh
 		}
 
-		for _, service := range services {
+		p.log.Info("parsed services from proto",
+			zap.String("file", p.config.Proto[i]),
+			zap.Int("services_count", len(services)))
+
+		for j, service := range services {
 			fullServiceName := service.Name
 			if service.Package != "" {
 				fullServiceName = service.Package + "." + service.Name
 			}
 
+			p.log.Info("processing service",
+				zap.Int("service_index", j),
+				zap.String("service_name", service.Name),
+				zap.String("package", service.Package),
+				zap.String("full_name", fullServiceName),
+				zap.Bool("already_registered", registeredServices[fullServiceName]))
+
 			if registeredServices[fullServiceName] {
-				p.log.Debug("service already registered, skipping",
-					zap.String("service", fullServiceName))
+				p.log.Warn("DUPLICATE DETECTED - skipping service",
+					zap.String("service", fullServiceName),
+					zap.String("proto_file", p.config.Proto[i]))
 				continue
 			}
+
+			p.log.Info("creating proxy for service", zap.String("service", fullServiceName))
 
 			prx := proxy.NewProxy(
 				fullServiceName,
@@ -203,18 +222,22 @@ func (p *Plugin) Serve() chan error {
 				prx.RegisterMethod(method.Name)
 			}
 
+			p.log.Info("registering service in grpc server", zap.String("service", fullServiceName))
+
 			p.server.RegisterService(prx.ServiceDesc(), prx)
 
 			registeredServices[fullServiceName] = true
 
 			p.proxyList = append(p.proxyList, prx)
-			p.log.Info("proto service registered",
+			p.log.Info("proto service registered successfully",
 				zap.String("service", fullServiceName),
 				zap.String("package", service.Package),
 				zap.String("proto", p.config.Proto[i]),
 				zap.Int("methods", len(service.Methods)))
 		}
 	}
+
+	p.log.Info("all proto services registered", zap.Int("total_services", len(registeredServices)))
 
 	reflection.Register(p.server)
 	p.log.Info("grpc reflection is enabled")
