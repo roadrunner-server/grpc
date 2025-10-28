@@ -171,7 +171,8 @@ func (p *Plugin) Serve() chan error {
 	registeredServices := make(map[string]bool)
 
 	for i := 0; i < len(p.config.Proto); i++ {
-		services, err := parser.File(p.config.Proto[i], "")
+
+		services, err := parser.FileNoImports(p.config.Proto[i])
 		if err != nil {
 			errCh <- errors.E(op, err)
 			return errCh
@@ -203,7 +204,7 @@ func (p *Plugin) Serve() chan error {
 			}
 
 			p.server.RegisterService(prx.ServiceDesc(), prx)
-			
+
 			registeredServices[fullServiceName] = true
 
 			p.proxyList = append(p.proxyList, prx)

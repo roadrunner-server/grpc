@@ -114,3 +114,36 @@ func parseMethods(s *pp.Service) []Method {
 
 	return methods
 }
+
+func FileNoImports(file string) ([]Service, error) {
+	reader, err := os.Open(file)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		_ = reader.Close()
+	}()
+
+	return parseNoImports(reader)
+}
+
+func parseNoImports(reader io.Reader) ([]Service, error) {
+	proto, err := pp.NewParser(reader).Parse()
+	if err != nil {
+		return nil, err
+	}
+
+	// Только сервисы из текущего файла, БЕЗ импортов
+	services := make([]Service, 0)
+	pkg := parsePackage(proto)
+
+	pp.Walk(proto, pp.WithService(func(service *pp.Service) {
+		services = append(services, Service{
+			Package: pkg,
+			Name:    service.Name,
+			Methods: parseMethods(service),
+		})
+	}))
+
+	return services, nil
+}
