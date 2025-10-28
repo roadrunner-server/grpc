@@ -1,4 +1,4 @@
-module github.com/roadrunner-server/grpc/v5
+module github.com/Sinersis/grpc/v5
 
 go 1.25
 
