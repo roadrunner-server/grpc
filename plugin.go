@@ -8,17 +8,15 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/roadrunner-server/pool/pool/static_pool"
 	"github.com/roadrunner-server/tcplisten"
-	"go.opentelemetry.io/otel/propagation"
-	"google.golang.org/grpc/reflection"
-
 	jprop "go.opentelemetry.io/contrib/propagators/jaeger"
+	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/roadrunner-server/endure/v2/dep"
-	"github.com/roadrunner-server/errors"
 	"github.com/Sinersis/grpc/v5/api"
 	"github.com/Sinersis/grpc/v5/codec"
 	"github.com/Sinersis/grpc/v5/proxy"
+	"github.com/roadrunner-server/endure/v2/dep"
+	"github.com/roadrunner-server/errors"
 	"github.com/roadrunner-server/pool/pool"
 	"github.com/roadrunner-server/pool/state/process"
 	"go.uber.org/zap"
@@ -166,9 +164,6 @@ func (p *Plugin) Serve() chan error {
 
 	p.healthServer = NewHeathServer(p, p.log)
 	p.healthServer.RegisterServer(p.server)
-	
-	reflection.Register(p.server)
-	p.log.Info("grpc reflection is enabled")
 
 	go func() {
 		p.log.Info("grpc server was started", zap.String("address", p.config.Listen))

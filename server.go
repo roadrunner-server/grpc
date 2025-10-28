@@ -18,6 +18,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/keepalive"
+	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 )
 
@@ -95,6 +96,9 @@ func (p *Plugin) createGRPCserver(interceptors map[string]api.Interceptor) (*grp
 				zap.Int("methods", len(service.Methods)))
 		}
 	}
+
+	reflection.Register(server)
+	p.log.Info("grpc reflection registered in createGRPCserver")
 
 	return server, nil
 }
