@@ -9,6 +9,7 @@ import (
 	"github.com/roadrunner-server/pool/pool/static_pool"
 	"github.com/roadrunner-server/tcplisten"
 	"go.opentelemetry.io/otel/propagation"
+	"google.golang.org/grpc/reflection"
 
 	jprop "go.opentelemetry.io/contrib/propagators/jaeger"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -157,14 +158,6 @@ func (p *Plugin) Serve() chan error {
 		return errCh
 	}
 
-	for name, interceptor := range p.interceptors {
-		if registrar, ok := interceptor.(interface{ RegisterGRPCService(*grpc.Server) error }); ok {
-			if err := registrar.RegisterGRPCService(p.server); err != nil {
-				p.log.Warn("failed to register grpc service", zap.String("plugin", name), zap.Error(err))
-			}
-		}
-	}
-
 	l, err := tcplisten.CreateListener(p.config.Listen)
 	if err != nil {
 		errCh <- errors.E(op, err)
@@ -173,6 +166,9 @@ func (p *Plugin) Serve() chan error {
 
 	p.healthServer = NewHeathServer(p, p.log)
 	p.healthServer.RegisterServer(p.server)
+
+	reflection.Register(p.server)
+	p.log.Info("grpc reflection is enabled")
 
 	go func() {
 		p.log.Info("grpc server was started", zap.String("address", p.config.Listen))
@@ -285,11 +281,5 @@ func (p *Plugin) Collects() []*dep.In {
 		dep.Fits(func(pp any) {
 			p.tracer = pp.(Tracer).Tracer()
 		}, (*Tracer)(nil)),
-	}
-}
-
-func (p *Plugin) RegisterServices(services ...func(*grpc.Server)) {
-	for _, register := range services {
-		register(p.server)
 	}
 }
