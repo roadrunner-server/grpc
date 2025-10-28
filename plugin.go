@@ -178,9 +178,15 @@ func (p *Plugin) Serve() chan error {
 
 		// Для каждого сервиса в proto файле
 		for _, service := range services {
-			// Создаем прокси
+			// Формируем полное имя сервиса
+			fullServiceName := service.Name
+			if service.Package != "" {
+				fullServiceName = service.Package + "." + service.Name
+			}
+
+			// Создаем прокси с полным именем
 			prx := proxy.NewProxy(
-				service.Name,
+				fullServiceName,
 				p.config.Proto[i],
 				p.log,
 				p.gPool,
@@ -198,7 +204,8 @@ func (p *Plugin) Serve() chan error {
 
 			p.proxyList = append(p.proxyList, prx)
 			p.log.Info("proto service registered",
-				zap.String("service", service.Name),
+				zap.String("service", fullServiceName),
+				zap.String("package", service.Package),
 				zap.String("proto", p.config.Proto[i]),
 				zap.Int("methods", len(service.Methods)))
 		}
