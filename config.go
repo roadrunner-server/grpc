@@ -23,8 +23,9 @@ const (
 )
 
 type Config struct {
-	Listen string   `mapstructure:"listen"`
-	Proto  []string `mapstructure:"proto"`
+	Listen         string   `mapstructure:"listen"`
+	Proto          []string `mapstructure:"proto"`
+	DescriptorSets []string `mapstructure:"descriptor_sets"`
 
 	TLS *TLS `mapstructure:"tls"`
 

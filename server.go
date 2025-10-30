@@ -97,6 +97,10 @@ func (p *Plugin) createGRPCserver(interceptors map[string]api.Interceptor) (*grp
 		}
 	}
 
+	if err := p.loadDescriptorSets(); err != nil {
+		p.log.Warn("failed to load descriptor sets", zap.Error(err))
+	}
+
 	reflection.Register(server)
 	p.log.Info("grpc reflection registered in createGRPCserver")
 
