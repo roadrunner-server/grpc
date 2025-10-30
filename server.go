@@ -88,11 +88,6 @@ func (p *Plugin) createGRPCserver(interceptors map[string]api.Interceptor) (*grp
 			server.RegisterService(px.ServiceDesc(), px)
 			registeredServices[fullServiceName] = true
 			p.proxyList = append(p.proxyList, px)
-
-			p.log.Info("proto service registered",
-				zap.String("service", fullServiceName),
-				zap.String("proto", p.config.Proto[i]),
-				zap.Int("methods", len(service.Methods)))
 		}
 	}
 
