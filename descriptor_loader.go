@@ -12,7 +12,13 @@ import (
 )
 
 func (p *Plugin) loadDescriptorSets() error {
-	for _, descriptorFile := range p.config.DescriptorSets {
+	descriptorSets := p.config.GetDescriptorSets()
+	if len(descriptorSets) == 0 {
+		p.log.Debug("no descriptor sets configured")
+		return nil
+	}
+
+	for _, descriptorFile := range descriptorSets {
 		if descriptorFile == "" {
 			continue
 		}
@@ -43,7 +49,6 @@ func (p *Plugin) loadDescriptorSets() error {
 
 		var registeredCount int
 		files.RangeFiles(func(fd protoreflect.FileDescriptor) bool {
-
 			if _, err := protoregistry.GlobalFiles.FindFileByPath(fd.Path()); err == nil {
 				return true
 			}

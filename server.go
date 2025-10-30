@@ -65,8 +65,7 @@ func (p *Plugin) createGRPCserver(interceptors map[string]api.Interceptor) (*grp
 
 		for _, service := range services {
 			fullServiceName := fmt.Sprintf("%s.%s", service.Package, service.Name)
-
-			// Skip if already registered
+			
 			if registeredServices[fullServiceName] {
 				p.log.Debug("service already registered, skipping",
 					zap.String("service", fullServiceName))
@@ -97,12 +96,15 @@ func (p *Plugin) createGRPCserver(interceptors map[string]api.Interceptor) (*grp
 		}
 	}
 
-	if err := p.loadDescriptorSets(); err != nil {
-		p.log.Warn("failed to load descriptor sets", zap.Error(err))
-	}
+	if p.config.EnableReflection() {
+		if err := p.loadDescriptorSets(); err != nil {
+			p.log.Warn("failed to load descriptor sets", zap.Error(err))
+		}
 
-	reflection.Register(server)
-	p.log.Info("grpc reflection registered in createGRPCserver")
+		reflection.Register(server)
+		p.log.Info("grpc reflection enabled",
+			zap.Int("descriptor_sets", len(p.config.GetDescriptorSets())))
+	}
 
 	return server, nil
 }

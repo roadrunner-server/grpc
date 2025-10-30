@@ -23,9 +23,10 @@ const (
 )
 
 type Config struct {
-	Listen         string   `mapstructure:"listen"`
-	Proto          []string `mapstructure:"proto"`
-	DescriptorSets []string `mapstructure:"descriptor_sets"`
+	Listen         string            `mapstructure:"listen"`
+	Proto          []string          `mapstructure:"proto"`
+	Reflection     *ReflectionConfig `mapstructure:"reflection"`
+	DescriptorSets []string          `mapstructure:"descriptor_sets"`
 
 	TLS *TLS `mapstructure:"tls"`
 
@@ -41,6 +42,11 @@ type Config struct {
 	MaxConcurrentStreams  int64         `mapstructure:"max_concurrent_streams"`
 	PingTime              time.Duration `mapstructure:"ping_time"`
 	Timeout               time.Duration `mapstructure:"timeout"`
+}
+
+type ReflectionConfig struct {
+	Enabled        bool     `mapstructure:"enabled"`
+	DescriptorSets []string `mapstructure:"descriptors"`
 }
 
 type TLS struct {
@@ -89,6 +95,13 @@ func (c *Config) InitDefaults() error { //nolint:gocyclo,gocognit
 		protos = append(protos, path)
 	}
 	c.Proto = protos
+
+	if c.Reflection == nil {
+		c.Reflection = &ReflectionConfig{
+			Enabled:        false,
+			DescriptorSets: nil,
+		}
+	}
 
 	if c.EnableTLS() {
 		if _, err := os.Stat(c.TLS.Key); err != nil {
@@ -182,4 +195,15 @@ func (c *Config) EnableTLS() bool {
 		return c.TLS.Key != "" && c.TLS.Cert != ""
 	}
 	return false
+}
+
+func (c *Config) EnableReflection() bool {
+	return c.Reflection != nil && c.Reflection.Enabled
+}
+
+func (c *Config) GetDescriptorSets() []string {
+	if c.Reflection != nil {
+		return c.Reflection.DescriptorSets
+	}
+	return nil
 }
