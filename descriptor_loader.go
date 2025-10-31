@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jhump/protocompile"
-	"github.com/jhump/protocompile/linker"
-	"github.com/jhump/protocompile/reporter"
+	"github.com/bufbuild/protocompile"
+	"github.com/bufbuild/protocompile/linker"
+	"github.com/bufbuild/protocompile/reporter"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"

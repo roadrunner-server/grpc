@@ -5,8 +5,8 @@ go 1.25
 toolchain go1.25.3
 
 require (
+	github.com/bufbuild/protocompile v0.14.1
 	github.com/emicklei/proto v1.14.2
-	github.com/jhump/protocompile v0.0.0-20221021153901-4f6f732835e8
 	github.com/prometheus/client_golang v1.23.2
 	github.com/roadrunner-server/api/v4 v4.22.1
 	github.com/roadrunner-server/endure/v2 v2.6.2
