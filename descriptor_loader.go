@@ -208,15 +208,6 @@ func (p *Plugin) addAllSubdirectories(rootPath string, pathsMap map[string]bool)
 			}
 
 			name := entry.Name()
-			if strings.HasPrefix(name, ".") ||
-				name == "node_modules" ||
-				name == "vendor" ||
-				name == "dist" ||
-				name == "build" ||
-				name == "target" ||
-				name == "out" {
-				continue
-			}
 
 			subdirPath := filepath.Join(dir, name)
 			pathsMap[subdirPath] = true
