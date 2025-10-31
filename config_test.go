@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 const separator = string(filepath.Separator)
@@ -52,61 +51,164 @@ func TestInitDefaults(t *testing.T) {
 }
 
 func TestReflectionConfig(t *testing.T) {
-	t.Run("nil reflection config", func(t *testing.T) {
-		c := &Config{}
-		assert.False(t, c.EnableReflection())
-		nilDescriptors := c.GetDescriptorSets()
-		assert.Nil(t, nilDescriptors)
+	t.Run("nil reflection config creates default", func(t *testing.T) {
+		c := &Config{
+			Listen: "localhost:1234",
+		}
+		assert.NoError(t, c.InitDefaults())
+		assert.NotNil(t, c.Reflection)
+		assert.Nil(t, c.Reflection.ImportPaths)
 	})
 
-	t.Run("reflection disabled", func(t *testing.T) {
+	t.Run("empty import paths", func(t *testing.T) {
 		c := &Config{
+			Listen: "localhost:1234",
 			Reflection: &ReflectionConfig{
-				Enabled:        false,
-				DescriptorSets: []string{"test1.descriptor", "test2.descriptor"},
+				ImportPaths: []string{},
 			},
 		}
-		assert.False(t, c.EnableReflection())
-		descriptors := c.GetDescriptorSets()
-		assert.NotNil(t, descriptors)
-		assert.Len(t, descriptors, 2)
-		assert.Equal(t, []string{"test1.descriptor", "test2.descriptor"}, descriptors)
+		assert.NoError(t, c.InitDefaults())
+		assert.Empty(t, c.Reflection.ImportPaths)
 	})
 
-	t.Run("reflection enabled with descriptors", func(t *testing.T) {
+	t.Run("with import paths", func(t *testing.T) {
 		c := &Config{
+			Listen: "localhost:1234",
 			Reflection: &ReflectionConfig{
-				Enabled:        true,
-				DescriptorSets: []string{"test1.descriptor", "test2.descriptor"},
+				ImportPaths: []string{"path1", "path2"},
 			},
 		}
-		assert.True(t, c.EnableReflection())
-		descriptors := c.GetDescriptorSets()
-		require.Len(t, descriptors, 2)
-		assert.Equal(t, "test1.descriptor", descriptors[0])
-		assert.Equal(t, "test2.descriptor", descriptors[1])
+		assert.NoError(t, c.InitDefaults())
+		assert.Len(t, c.Reflection.ImportPaths, 2)
+		assert.Equal(t, "path1", c.Reflection.ImportPaths[0])
+		assert.Equal(t, "path2", c.Reflection.ImportPaths[1])
 	})
 
-	t.Run("reflection enabled without descriptors", func(t *testing.T) {
+	t.Run("nil import paths", func(t *testing.T) {
 		c := &Config{
+			Listen: "localhost:1234",
 			Reflection: &ReflectionConfig{
-				Enabled:        true,
-				DescriptorSets: []string{},
+				ImportPaths: nil,
 			},
 		}
-		assert.True(t, c.EnableReflection())
-		descriptors := c.GetDescriptorSets()
-		assert.Empty(t, descriptors)
+		assert.NoError(t, c.InitDefaults())
+		assert.Nil(t, c.Reflection.ImportPaths)
+	})
+}
+
+func TestReflectionImportPaths(t *testing.T) {
+	tests := []struct {
+		name          string
+		config        *Config
+		expectedPaths []string
+		shouldBeEmpty bool
+		shouldBeNil   bool
+	}{
+		{
+			name: "single import path",
+			config: &Config{
+				Listen: "localhost:1234",
+				Reflection: &ReflectionConfig{
+					ImportPaths: []string{"/path/to/proto"},
+				},
+			},
+			expectedPaths: []string{"/path/to/proto"},
+		},
+		{
+			name: "multiple import paths",
+			config: &Config{
+				Listen: "localhost:1234",
+				Reflection: &ReflectionConfig{
+					ImportPaths: []string{"/path1", "/path2", "/path3"},
+				},
+			},
+			expectedPaths: []string{"/path1", "/path2", "/path3"},
+		},
+		{
+			name: "empty import paths",
+			config: &Config{
+				Listen: "localhost:1234",
+				Reflection: &ReflectionConfig{
+					ImportPaths: []string{},
+				},
+			},
+			shouldBeEmpty: true,
+		},
+		{
+			name: "nil import paths for auto-detection",
+			config: &Config{
+				Listen: "localhost:1234",
+				Reflection: &ReflectionConfig{
+					ImportPaths: nil,
+				},
+			},
+			shouldBeNil: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.config.InitDefaults()
+			assert.NoError(t, err)
+
+			switch {
+			case tt.shouldBeNil:
+				assert.Nil(t, tt.config.Reflection.ImportPaths)
+			case tt.shouldBeEmpty:
+				assert.Empty(t, tt.config.Reflection.ImportPaths)
+			default:
+				assert.Equal(t, len(tt.expectedPaths), len(tt.config.Reflection.ImportPaths))
+				for i, expectedPath := range tt.expectedPaths {
+					assert.Equal(t, expectedPath, tt.config.Reflection.ImportPaths[i])
+				}
+			}
+		})
+	}
+}
+
+func TestReflectionWithProtoFiles(t *testing.T) {
+	t.Run("with proto files and import paths", func(t *testing.T) {
+		c := &Config{
+			Listen: "localhost:9090",
+			Proto:  []string{"parser/test.proto", "parser/message.proto"},
+			Reflection: &ReflectionConfig{
+				ImportPaths: []string{"parser"},
+			},
+		}
+
+		err := c.InitDefaults()
+		assert.NoError(t, err)
+		assert.Len(t, c.Proto, 2)
+		assert.Len(t, c.Reflection.ImportPaths, 1)
 	})
 
-	t.Run("reflection enabled with nil descriptors", func(t *testing.T) {
+	t.Run("auto-detect import paths with proto files", func(t *testing.T) {
 		c := &Config{
+			Listen: "localhost:9090",
+			Proto:  []string{"parser/test.proto"},
 			Reflection: &ReflectionConfig{
-				Enabled: true,
+				ImportPaths: nil,
 			},
 		}
-		assert.True(t, c.EnableReflection())
-		descriptors := c.GetDescriptorSets()
-		assert.Nil(t, descriptors)
+
+		err := c.InitDefaults()
+		assert.NoError(t, err)
+		assert.Len(t, c.Proto, 1)
+		assert.Nil(t, c.Reflection.ImportPaths)
+	})
+
+	t.Run("with empty proto files", func(t *testing.T) {
+		c := &Config{
+			Listen: "localhost:9090",
+			Proto:  []string{},
+			Reflection: &ReflectionConfig{
+				ImportPaths: []string{"parser"},
+			},
+		}
+
+		err := c.InitDefaults()
+		assert.NoError(t, err)
+		assert.Empty(t, c.Proto)
+		assert.Len(t, c.Reflection.ImportPaths, 1)
 	})
 }

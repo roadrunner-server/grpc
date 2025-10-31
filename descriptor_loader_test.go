@@ -3,198 +3,146 @@ package grpc
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
-	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
-	"google.golang.org/protobuf/types/descriptorpb"
 )
 
-func TestLoadDescriptorSets(t *testing.T) {
+func TestBuildAndRegisterDescriptors(t *testing.T) {
 	tests := []struct {
-		name           string
-		descriptorSets []string
-		setup          func(t *testing.T) []string
-		expectedError  bool
-		verify         func(t *testing.T, p *Plugin)
+		name          string
+		setup         func(t *testing.T) *Plugin
+		expectedError bool
+		verify        func(t *testing.T, p *Plugin)
 	}{
 		{
-			name:           "no descriptor sets",
-			descriptorSets: []string{},
-			setup:          nil,
-			expectedError:  false,
-			verify: func(t *testing.T, p *Plugin) {
-				_, err := protoregistry.GlobalFiles.FindDescriptorByName("test.Test")
-				assert.Error(t, err, "no descriptors should be registered")
-			},
-		},
-		{
-			name: "real test.pb descriptor",
-			setup: func(t *testing.T) []string {
-				testPbPath := filepath.Join("tests", "proto", "test", "test.pb")
-
-				require.FileExists(t, testPbPath, "test.pb should exist in tests/proto/test/")
-
-				return []string{testPbPath}
-			},
-			expectedError: false,
-			verify: func(t *testing.T, p *Plugin) {
-				desc, err := protoregistry.GlobalFiles.FindDescriptorByName("test.Test")
-				require.NoError(t, err, "test.Test service should be registered")
-
-				serviceDesc, ok := desc.(protoreflect.ServiceDescriptor)
-				require.True(t, ok, "descriptor should be a ServiceDescriptor")
-
-				// Verify service name
-				assert.Equal(t, "Test", string(serviceDesc.Name()))
-				assert.Equal(t, "test", string(serviceDesc.ParentFile().Package()))
-
-				// Verify methods exist
-				methods := serviceDesc.Methods()
-				assert.Equal(t, 5, methods.Len(), "Test service should have 5 methods")
-
-				// Check individual methods
-				echoMethod := methods.ByName("Echo")
-				require.NotNil(t, echoMethod, "Echo method should exist")
-				assert.Equal(t, "Echo", string(echoMethod.Name()))
-
-				throwMethod := methods.ByName("Throw")
-				require.NotNil(t, throwMethod, "Throw method should exist")
-
-				dieMethod := methods.ByName("Die")
-				require.NotNil(t, dieMethod, "Die method should exist")
-
-				infoMethod := methods.ByName("Info")
-				require.NotNil(t, infoMethod, "Info method should exist")
-
-				pingMethod := methods.ByName("Ping")
-				require.NotNil(t, pingMethod, "Ping method should exist")
-
-				// Verify message types
-				_, err = protoregistry.GlobalFiles.FindDescriptorByName("test.Message")
-				assert.NoError(t, err, "test.Message should be registered")
-
-				_, err = protoregistry.GlobalFiles.FindDescriptorByName("test.EmptyMessage")
-				assert.NoError(t, err, "test.EmptyMessage should be registered")
-
-				_, err = protoregistry.GlobalFiles.FindDescriptorByName("test.DetailsMessageForException")
-				assert.NoError(t, err, "test.DetailsMessageForException should be registered")
-			},
-		},
-		{
-			name: "valid descriptor set",
-			setup: func(t *testing.T) []string {
-				tempFile := filepath.Join(t.TempDir(), "test.desc")
-
-				fd := &descriptorpb.FileDescriptorProto{
-					Name:    proto.String("minimal.proto"),
-					Package: proto.String("minimal"),
-					MessageType: []*descriptorpb.DescriptorProto{{
-						Name: proto.String("TestMessage"),
-					}},
-					Service: []*descriptorpb.ServiceDescriptorProto{{
-						Name: proto.String("MinimalService"),
-					}},
+			name: "no proto files configured",
+			setup: func(_ *testing.T) *Plugin {
+				return &Plugin{
+					config: &Config{
+						Proto: []string{},
+						Reflection: &ReflectionConfig{
+							ImportPaths: []string{},
+						},
+					},
+					log: zap.NewNop(),
 				}
-
-				fds := &descriptorpb.FileDescriptorSet{
-					File: []*descriptorpb.FileDescriptorProto{fd},
-				}
-
-				data, err := proto.Marshal(fds)
-				require.NoError(t, err)
-				err = os.WriteFile(tempFile, data, 0o644)
-				require.NoError(t, err)
-
-				return []string{tempFile}
 			},
 			expectedError: false,
-			verify: func(t *testing.T, p *Plugin) {
-				_, err := protoregistry.GlobalFiles.FindDescriptorByName("minimal.MinimalService")
-				assert.NoError(t, err, "minimal.MinimalService should be registered")
-			},
-		},
-		{
-			name: "invalid descriptor file",
-			setup: func(t *testing.T) []string {
-				tempFile := filepath.Join(t.TempDir(), "invalid.desc")
-				err := os.WriteFile(tempFile, []byte("invalid data"), 0o644)
-				require.NoError(t, err)
-				return []string{tempFile}
-			},
-			expectedError: false,
-			verify: func(t *testing.T, p *Plugin) {
-				_, err := protoregistry.GlobalFiles.FindDescriptorByName("test.Test")
-				assert.Error(t, err, "no descriptors should be registered for invalid files")
-			},
-		},
-		{
-			name: "non-existent file",
-			setup: func(t *testing.T) []string {
-				return []string{filepath.Join(t.TempDir(), "nonexistent.desc")}
-			},
-			expectedError: false,
-			verify: func(t *testing.T, p *Plugin) {
-				_, err := protoregistry.GlobalFiles.FindDescriptorByName("test.Test")
-				assert.Error(t, err, "no descriptors should be registered for non-existent files")
-			},
-		},
-		{
-			name: "duplicate registration",
-			setup: func(t *testing.T) []string {
-				testPbPath := filepath.Join("tests", "proto", "test", "test.pb")
-				require.FileExists(t, testPbPath)
-				return []string{testPbPath, testPbPath} // Same file twice
-			},
-			expectedError: false,
-			verify: func(t *testing.T, p *Plugin) {
-				_, err := protoregistry.GlobalFiles.FindDescriptorByName("test.Test")
-				assert.NoError(t, err, "test.Test service should be registered")
-
+			verify: func(t *testing.T, _ *Plugin) {
 				var fileCount int
+				protoregistry.GlobalFiles.RangeFiles(func(_ protoreflect.FileDescriptor) bool {
+					fileCount++
+					return true
+				})
+				assert.Equal(t, 0, fileCount, "no files should be registered")
+			},
+		},
+		{
+			name: "compile real proto files from tests directory",
+			setup: func(t *testing.T) *Plugin {
+				protoPath := filepath.Join("tests", "proto", "test", "test.proto")
+				require.FileExists(t, protoPath, "test.proto should exist in tests/proto/test/")
+
+				return &Plugin{
+					config: &Config{
+						Proto: []string{protoPath},
+						Reflection: &ReflectionConfig{
+							ImportPaths: []string{filepath.Join("tests", "proto", "test")},
+						},
+					},
+					log: zap.NewNop(),
+				}
+			},
+			expectedError: false,
+			verify: func(t *testing.T, _ *Plugin) {
+				var registeredFiles []string
 				protoregistry.GlobalFiles.RangeFiles(func(fd protoreflect.FileDescriptor) bool {
+					registeredFiles = append(registeredFiles, fd.Path())
+					return true
+				})
+
+				if len(registeredFiles) == 0 {
+					t.Fatal("No files were registered!")
+				}
+
+				fileDesc, err := protoregistry.GlobalFiles.FindFileByPath("test.proto")
+				if err != nil {
+					for _, path := range []string{"tests/proto/test/test.proto", "test/test.proto"} {
+						if fd, err2 := protoregistry.GlobalFiles.FindFileByPath(path); err2 == nil {
+							fileDesc = fd
+							err = nil
+							break
+						}
+					}
+				}
+				require.NoError(t, err, "test.proto file should be registered")
+
+				assert.Equal(t, "test", string(fileDesc.Package()))
+
+				services := fileDesc.Services()
+				require.Greater(t, services.Len(), 0, "should have at least one service")
+
+				serviceDesc := services.Get(0)
+				assert.Equal(t, "Test", string(serviceDesc.Name()))
+
+				methods := serviceDesc.Methods()
+				assert.Greater(t, methods.Len(), 0, "Test service should have methods")
+			},
+		},
+		{
+			name: "duplicate proto files",
+			setup: func(t *testing.T) *Plugin {
+				protoPath := filepath.Join("tests", "proto", "test", "test.proto")
+				require.FileExists(t, protoPath)
+
+				return &Plugin{
+					config: &Config{
+						Proto: []string{protoPath, protoPath}, // Same file twice
+						Reflection: &ReflectionConfig{
+							ImportPaths: []string{filepath.Join("tests", "proto", "test")},
+						},
+					},
+					log: zap.NewNop(),
+				}
+			},
+			expectedError: false,
+			verify: func(t *testing.T, _ *Plugin) {
+				var allFiles []string
+				var testProtoCount int
+				protoregistry.GlobalFiles.RangeFiles(func(fd protoreflect.FileDescriptor) bool {
+					allFiles = append(allFiles, fd.Path())
 					if fd.Path() == "test.proto" {
-						fileCount++
+						testProtoCount++
 					}
 					return true
 				})
-				assert.Equal(t, 1, fileCount, "file should be registered only once")
+
+				assert.Greater(t, len(allFiles), 0, "at least one file should be registered")
+
+				assert.Equal(t, 1, testProtoCount, "test.proto should be registered only once")
 			},
 		},
 		{
-			name: "multiple different descriptor sets",
-			setup: func(t *testing.T) []string {
-				testPbPath := filepath.Join("tests", "proto", "test", "test.pb")
-				require.FileExists(t, testPbPath)
-
-				tempFile := filepath.Join(t.TempDir(), "another.desc")
-				fd := &descriptorpb.FileDescriptorProto{
-					Name:    proto.String("another.proto"),
-					Package: proto.String("another"),
-					Service: []*descriptorpb.ServiceDescriptorProto{{
-						Name: proto.String("AnotherService"),
-					}},
+			name: "invalid proto file path",
+			setup: func(_ *testing.T) *Plugin {
+				return &Plugin{
+					config: &Config{
+						Proto: []string{"nonexistent/invalid.proto"},
+						Reflection: &ReflectionConfig{
+							ImportPaths: []string{"."},
+						},
+					},
+					log: zap.NewNop(),
 				}
-				fds := &descriptorpb.FileDescriptorSet{
-					File: []*descriptorpb.FileDescriptorProto{fd},
-				}
-				data, _ := proto.Marshal(fds)
-				os.WriteFile(tempFile, data, 0o644)
-
-				return []string{testPbPath, tempFile}
 			},
-			expectedError: false,
-			verify: func(t *testing.T, p *Plugin) {
-				_, err1 := protoregistry.GlobalFiles.FindDescriptorByName("test.Test")
-				assert.NoError(t, err1, "test.Test should be registered")
-
-				_, err2 := protoregistry.GlobalFiles.FindDescriptorByName("another.AnotherService")
-				assert.NoError(t, err2, "another.AnotherService should be registered")
-			},
+			expectedError: true,
+			verify:        nil,
 		},
 	}
 
@@ -202,24 +150,9 @@ func TestLoadDescriptorSets(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			protoregistry.GlobalFiles = new(protoregistry.Files)
 
-			var descriptorSets []string
-			if tt.setup != nil {
-				descriptorSets = tt.setup(t)
-			} else {
-				descriptorSets = tt.descriptorSets
-			}
+			p := tt.setup(t)
+			err := p.buildAndRegisterDescriptors()
 
-			p := &Plugin{
-				config: &Config{
-					Reflection: &ReflectionConfig{
-						Enabled:        true,
-						DescriptorSets: descriptorSets,
-					},
-				},
-				log: zap.NewNop(),
-			}
-
-			err := p.loadDescriptorSets()
 			if tt.expectedError {
 				assert.Error(t, err)
 			} else {
@@ -228,6 +161,250 @@ func TestLoadDescriptorSets(t *testing.T) {
 
 			if tt.verify != nil {
 				tt.verify(t, p)
+			}
+		})
+	}
+}
+
+func TestBuildImportPaths(t *testing.T) {
+	tests := []struct {
+		name   string
+		setup  func(t *testing.T) *Plugin
+		verify func(t *testing.T, paths []string)
+	}{
+		{
+			name: "explicit import paths",
+			setup: func(_ *testing.T) *Plugin {
+				return &Plugin{
+					config: &Config{
+						Proto: []string{filepath.Join("tests", "proto", "test", "test.proto")},
+						Reflection: &ReflectionConfig{
+							ImportPaths: []string{filepath.Join("tests", "proto", "test")},
+						},
+					},
+					log: zap.NewNop(),
+				}
+			},
+			verify: func(t *testing.T, paths []string) {
+				assert.Greater(t, len(paths), 0)
+
+				hasTestDir := false
+				for _, p := range paths {
+					if strings.Contains(p, filepath.Join("tests", "proto", "test")) {
+						hasTestDir = true
+						break
+					}
+				}
+				assert.True(t, hasTestDir, "should contain tests/proto/test directory")
+			},
+		},
+		{
+			name: "includes current working directory",
+			setup: func(_ *testing.T) *Plugin {
+				return &Plugin{
+					config: &Config{
+						Proto: []string{filepath.Join("tests", "proto", "test", "test.proto")},
+						Reflection: &ReflectionConfig{
+							ImportPaths: []string{},
+						},
+					},
+					log: zap.NewNop(),
+				}
+			},
+			verify: func(t *testing.T, paths []string) {
+				assert.Greater(t, len(paths), 0)
+
+				cwd, err := os.Getwd()
+				require.NoError(t, err)
+
+				assert.Contains(t, paths, cwd, "should include current working directory")
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := tt.setup(t)
+			paths := p.buildImportPaths()
+			tt.verify(t, paths)
+		})
+	}
+}
+
+func TestConvertToRelativePaths(t *testing.T) {
+	tests := []struct {
+		name        string
+		setup       func(t *testing.T) (*Plugin, []string)
+		expectedErr bool
+		verify      func(t *testing.T, relativePaths []string)
+	}{
+		{
+			name: "convert absolute to relative",
+			setup: func(t *testing.T) (*Plugin, []string) {
+				protoPath := filepath.Join("tests", "proto", "test", "test.proto")
+				absPath, err := filepath.Abs(protoPath)
+				require.NoError(t, err)
+
+				importPaths := []string{filepath.Dir(absPath)}
+
+				p := &Plugin{
+					config: &Config{
+						Proto: []string{absPath},
+					},
+					log: zap.NewNop(),
+				}
+
+				return p, importPaths
+			},
+			expectedErr: false,
+			verify: func(t *testing.T, relativePaths []string) {
+				require.Len(t, relativePaths, 1)
+				assert.Equal(t, "test.proto", relativePaths[0])
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p, importPaths := tt.setup(t)
+			relativePaths, err := p.convertToRelativePaths(importPaths)
+
+			if tt.expectedErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				if tt.verify != nil {
+					tt.verify(t, relativePaths)
+				}
+			}
+		})
+	}
+}
+
+func TestBuildFileMap(t *testing.T) {
+	tests := []struct {
+		name        string
+		importPaths []string
+		verify      func(t *testing.T, fileMap map[string]string)
+	}{
+		{
+			name:        "scan tests proto directory",
+			importPaths: []string{filepath.Join("tests", "proto", "test")},
+			verify: func(t *testing.T, fileMap map[string]string) {
+				assert.Greater(t, len(fileMap), 0, "should find proto files")
+
+				// Check that proto files are in the map
+				hasProtoFiles := false
+				for key := range fileMap {
+					if filepath.Ext(key) == ".proto" || strings.HasSuffix(key, ".proto") {
+						hasProtoFiles = true
+						break
+					}
+				}
+				assert.True(t, hasProtoFiles, "should contain .proto files")
+			},
+		},
+		{
+			name:        "empty import paths",
+			importPaths: []string{},
+			verify: func(t *testing.T, fileMap map[string]string) {
+				assert.Equal(t, 0, len(fileMap), "should be empty for no import paths")
+			},
+		},
+		{
+			name:        "non-existent directory",
+			importPaths: []string{"nonexistent_directory_12345"},
+			verify: func(t *testing.T, fileMap map[string]string) {
+				assert.Equal(t, 0, len(fileMap), "should be empty for non-existent directory")
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := &Plugin{
+				config: &Config{},
+				log:    zap.NewNop(),
+			}
+
+			fileMap := p.buildFileMap(tt.importPaths)
+			tt.verify(t, fileMap)
+		})
+	}
+}
+
+func TestCreateSmartAccessor(t *testing.T) {
+	tests := []struct {
+		name        string
+		setup       func(t *testing.T) (map[string]string, []string)
+		filename    string
+		shouldFind  bool
+		description string
+	}{
+		{
+			name: "find by basename",
+			setup: func(_ *testing.T) (map[string]string, []string) {
+				fileMap := map[string]string{
+					"test.proto": "syntax = \"proto3\";",
+				}
+				return fileMap, []string{"parser"}
+			},
+			filename:    "test.proto",
+			shouldFind:  true,
+			description: "should find file by basename",
+		},
+		{
+			name: "skip google protobuf imports",
+			setup: func(_ *testing.T) (map[string]string, []string) {
+				fileMap := map[string]string{}
+				return fileMap, []string{}
+			},
+			filename:    "google/protobuf/empty.proto",
+			shouldFind:  false,
+			description: "should skip google/protobuf imports",
+		},
+		{
+			name: "skip google api imports",
+			setup: func(_ *testing.T) (map[string]string, []string) {
+				fileMap := map[string]string{}
+				return fileMap, []string{}
+			},
+			filename:    "google/api/annotations.proto",
+			shouldFind:  false,
+			description: "should skip google/api imports",
+		},
+		{
+			name: "find by relative path",
+			setup: func(_ *testing.T) (map[string]string, []string) {
+				fileMap := map[string]string{
+					"parser/test.proto": "syntax = \"proto3\";",
+				}
+				return fileMap, []string{"parser"}
+			},
+			filename:    "parser/test.proto",
+			shouldFind:  true,
+			description: "should find file by relative path",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fileMap, importPaths := tt.setup(t)
+			p := &Plugin{
+				log: zap.NewNop(),
+			}
+
+			accessor := p.createSmartAccessor(fileMap, importPaths)
+			reader, err := accessor(tt.filename)
+
+			if tt.shouldFind {
+				assert.NoError(t, err, tt.description)
+				assert.NotNil(t, reader)
+				if reader != nil {
+					reader.Close()
+				}
+			} else {
+				assert.Error(t, err, tt.description)
 			}
 		})
 	}

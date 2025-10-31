@@ -44,8 +44,7 @@ type Config struct {
 }
 
 type ReflectionConfig struct {
-	Enabled        bool     `mapstructure:"enabled"`
-	DescriptorSets []string `mapstructure:"descriptors"`
+	ImportPaths []string `mapstructure:"import_paths"`
 }
 
 type TLS struct {
@@ -97,8 +96,7 @@ func (c *Config) InitDefaults() error { //nolint:gocyclo,gocognit
 
 	if c.Reflection == nil {
 		c.Reflection = &ReflectionConfig{
-			Enabled:        false,
-			DescriptorSets: nil,
+			ImportPaths: nil,
 		}
 	}
 
@@ -197,12 +195,5 @@ func (c *Config) EnableTLS() bool {
 }
 
 func (c *Config) EnableReflection() bool {
-	return c.Reflection != nil && c.Reflection.Enabled
-}
-
-func (c *Config) GetDescriptorSets() []string {
-	if c.Reflection != nil {
-		return c.Reflection.DescriptorSets
-	}
-	return nil
+	return c.Reflection != nil
 }
