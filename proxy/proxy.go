@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	stderr "errors"
@@ -22,7 +23,6 @@ import (
 	"github.com/roadrunner-server/pool/worker"
 	"go.opentelemetry.io/otel/propagation"
 	"go.uber.org/zap"
-	"golang.org/x/net/context"
 	spb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
