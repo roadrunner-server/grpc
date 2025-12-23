@@ -2,7 +2,7 @@ module github.com/roadrunner-server/grpc/v5
 
 go 1.25
 
-toolchain go1.25.3
+toolchain go1.25.5
 
 require (
 	github.com/emicklei/proto v1.14.2
@@ -19,9 +19,9 @@ require (
 	go.opentelemetry.io/otel v1.39.0
 	go.opentelemetry.io/otel/sdk v1.39.0
 	go.uber.org/zap v1.27.1
-	google.golang.org/genproto v0.0.0-20251213004720-97cd9d5aeac2
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20251213004720-97cd9d5aeac2
-	google.golang.org/grpc v1.77.0
+	google.golang.org/genproto v0.0.0-20251222181119-0a764e51fe1b
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20251222181119-0a764e51fe1b
+	google.golang.org/grpc v1.78.0
 	google.golang.org/protobuf v1.36.11
 )
 
