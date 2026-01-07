@@ -3,13 +3,21 @@ package api
 import (
 	"context"
 
+	"github.com/jhump/protoreflect/v2/protoresolve"
 	"github.com/roadrunner-server/pool/payload"
 	"github.com/roadrunner-server/pool/pool"
 	staticPool "github.com/roadrunner-server/pool/pool/static_pool"
 	"github.com/roadrunner-server/pool/worker"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/reflect/protoreflect"
 )
+
+type Registry interface {
+	Registry() *protoresolve.Registry
+	Services() map[string]protoreflect.ServiceDescriptor
+	FindMethodByFullPath(method string) (protoreflect.MethodDescriptor, error)
+}
 
 type Interceptor interface {
 	UnaryServerInterceptor() grpc.UnaryServerInterceptor
