@@ -6,6 +6,7 @@ toolchain go1.25.5
 
 require (
 	github.com/emicklei/proto v1.14.2
+	github.com/jhump/protoreflect/v2 v2.0.0-beta.2
 	github.com/prometheus/client_golang v1.23.2
 	github.com/roadrunner-server/api/v4 v4.23.0
 	github.com/roadrunner-server/endure/v2 v2.6.2
@@ -36,7 +37,7 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
-	github.com/prometheus/common v0.67.4 // indirect
+	github.com/prometheus/common v0.67.5 // indirect
 	github.com/prometheus/procfs v0.19.2 // indirect
 	github.com/roadrunner-server/events v1.0.1 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect

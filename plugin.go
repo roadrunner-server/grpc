@@ -24,6 +24,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/encoding"
 	"google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/reflection"
 
 	// Will register via init
 	_ "google.golang.org/grpc/encoding/gzip"
@@ -47,6 +48,7 @@ type Plugin struct {
 	rrServer     api.Server
 	proxyList    []*proxy.Proxy
 	healthServer *HealthCheckServer
+	registry     api.Registry
 
 	statsExporter *StatsExporter
 	prop          propagation.TextMapPropagator
@@ -165,6 +167,7 @@ func (p *Plugin) Serve() chan error {
 
 	p.healthServer = NewHeathServer(p, p.log)
 	p.healthServer.RegisterServer(p.server)
+	reflection.Register(p.server)
 
 	go func() {
 		p.log.Info("grpc server was started", zap.String("address", p.config.Listen))
@@ -267,6 +270,10 @@ func (p *Plugin) Workers() []*process.State {
 // Collects collecting grpc interceptors
 func (p *Plugin) Collects() []*dep.In {
 	return []*dep.In{
+		dep.Fits(func(pp any) {
+			pg := pp.(api.Registry)
+			p.registry = pg
+		}, (*api.Registry)(nil)),
 		dep.Fits(func(pp any) {
 			interceptor := pp.(api.Interceptor)
 			// just to be safe
