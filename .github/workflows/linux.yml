@@ -1,5 +1,4 @@
 name: grpc
-
 on:
   push:
     branches:
@@ -9,7 +8,6 @@ on:
     branches:
       - master
       - stable
-
 jobs:
   grpc_test:
     name: gRPC plugin (Go ${{ matrix.go }}, PHP ${{ matrix.php }}, OS ${{matrix.os}})
@@ -17,98 +15,64 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        php: [ "8.4" ]
-        go: [ stable ]
-        os: [ "ubuntu-latest" ]
+        php: ["8.5"]
+        go: [stable]
+        os: ["ubuntu-latest"]
     steps:
       - name: Set up Go ${{ matrix.go }}
         uses: actions/setup-go@v5 # action page: <https://github.com/actions/setup-go>
         with:
           go-version: ${{ matrix.go }}
-
       - name: Set up PHP ${{ matrix.php }}
         uses: shivammathur/setup-php@v2 # action page: <https://github.com/shivammathur/setup-php>
         with:
           php-version: ${{ matrix.php }}
           extensions: sockets
-
       - name: Check out code
         uses: actions/checkout@v4
-
       - name: Get Composer Cache Directory
         id: composer-cache
         run: |
           cd tests/php_test_files
           echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
       - name: Init Composer Cache # Docs: <https://git.io/JfAKn#php---composer>
         uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ matrix.php }}-${{ hashFiles('**/composer.json') }}
           restore-keys: ${{ runner.os }}-composer-
-
       - name: Install Composer dependencies
         run: cd tests/php_test_files && composer update --prefer-dist --no-progress --ansi
-
       - name: Init Go modules Cache # Docs: <https://git.io/JfAKn#go---modules>
         uses: actions/cache@v4
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: ${{ runner.os }}-go-
-
       - name: Install Go dependencies
         run: go mod download
-
       - name: Create folders
         run: |
           mkdir ./tests/coverage-ci
-
       - name: Install protoc
         uses: arduino/setup-protoc@v3
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Run golang root module tests
         run: |
           go test -timeout 20m -v -race -cover -tags=debug -failfast -coverpkg=$(cat ./tests/pkgs.txt) -coverprofile=./tests/coverage-ci/grpc_root.out -covermode=atomic ./codec ./parser ./protoc_plugins ./proxy
-
       - name: Run ee tests with coverage
-        run: |
-          cd tests
-          
-          sudo apt update
-          sudo apt install -y libnss3-tools
-          curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
-          chmod +x mkcert-v*-linux-amd64
-          sudo cp mkcert-v*-linux-amd64 /usr/local/bin/mkcert
-          mkcert -install
-          mkcert localhost 127.0.0.1 ::1
-          mkcert -client localhost 127.0.0.1 ::1 
-          mkdir test-certs
-          cp -r localhost+2-client-key.pem localhost+2-client.pem localhost+2-key.pem localhost+2.pem test-certs/
-          cp -r $(mkcert -CAROOT)/rootCA.pem test-certs/
-          
-          docker compose -f env/docker-compose-otel.yaml up -d
-          sleep 30
-          go test -timeout 20m -v -race -cover -tags=debug -failfast -coverpkg=$(cat pkgs.txt) -coverprofile=./coverage-ci/grpc.out -covermode=atomic grpc_plugin_gzip_test.go grpc_plugin_test.go
-
-          docker compose -f env/docker-compose-otel.yaml down
-
+        run: "cd tests\n\nsudo apt update\nsudo apt install -y libnss3-tools\ncurl -JLO \"https://dl.filippo.io/mkcert/latest?for=linux/amd64\"\nchmod +x mkcert-v*-linux-amd64\nsudo cp mkcert-v*-linux-amd64 /usr/local/bin/mkcert\nmkcert -install\nmkcert localhost 127.0.0.1 ::1\nmkcert -client localhost 127.0.0.1 ::1 \nmkdir test-certs\ncp -r localhost+2-client-key.pem localhost+2-client.pem localhost+2-key.pem localhost+2.pem test-certs/\ncp -r $(mkcert -CAROOT)/rootCA.pem test-certs/\n\ndocker compose -f env/docker-compose-otel.yaml up -d\nsleep 30\ngo test -timeout 20m -v -race -cover -tags=debug -failfast -coverpkg=$(cat pkgs.txt) -coverprofile=./coverage-ci/grpc.out -covermode=atomic grpc_plugin_gzip_test.go grpc_plugin_test.go\n\ndocker compose -f env/docker-compose-otel.yaml down\n"
       - name: Archive code coverage results
         uses: actions/upload-artifact@v4
         with:
           name: coverage
           path: ./tests/coverage-ci
-
-
   codecov:
     name: Upload codecov
     runs-on: ubuntu-latest
     needs:
       - grpc_test
-
     timeout-minutes: 60
     steps:
       - name: Download code coverage results
@@ -117,7 +81,6 @@ jobs:
           echo 'mode: atomic' > summary.txt
           tail -q -n +2 *.out >> summary.txt
           sed -i '2,${/roadrunner/!d}' summary.txt
-
       - name: upload to codecov
         uses: codecov/codecov-action@v5 # Docs: <https://github.com/codecov/codecov-action>
         with:
