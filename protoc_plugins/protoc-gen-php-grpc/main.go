@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+// Command protoc-gen-php-grpc is a protoc plugin that generates PHP interfaces for gRPC services.
 package main
 
 import (

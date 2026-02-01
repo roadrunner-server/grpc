@@ -1,3 +1,4 @@
+// Package parser provides functionality to parse protobuf files and extract gRPC service definitions.
 package parser
 
 import (
@@ -40,7 +41,10 @@ type Method struct {
 
 // File parses given proto file or returns error.
 func File(file string, importPath string) ([]Service, error) {
-	reader, _ := os.Open(file)
+	reader, err := os.Open(file)
+	if err != nil {
+		return nil, err
+	}
 	defer func() {
 		_ = reader.Close()
 	}()

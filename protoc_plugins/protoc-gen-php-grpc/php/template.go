@@ -95,13 +95,11 @@ func body(req *plugin.CodeGeneratorRequest, file *desc.FileDescriptorProto, serv
 			return strings.ReplaceAll(name, "\\\\", "\\")
 		},
 		"resolve_name_const": func(packagePath, serviceName *string) string {
-
 			if defaultOrVal(packagePath) == "" {
 				return defaultOrVal(serviceName)
 			}
 
 			return *packagePath + "." + defaultOrVal(serviceName)
-
 		},
 	}).Parse(phpBody))
 
