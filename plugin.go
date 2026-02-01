@@ -1,3 +1,4 @@
+// Package grpc implements a gRPC server plugin for RoadRunner that proxies requests to PHP workers.
 package grpc
 
 import (

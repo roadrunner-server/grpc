@@ -96,6 +96,8 @@ func (h *HealthCheckServer) Watch(_ *grpc_health_v1.HealthCheckRequest, stream g
 
 func (h *HealthCheckServer) SetServingStatus(servingStatus grpc_health_v1.HealthCheckResponse_ServingStatus) {
 	h.mu.Lock()
+	defer h.mu.Unlock()
+
 	if h.shutdown {
 		h.log.Info("health status changing is ignored, because health service is shutdown")
 		return
@@ -112,7 +114,6 @@ func (h *HealthCheckServer) SetServingStatus(servingStatus grpc_health_v1.Health
 		// put the most recent one
 		upd <- servingStatus
 	}
-	h.mu.Unlock()
 }
 
 func (h *HealthCheckServer) Shutdown() {

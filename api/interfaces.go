@@ -1,3 +1,4 @@
+// Package api defines public interfaces for the gRPC plugin components.
 package api
 
 import (

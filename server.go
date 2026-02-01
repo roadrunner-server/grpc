@@ -84,11 +84,13 @@ func (p *Plugin) interceptor(ctx context.Context, req any, info *grpc.UnaryServe
 
 	s, ok := status.FromError(err)
 	var statusCode codes.Code
-	switch ok {
-	case true:
+	switch {
+	case ok:
 		statusCode = s.Code()
-	case false:
+	case err != nil:
 		statusCode = status.New(codes.Unknown, err.Error()).Code()
+	default:
+		statusCode = codes.OK
 	}
 
 	defer func() {

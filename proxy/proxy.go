@@ -1,3 +1,4 @@
+// Package proxy implements a gRPC service proxy that forwards requests to RoadRunner PHP workers.
 package proxy
 
 import (
@@ -192,7 +193,7 @@ func (p *Proxy) invoke(ctx context.Context, method string, in *codec.RawMessage)
 	select {
 	case pl := <-re:
 		if pl.Error() != nil {
-			return nil, err
+			return nil, pl.Error()
 		}
 		// streaming is not supported
 		if pl.Payload().Flags&frame.STREAM != 0 {

@@ -1,3 +1,4 @@
+// Package codec provides a raw codec implementation for gRPC that passes through protobuf messages without re-encoding.
 package codec
 
 import (
