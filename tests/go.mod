@@ -10,7 +10,7 @@ require (
 	github.com/roadrunner-server/goridge/v3 v3.8.3
 	github.com/roadrunner-server/grpc/v5 v5.2.3
 	github.com/roadrunner-server/logger/v5 v5.1.9
-	github.com/roadrunner-server/metrics/v5 v5.1.9
+	github.com/roadrunner-server/metrics/v5 v5.2.0
 	github.com/roadrunner-server/otel/v5 v5.4.0
 	github.com/roadrunner-server/resetter/v5 v5.1.9
 	github.com/roadrunner-server/rpc/v5 v5.1.9
