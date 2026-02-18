@@ -1,8 +1,6 @@
 module github.com/roadrunner-server/grpc/protoc_plugins/v5
 
-go 1.23
-
-toolchain go1.23.1
+go 1.26
 
 require (
 	github.com/stretchr/testify v1.11.1
