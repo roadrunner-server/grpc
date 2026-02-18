@@ -1,27 +1,20 @@
 version: '3'
-
 rpc:
   listen: "tcp://127.0.0.1:6011"
-
 server:
   command: "php php_test_files/worker-grpc.php"
   relay: "pipes"
   relay_timeout: "20s"
-
 logs:
   mode: development
   level: error
-
 grpc:
   listen: "tcp://127.0.0.1:9011"
-
   proto:
     - "proto/service/service.proto"
-
   interceptors:
     - "interceptor1"
     - "interceptor2"
-
   max_send_msg_size: 50
   max_recv_msg_size: 50
   max_connection_idle: 0s
@@ -30,7 +23,6 @@ grpc:
   max_concurrent_streams: 10
   ping_time: 1s
   timeout: 200s
-
   pool:
     num_workers: 2
     max_jobs: 0
