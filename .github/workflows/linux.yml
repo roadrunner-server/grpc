@@ -75,12 +75,29 @@ jobs:
       - grpc_test
     timeout-minutes: 60
     steps:
+      - name: Check out code
+        uses: actions/checkout@v4
       - name: Download code coverage results
         uses: actions/download-artifact@v5
+        with:
+          name: coverage
+          path: coverage
       - run: |
           echo 'mode: atomic' > summary.txt
-          tail -q -n +2 *.out >> summary.txt
-          sed -i '2,${/roadrunner/!d}' summary.txt
+          tail -q -n +2 coverage/*.out >> summary.txt
+          awk '
+            NR == 1 { print; next }
+            /^github\.com\/roadrunner-server\/grpc\/v5\// {
+              sub(/^github\.com\/roadrunner-server\/grpc\/v5\//, "", $0)
+              print
+              next
+            }
+            /^github\.com\/roadrunner-server\/grpc\/protoc_plugins\/v5\// {
+              sub(/^github\.com\/roadrunner-server\/grpc\/protoc_plugins\/v5\//, "protoc_plugins/", $0)
+              print
+            }
+          ' summary.txt > summary.filtered.txt
+          mv summary.filtered.txt summary.txt
       - name: upload to codecov
         uses: codecov/codecov-action@v5 # Docs: <https://github.com/codecov/codecov-action>
         with:
