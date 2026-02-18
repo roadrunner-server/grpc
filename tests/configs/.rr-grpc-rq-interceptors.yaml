@@ -19,8 +19,8 @@ grpc:
     - "proto/service/service.proto"
 
   interceptors:
-    - "interceptor2"
     - "interceptor1"
+    - "interceptor2"
 
   max_send_msg_size: 50
   max_recv_msg_size: 50
