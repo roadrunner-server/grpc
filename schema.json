@@ -34,6 +34,24 @@
         ]
       }
     },
+    "interceptors": {
+      "description": "List of registered unary gRPC interceptor plugin names.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "examples": [
+        [
+          "sample-grpc-interceptor"
+        ],
+        [
+          "auth-interceptor",
+          "ratelimit-interceptor"
+        ]
+      ]
+    },
     "tls": {
       "description": "GRPC TLS configuration",
       "type": "object",

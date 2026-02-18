@@ -1074,7 +1074,8 @@ func TestGRPCMetrics(t *testing.T) {
 
 func sendReset(address string) func(t *testing.T) {
 	return func(t *testing.T) {
-		conn, err := net.Dial("tcp", address)
+		var d net.Dialer
+		conn, err := d.DialContext(context.Background(), "tcp", address)
 		assert.NoError(t, err)
 		client := rpc.NewClientWithCodec(goridgeRpc.NewClientCodec(conn))
 		// WorkerList contains list of workers.
