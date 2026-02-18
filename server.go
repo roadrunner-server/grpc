@@ -35,7 +35,7 @@ func (p *Plugin) createGRPCserver(interceptors map[string]api.Interceptor) (*grp
 
 	// if we have interceptors in the config, we need to chain them with our interceptor, and add them to the server options
 	if len(p.config.Interceptors) > 0 && len(interceptors) > 0 {
-		// we need to loop backwards, since the first interceptor in the list should be the last one to execute, and the last one should be the first to execute
+		// we need to loop backwards, since the last interceptor in the list should be the first one to execute
 		for i := len(p.config.Interceptors) - 1; i >= 0; i-- {
 			name := p.config.Interceptors[i]
 			if _, ok := interceptors[name]; !ok {
