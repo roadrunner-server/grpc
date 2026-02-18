@@ -1,24 +1,19 @@
-FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS builder
+FROM golang:1.26-alpine AS builder
 
-ARG TARGETOS
-ARG TARGETARCH
-ARG TARGETVARIANT
+ARG TARGETPLATFORM
 
 ENV CGO_ENABLED=0
 
 WORKDIR /src
+# https://buf.build/docs/bsr/remote-plugins/custom-plugins/#build-a-docker-image
+RUN test "${TARGETPLATFORM}" = "linux/amd64" || (echo "buf plugin image must be built for linux/amd64" && exit 1)
+
 COPY protoc_plugins/go.mod protoc_plugins/go.sum ./
 RUN go mod download
 
 COPY protoc_plugins/ .
 
-RUN set -eux; \
-	goarm=""; \
-	goamd64=""; \
-	if [ "${TARGETARCH:-}" = "arm" ] && [ -n "${TARGETVARIANT:-}" ]; then goarm="${TARGETVARIANT#v}"; fi; \
-	if [ "${TARGETARCH:-}" = "amd64" ] && [ -n "${TARGETVARIANT:-}" ]; then goamd64="${TARGETVARIANT#v}"; fi; \
-	GOOS="${TARGETOS:-linux}" GOARCH="${TARGETARCH:-amd64}" GOARM="${goarm}" GOAMD64="${goamd64}" \
-	go build -trimpath -ldflags "-s -w" -o /out/protoc-gen-php-grpc-plugin ./protoc-gen-php-grpc
+RUN go build -trimpath -ldflags "-s -w" -o /out/protoc-gen-php-grpc-plugin ./protoc-gen-php-grpc
 
 FROM scratch
 

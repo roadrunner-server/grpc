@@ -48,14 +48,14 @@ func (p *Plugin) createGRPCserver(interceptors map[string]api.Interceptor) (*grp
 				interceptors[name].UnaryServerInterceptor(),
 			)
 		}
-
-		opts = append(
-			opts,
-			grpc.ChainUnaryInterceptor(
-				unaryInterceptors...,
-			),
-		)
 	}
+
+	opts = append(
+		opts,
+		grpc.ChainUnaryInterceptor(
+			unaryInterceptors...,
+		),
+	)
 
 	opts = append(opts, grpc.StatsHandler(otelgrpc.NewServerHandler(otelgrpc.WithTracerProvider(p.tracer), otelgrpc.WithPropagators(p.prop))))
 	server := grpc.NewServer(opts...)
