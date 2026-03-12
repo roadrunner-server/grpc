@@ -46,6 +46,29 @@ func TestInitDefaults(t *testing.T) {
 	assert.NoError(t, c.InitDefaults())
 	assert.Equal(t, []string{"parser" + separator + "test.proto"}, c.Proto)
 
+	c.Proto = []string{"parser/test_nested/**/*.proto"}
+	assert.NoError(t, c.InitDefaults())
+	assert.Equal(t, []string{
+		"parser" + separator + "test_nested" + separator + "message.proto",
+		"parser" + separator + "test_nested" + separator + "pong.proto",
+		"parser" + separator + "test_nested" + separator + "test_import.proto",
+		"parser" + separator + "test_nested" + separator + "sub" + separator + "deep.proto",
+	}, c.Proto)
+
+	c.Proto = []string{"parser/{message,pong}.proto"}
+	assert.NoError(t, c.InitDefaults())
+	assert.Equal(t, []string{
+		"parser" + separator + "message.proto",
+		"parser" + separator + "pong.proto",
+	}, c.Proto)
+
+	c.Proto = []string{"parser/{*_import.proto,pong.proto}"}
+	assert.NoError(t, c.InitDefaults())
+	assert.Equal(t, []string{
+		"parser" + separator + "pong.proto",
+		"parser" + separator + "test_import.proto",
+	}, c.Proto)
+
 	c.Proto = []string{"[[[error"}
 	assert.Error(t, c.InitDefaults())
 }
