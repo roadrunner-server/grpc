@@ -4,10 +4,10 @@ import (
 	"crypto/tls"
 	"math"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/bmatcuk/doublestar/v4"
 	"github.com/roadrunner-server/errors"
 	"github.com/roadrunner-server/pool/pool"
 )
@@ -70,8 +70,8 @@ func (c *Config) InitDefaults() error { //nolint:gocyclo,gocognit
 			continue
 		}
 
-		if strings.ContainsAny(path, "*?[") {
-			files, err := filepath.Glob(path)
+		if strings.ContainsAny(path, "*?[{") {
+			files, err := doublestar.FilepathGlob(path)
 			if err != nil {
 				return errors.E(op, err)
 			}
