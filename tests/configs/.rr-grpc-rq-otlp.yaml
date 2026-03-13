@@ -30,13 +30,3 @@ grpc:
     max_jobs: 0
     allocate_timeout: 60s
     destroy_timeout: 60s
-
-otel:
-  insecure: false
-  compress: true
-  exporter: stderr
-  resource:
-    service_name: "rr_test_grpc"
-    service_version: "1.0.0"
-    service_namespace: "RR-gRPC"
-    service_instance_id: "UUID-super-long-unique-id"

@@ -1,7 +1,6 @@
 package grpc_test
 
 import (
-	"bytes"
 	"context"
 	"crypto/tls"
 	"io"
@@ -11,6 +10,7 @@ import (
 	"net/rpc"
 	"os"
 	"os/signal"
+	"slices"
 	"sync"
 	"syscall"
 	"testing"
@@ -22,7 +22,6 @@ import (
 	"github.com/roadrunner-server/endure/v2"
 	"github.com/roadrunner-server/logger/v5"
 	"github.com/roadrunner-server/metrics/v5"
-	"github.com/roadrunner-server/otel/v5"
 	"github.com/roadrunner-server/resetter/v5"
 	"github.com/roadrunner-server/server/v5"
 	"github.com/roadrunner-server/status/v5"
@@ -37,11 +36,30 @@ import (
 	rpcPlugin "github.com/roadrunner-server/rpc/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
 
 const getAddr = "http://127.0.0.1:2112/metrics"
+
+type inMemoryTracer struct {
+	tp  *sdktrace.TracerProvider
+	exp *tracetest.InMemoryExporter
+}
+
+func newInMemoryTracer(t *testing.T) *inMemoryTracer {
+	t.Helper()
+	exp := tracetest.NewInMemoryExporter()
+	tp := sdktrace.NewTracerProvider(sdktrace.WithSyncer(exp))
+	t.Cleanup(func() { _ = tp.Shutdown(context.Background()) })
+	return &inMemoryTracer{tp: tp, exp: exp}
+}
+
+func (m *inMemoryTracer) Init() error                      { return nil }
+func (m *inMemoryTracer) Name() string                     { return "inMemoryTracer" }
+func (m *inMemoryTracer) Tracer() *sdktrace.TracerProvider { return m.tp }
 
 func TestGrpcInit(t *testing.T) {
 	cont := endure.New(slog.LevelDebug)
@@ -120,7 +138,8 @@ func TestGrpcInit(t *testing.T) {
 }
 
 func TestGrpcOtel(t *testing.T) {
-	// TODO(rustatian) use the: https://pkg.go.dev/go.opentelemetry.io/otel/sdk/trace/tracetest"
+	tracer := newInMemoryTracer(t)
+
 	cont := endure.New(slog.LevelDebug)
 
 	cfg := &config.Plugin{
@@ -133,7 +152,7 @@ func TestGrpcOtel(t *testing.T) {
 		&grpcPlugin.Plugin{},
 		&rpcPlugin.Plugin{},
 		&logger.Plugin{},
-		&otel.Plugin{},
+		tracer,
 		&server.Plugin{},
 	)
 	assert.NoError(t, err)
@@ -189,21 +208,12 @@ func TestGrpcOtel(t *testing.T) {
 	stopCh <- struct{}{}
 	wg.Wait()
 
-	time.Sleep(time.Second * 3)
-
-	req2, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "http://127.0.0.1:9411/api/v2/spans?serviceName=rr_test_grpc", nil)
-	require.NoError(t, err)
-	require.NotNil(t, req2)
-	resp2, err := http.DefaultClient.Do(req2)
-	require.NoError(t, err)
-	require.NotNil(t, resp2)
-	require.NotNil(t, resp2.Body)
-	require.Equal(t, http.StatusOK, resp2.StatusCode)
-
-	bd, err := io.ReadAll(resp2.Body)
-	// contains spans
-	assert.Contains(t, string(bd), "service.echo/ping")
-	_ = resp2.Body.Close()
+	spans := tracer.exp.GetSpans()
+	spanNames := make([]string, len(spans))
+	for i, s := range spans {
+		spanNames[i] = s.Name
+	}
+	require.True(t, slices.Contains(spanNames, "service.Echo/Ping"), "expected span 'service.Echo/Ping', got: %v", spanNames)
 }
 
 func TestGrpcCheckStatus(t *testing.T) {
@@ -1115,9 +1125,7 @@ func get() (string, error) {
 }
 
 func Test_GrpcRqOtlp(t *testing.T) {
-	rd, wr, err := os.Pipe()
-	assert.NoError(t, err)
-	os.Stderr = wr
+	tracer := newInMemoryTracer(t)
 
 	cont := endure.New(slog.LevelDebug)
 
@@ -1126,13 +1134,13 @@ func Test_GrpcRqOtlp(t *testing.T) {
 		Path:    "configs/.rr-grpc-rq-otlp.yaml",
 	}
 
-	err = cont.RegisterAll(
+	err := cont.RegisterAll(
 		cfg,
 		&grpcPlugin.Plugin{},
 		&rpcPlugin.Plugin{},
 		&logger.Plugin{},
 		&server.Plugin{},
-		&otel.Plugin{},
+		tracer,
 	)
 	assert.NoError(t, err)
 
@@ -1194,12 +1202,10 @@ func Test_GrpcRqOtlp(t *testing.T) {
 	stopCh <- struct{}{}
 	wg.Wait()
 
-	time.Sleep(time.Second * 2)
-	_ = wr.Close()
-	buf := new(bytes.Buffer)
-	_, err = io.Copy(buf, rd)
-	require.NoError(t, err)
-
-	// contains spans
-	require.Contains(t, buf.String(), `"Name": "service.Echo/Ping",`)
+	spans := tracer.exp.GetSpans()
+	spanNames := make([]string, len(spans))
+	for i, s := range spans {
+		spanNames[i] = s.Name
+	}
+	require.True(t, slices.Contains(spanNames, "service.Echo/Ping"), "expected span 'service.Echo/Ping', got: %v", spanNames)
 }

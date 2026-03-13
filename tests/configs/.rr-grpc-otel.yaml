@@ -23,13 +23,3 @@ grpc:
     allocate_timeout: 60s
     destroy_timeout: 60s
 
-otel:
-  resource:
-    service_name: "rr_test_grpc"
-    service_version: "1.0.0"
-    service_namespace: "RR-gRPC"
-    service_instance_id: "UUID-super-long-unique-id"
-  insecure: true
-  compress: true
-  exporter: otlp
-  endpoint: 127.0.0.1:4318
