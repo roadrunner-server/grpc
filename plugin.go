@@ -4,6 +4,7 @@ package grpc
 import (
 	"context"
 	stderr "errors"
+	"log/slog"
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -21,7 +22,6 @@ import (
 	"github.com/roadrunner-server/grpc/v6/proxy"
 	"github.com/roadrunner-server/pool/v2/pool"
 	"github.com/roadrunner-server/pool/v2/state/process"
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/encoding"
 	"google.golang.org/grpc/health/grpc_health_v1"
@@ -57,7 +57,7 @@ type Plugin struct {
 	requestCounter  *prometheus.CounterVec
 	requestDuration *prometheus.HistogramVec
 
-	log *zap.Logger
+	log *slog.Logger
 
 	// interceptors to chain
 	interceptors map[string]api.Interceptor
@@ -168,7 +168,7 @@ func (p *Plugin) Serve() chan error {
 	p.healthServer.RegisterServer(p.server)
 
 	go func() {
-		p.log.Info("grpc server was started", zap.String("address", p.config.Listen))
+		p.log.Info("grpc server was started", "address", p.config.Listen)
 
 		p.healthServer.SetServingStatus(grpc_health_v1.HealthCheckResponse_SERVING)
 		err = p.server.Serve(l)
@@ -179,7 +179,7 @@ func (p *Plugin) Serve() chan error {
 				return
 			}
 
-			p.log.Error("grpc server was stopped", zap.Error(err))
+			p.log.Error("grpc server was stopped", "error", err)
 			errCh <- errors.E(op, err)
 			return
 		}

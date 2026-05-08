@@ -2,9 +2,9 @@ package grpc
 
 import (
 	"context"
+	"log/slog"
 	"sync"
 
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/health/grpc_health_v1"
@@ -15,13 +15,13 @@ type HealthCheckServer struct {
 	mu sync.Mutex
 	grpc_health_v1.HealthCheckRequest
 	plugin   *Plugin
-	log      *zap.Logger
+	log      *slog.Logger
 	shutdown bool
 	updates  map[grpc_health_v1.Health_WatchServer]chan grpc_health_v1.HealthCheckResponse_ServingStatus
 	status   grpc_health_v1.HealthCheckResponse_ServingStatus
 }
 
-func NewHeathServer(p *Plugin, log *zap.Logger) *HealthCheckServer {
+func NewHeathServer(p *Plugin, log *slog.Logger) *HealthCheckServer {
 	return &HealthCheckServer{
 		updates: make(map[grpc_health_v1.Health_WatchServer]chan grpc_health_v1.HealthCheckResponse_ServingStatus, 1),
 		plugin:  p,
@@ -79,7 +79,7 @@ func (h *HealthCheckServer) Watch(_ *grpc_health_v1.HealthCheckRequest, stream g
 		select {
 		case servingStatus := <-update:
 			if lastStatus == servingStatus {
-				h.log.Debug("status won't changed", zap.String("status", lastStatus.String()))
+				h.log.Debug("status won't changed", "status", lastStatus.String())
 				continue
 			}
 			lastStatus = servingStatus

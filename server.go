@@ -14,7 +14,6 @@ import (
 	"github.com/roadrunner-server/grpc/v6/parser"
 	"github.com/roadrunner-server/grpc/v6/proxy"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
@@ -72,7 +71,7 @@ func (p *Plugin) createGRPCserver(interceptors map[string]api.Interceptor) (*grp
 		}
 
 		for _, service := range services {
-			px := proxy.NewProxy(fmt.Sprintf("%s.%s", service.Package, service.Name), p.config.Proto[i], p.log.Named(service.Name), p.gPool, p.mu, p.prop)
+			px := proxy.NewProxy(fmt.Sprintf("%s.%s", service.Package, service.Name), p.config.Proto[i], p.log.With("service", service.Name), p.gPool, p.mu, p.prop)
 			for _, m := range service.Methods {
 				px.RegisterMethod(m.Name)
 			}
@@ -110,12 +109,12 @@ func (p *Plugin) interceptor(ctx context.Context, req any, info *grpc.UnaryServe
 	}()
 
 	if err != nil {
-		p.log.Error("method call was finished with error", zap.Error(err), zap.String("method", info.FullMethod), zap.Time("start", start), zap.Int64("elapsed", time.Since(start).Milliseconds()))
+		p.log.Error("method call was finished with error", "error", err, "method", info.FullMethod, "start", start, "elapsed", time.Since(start).Milliseconds())
 
 		return nil, err
 	}
 
-	p.log.Debug("method was called successfully", zap.String("method", info.FullMethod), zap.Time("start", start), zap.Int64("elapsed", time.Since(start).Milliseconds()))
+	p.log.Debug("method was called successfully", "method", info.FullMethod, "start", start, "elapsed", time.Since(start).Milliseconds())
 	return resp, nil
 }
 

@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	stderr "errors"
 	"fmt"
+	"log/slog"
 	"math"
 	"strconv"
 	"strings"
@@ -23,7 +24,6 @@ import (
 	"github.com/roadrunner-server/pool/v2/pool/static_pool"
 	"github.com/roadrunner-server/pool/v2/worker"
 	"go.opentelemetry.io/otel/propagation"
-	"go.uber.org/zap"
 	spb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -73,7 +73,7 @@ type rpcContext struct {
 // Proxy manages GRPC/RoadRunner bridge.
 type Proxy struct {
 	mu       *sync.RWMutex
-	log      *zap.Logger
+	log      *slog.Logger
 	prop     propagation.TextMapPropagator
 	grpcPool Pool
 	name     string
@@ -84,7 +84,7 @@ type Proxy struct {
 }
 
 // NewProxy creates a new service proxy object.
-func NewProxy(name string, metadata string, log *zap.Logger, grpcPool Pool, mu *sync.RWMutex, prop propagation.TextMapPropagator) *Proxy {
+func NewProxy(name string, metadata string, log *slog.Logger, grpcPool Pool, mu *sync.RWMutex, prop propagation.TextMapPropagator) *Proxy {
 	return &Proxy{
 		log:      log,
 		mu:       mu,
@@ -243,7 +243,7 @@ func (p *Proxy) responseMetadata(st grpc.ServerTransportStream, resp *payload.Pa
 			err = json.Unmarshal([]byte(md.Get(headers)[0]), &mdh)
 			if err != nil {
 				// we don't need to return this error, log it
-				p.log.Error("error unmarshalling headers", zap.Error(err))
+				p.log.Error("error unmarshalling headers", "error", err)
 			}
 
 			for k, v := range mdh {
@@ -253,7 +253,7 @@ func (p *Proxy) responseMetadata(st grpc.ServerTransportStream, resp *payload.Pa
 				case int:
 					_ = st.SetHeader(metadata.Pairs(k, strconv.Itoa(tt)))
 				default:
-					p.log.Warn("skipping header with unsupported type", zap.String("key", k), zap.Any("value", v))
+					p.log.Warn("skipping header with unsupported type", "key", k, "value", v)
 				}
 			}
 		}
@@ -264,7 +264,7 @@ func (p *Proxy) responseMetadata(st grpc.ServerTransportStream, resp *payload.Pa
 			err = json.Unmarshal([]byte(md.Get(trailers)[0]), &mdh)
 			if err != nil {
 				// we don't need to return this error, log it
-				p.log.Error("error unmarshalling trailers", zap.Error(err))
+				p.log.Error("error unmarshalling trailers", "error", err)
 			}
 
 			for k, v := range mdh {
@@ -274,7 +274,7 @@ func (p *Proxy) responseMetadata(st grpc.ServerTransportStream, resp *payload.Pa
 				case int:
 					_ = st.SetTrailer(metadata.Pairs(k, strconv.Itoa(tt)))
 				default:
-					p.log.Warn("skipping header with unsupported type", zap.String("key", k), zap.Any("value", v))
+					p.log.Warn("skipping header with unsupported type", "key", k, "value", v)
 				}
 			}
 		}
