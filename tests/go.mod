@@ -7,8 +7,8 @@ toolchain go1.26.0
 require (
 	github.com/roadrunner-server/config/v5 v5.1.9
 	github.com/roadrunner-server/endure/v2 v2.6.2
-	github.com/roadrunner-server/goridge/v3 v3.8.3
-	github.com/roadrunner-server/grpc/v5 v5.2.3
+	github.com/roadrunner-server/goridge/v4 v4.0.0-beta.1
+	github.com/roadrunner-server/grpc/v6 v6.0.0
 	github.com/roadrunner-server/logger/v5 v5.1.9
 	github.com/roadrunner-server/metrics/v5 v5.2.0
 	github.com/roadrunner-server/resetter/v5 v5.1.9
@@ -21,7 +21,13 @@ require (
 	google.golang.org/protobuf v1.36.11
 )
 
-replace github.com/roadrunner-server/grpc/v5 => ../
+require (
+	github.com/roadrunner-server/api-plugins/v6 v6.0.0-beta.2 // indirect
+	github.com/roadrunner-server/goridge/v3 v3.8.3 // indirect
+	github.com/roadrunner-server/pool/v2 v2.0.0-beta.1 // indirect
+)
+
+replace github.com/roadrunner-server/grpc/v6 => ../
 
 exclude go.temporal.io/api v1.26.1
 

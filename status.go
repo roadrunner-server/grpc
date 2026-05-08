@@ -3,8 +3,8 @@ package grpc
 import (
 	"net/http"
 
-	"github.com/roadrunner-server/api/v4/plugins/v1/status"
-	"github.com/roadrunner-server/pool/fsm"
+	"github.com/roadrunner-server/api-plugins/v6/status"
+	"github.com/roadrunner-server/pool/v2/fsm"
 )
 
 // Status return status of the particular plugin

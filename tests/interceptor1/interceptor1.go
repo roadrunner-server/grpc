@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/roadrunner-server/grpc/v5/api"
+	"github.com/roadrunner-server/grpc/v6/api"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )

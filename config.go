@@ -9,7 +9,7 @@ import (
 
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/roadrunner-server/errors"
-	"github.com/roadrunner-server/pool/pool"
+	"github.com/roadrunner-server/pool/v2/pool"
 )
 
 type ClientAuthType string

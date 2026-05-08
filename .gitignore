@@ -18,3 +18,4 @@ vendor/
 .vscode
 .DS_Store
 **/composer.lock
+**/.claude/settings.local.json

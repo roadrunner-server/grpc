@@ -1,4 +1,4 @@
-module github.com/roadrunner-server/grpc/v5
+module github.com/roadrunner-server/grpc/v6
 
 go 1.26
 
@@ -8,11 +8,11 @@ require (
 	github.com/bmatcuk/doublestar/v4 v4.10.0
 	github.com/emicklei/proto v1.14.3
 	github.com/prometheus/client_golang v1.23.2
-	github.com/roadrunner-server/api/v4 v4.23.0
+	github.com/roadrunner-server/api-plugins/v6 v6.0.0-beta.2
 	github.com/roadrunner-server/endure/v2 v2.6.2
 	github.com/roadrunner-server/errors v1.4.1
-	github.com/roadrunner-server/goridge/v3 v3.8.3
-	github.com/roadrunner-server/pool v1.1.3
+	github.com/roadrunner-server/goridge/v4 v4.0.0-beta.1
+	github.com/roadrunner-server/pool/v2 v2.0.0-beta.1
 	github.com/roadrunner-server/tcplisten v1.5.2
 	github.com/stretchr/testify v1.11.1
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.67.0

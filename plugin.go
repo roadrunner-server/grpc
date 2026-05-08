@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/roadrunner-server/pool/pool/static_pool"
+	"github.com/roadrunner-server/pool/v2/pool/static_pool"
 	"github.com/roadrunner-server/tcplisten"
 	"go.opentelemetry.io/otel/propagation"
 
@@ -16,11 +16,11 @@ import (
 
 	"github.com/roadrunner-server/endure/v2/dep"
 	"github.com/roadrunner-server/errors"
-	"github.com/roadrunner-server/grpc/v5/api"
-	"github.com/roadrunner-server/grpc/v5/codec"
-	"github.com/roadrunner-server/grpc/v5/proxy"
-	"github.com/roadrunner-server/pool/pool"
-	"github.com/roadrunner-server/pool/state/process"
+	"github.com/roadrunner-server/grpc/v6/api"
+	"github.com/roadrunner-server/grpc/v6/codec"
+	"github.com/roadrunner-server/grpc/v6/proxy"
+	"github.com/roadrunner-server/pool/v2/pool"
+	"github.com/roadrunner-server/pool/v2/state/process"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/encoding"

@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/roadrunner-server/errors"
-	"github.com/roadrunner-server/grpc/v5/api"
-	"github.com/roadrunner-server/grpc/v5/parser"
-	"github.com/roadrunner-server/grpc/v5/proxy"
+	"github.com/roadrunner-server/grpc/v6/api"
+	"github.com/roadrunner-server/grpc/v6/parser"
+	"github.com/roadrunner-server/grpc/v6/proxy"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
