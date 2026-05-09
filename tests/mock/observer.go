@@ -18,6 +18,11 @@ type LoggedEntry struct {
 	Attrs   map[string]any
 }
 
+// ContextMap returns the entry's attributes as a map for assertion lookups.
+func (e LoggedEntry) ContextMap() map[string]any {
+	return e.Attrs
+}
+
 // ObservedLogs is a concurrency-safe, ordered collection of observed logs.
 type ObservedLogs struct {
 	mu   sync.RWMutex
