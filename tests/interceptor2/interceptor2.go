@@ -2,22 +2,21 @@ package interceptor2
 
 import (
 	"context"
-
-	"tests/interceptor1"
+	"log/slog"
 
 	"github.com/roadrunner-server/grpc/v6/api"
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"tests/interceptor1"
 )
 
 const name = "interceptor2"
 
 type Logger interface {
-	NamedLogger(name string) *zap.Logger
+	NamedLogger(name string) *slog.Logger
 }
 
 type Plugin struct {
-	log *zap.Logger
+	log *slog.Logger
 }
 
 var _ api.Interceptor = (*Plugin)(nil)
@@ -31,7 +30,7 @@ func (p *Plugin) UnaryServerInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
 		marker, ok := interceptor1.MarkerFromContext(ctx)
 		if ok {
-			p.logger().Info("interceptor2 received marker", zap.String("method", info.FullMethod), zap.String("marker", marker))
+			p.logger().Info("interceptor2 received marker", "method", info.FullMethod, "marker", marker)
 		} else {
 			panic("interceptor2 did not receive marker from interceptor1, context is not properly propagated")
 		}
@@ -44,9 +43,9 @@ func (p *Plugin) Name() string {
 	return name
 }
 
-func (p *Plugin) logger() *zap.Logger {
+func (p *Plugin) logger() *slog.Logger {
 	if p.log == nil {
-		return zap.NewNop()
+		return slog.New(slog.DiscardHandler)
 	}
 
 	return p.log

@@ -11,11 +11,6 @@ import (
 	"testing"
 	"time"
 
-	"tests/interceptor1"
-	"tests/interceptor2"
-	mocklogger "tests/mock"
-	"tests/proto/service"
-
 	"github.com/roadrunner-server/config/v5"
 	"github.com/roadrunner-server/endure/v2"
 	grpcPlugin "github.com/roadrunner-server/grpc/v6"
@@ -23,9 +18,12 @@ import (
 	"github.com/roadrunner-server/server/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"tests/interceptor1"
+	"tests/interceptor2"
+	mocklogger "tests/mock"
+	"tests/proto/service"
 )
 
 func TestGrpcInterceptors(t *testing.T) {
@@ -36,7 +34,7 @@ func TestGrpcInterceptors(t *testing.T) {
 		Path:    "configs/.rr-grpc-rq-interceptors.yaml",
 	}
 
-	l, observed := mocklogger.ZapTestLogger(zap.DebugLevel)
+	l, observed := mocklogger.SlogTestLogger(slog.LevelDebug)
 	err := cont.RegisterAll(
 		cfg,
 		&interceptor1.Plugin{},

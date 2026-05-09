@@ -16,30 +16,26 @@ import (
 	"testing"
 	"time"
 
-	mocklogger "tests/mock"
-
 	"github.com/roadrunner-server/config/v5"
 	"github.com/roadrunner-server/endure/v2"
+	goridgeRpc "github.com/roadrunner-server/goridge/v4/pkg/rpc"
+	grpcPlugin "github.com/roadrunner-server/grpc/v6"
 	"github.com/roadrunner-server/logger/v5"
 	"github.com/roadrunner-server/metrics/v5"
 	"github.com/roadrunner-server/resetter/v5"
+	rpcPlugin "github.com/roadrunner-server/rpc/v5"
 	"github.com/roadrunner-server/server/v5"
 	"github.com/roadrunner-server/status/v5"
-	"go.uber.org/zap"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/health/grpc_health_v1"
-
-	"tests/proto/service"
-
-	goridgeRpc "github.com/roadrunner-server/goridge/v4/pkg/rpc"
-	grpcPlugin "github.com/roadrunner-server/grpc/v6"
-	rpcPlugin "github.com/roadrunner-server/rpc/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/health/grpc_health_v1"
+	mocklogger "tests/mock"
+	"tests/proto/service"
 )
 
 const getAddr = "http://127.0.0.1:2112/metrics"
@@ -1000,7 +996,7 @@ func TestGRPCMetrics(t *testing.T) {
 		Path:    "configs/.rr-grpc-metrics.yaml",
 	}
 
-	l, oLogger := mocklogger.ZapTestLogger(zap.DebugLevel)
+	l, oLogger := mocklogger.SlogTestLogger(slog.LevelDebug)
 	err := cont.RegisterAll(
 		cfg,
 		&server.Plugin{},

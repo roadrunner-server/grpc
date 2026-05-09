@@ -3,10 +3,10 @@ package interceptor1
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/roadrunner-server/grpc/v6/api"
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
@@ -16,11 +16,11 @@ const (
 )
 
 type Logger interface {
-	NamedLogger(name string) *zap.Logger
+	NamedLogger(name string) *slog.Logger
 }
 
 type Plugin struct {
-	log *zap.Logger
+	log *slog.Logger
 }
 
 var _ api.Interceptor = (*Plugin)(nil)
@@ -42,7 +42,7 @@ func MarkerFromContext(ctx context.Context) (string, bool) {
 func (p *Plugin) UnaryServerInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
 		marker := fmt.Sprintf("%s%d", MarkerPrefix, time.Now().UnixNano())
-		p.logger().Info("interceptor1 created marker", zap.String("method", info.FullMethod), zap.String("marker", marker))
+		p.logger().Info("interceptor1 created marker", "method", info.FullMethod, "marker", marker)
 
 		return handler(context.WithValue(ctx, markerCtxKey, marker), req)
 	}
@@ -52,9 +52,9 @@ func (p *Plugin) Name() string {
 	return name
 }
 
-func (p *Plugin) logger() *zap.Logger {
+func (p *Plugin) logger() *slog.Logger {
 	if p.log == nil {
-		return zap.NewNop()
+		return slog.New(slog.DiscardHandler)
 	}
 
 	return p.log
