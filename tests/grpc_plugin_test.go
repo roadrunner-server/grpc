@@ -7,7 +7,6 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
-	"net/rpc"
 	"os"
 	"os/signal"
 	"slices"
@@ -16,9 +15,14 @@ import (
 	"testing"
 	"time"
 
+	mocklogger "tests/mock"
+	"tests/proto/service"
+
+	"connectrpc.com/connect"
+	resetterProto "github.com/roadrunner-server/api-go/v6/resetter/v1"
+	"github.com/roadrunner-server/api-go/v6/resetter/v1/resetterV1connect"
 	"github.com/roadrunner-server/config/v6"
 	"github.com/roadrunner-server/endure/v2"
-	goridgeRpc "github.com/roadrunner-server/goridge/v4/pkg/rpc"
 	grpcPlugin "github.com/roadrunner-server/grpc/v6"
 	"github.com/roadrunner-server/logger/v6"
 	"github.com/roadrunner-server/metrics/v6"
@@ -30,12 +34,11 @@ import (
 	"github.com/stretchr/testify/require"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
+	"golang.org/x/net/http2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health/grpc_health_v1"
-	mocklogger "tests/mock"
-	"tests/proto/service"
 )
 
 const getAddr = "http://127.0.0.1:2112/metrics"
@@ -1078,25 +1081,30 @@ func TestGRPCMetrics(t *testing.T) {
 	require.Equal(t, 1, oLogger.FilterMessageSnippet("method was called successfully").Len())
 }
 
+func newResetterClient(t *testing.T, address string) resetterV1connect.ResetterServiceClient {
+	t.Helper()
+	httpc := &http.Client{Transport: &http2.Transport{
+		AllowHTTP: true,
+		DialTLSContext: func(ctx context.Context, network, addr string, _ *tls.Config) (net.Conn, error) {
+			return new(net.Dialer).DialContext(ctx, network, addr)
+		},
+	}}
+	t.Cleanup(httpc.CloseIdleConnections)
+	return resetterV1connect.NewResetterServiceClient(httpc, "http://"+address)
+}
+
 func sendReset(address string) func(t *testing.T) {
 	return func(t *testing.T) {
-		var d net.Dialer
-		conn, err := d.DialContext(context.Background(), "tcp", address)
-		assert.NoError(t, err)
-		client := rpc.NewClientWithCodec(goridgeRpc.NewClientCodec(conn))
-		// WorkerList contains list of workers.
+		client := newResetterClient(t, address)
+		ctx := t.Context()
 
-		var ret bool
-		err = client.Call("resetter.Reset", "grpc", &ret)
-		assert.NoError(t, err)
-		assert.True(t, ret)
-		ret = false
+		resetResp, err := client.Reset(ctx, connect.NewRequest(&resetterProto.ResetRequest{Plugin: "grpc"}))
+		require.NoError(t, err)
+		assert.True(t, resetResp.Msg.GetOk())
 
-		var services []string
-		err = client.Call("resetter.List", nil, &services)
-		assert.NotNil(t, services)
-		assert.NoError(t, err)
-		require.Equal(t, []string{"grpc"}, services)
+		listResp, err := client.ListPlugins(ctx, connect.NewRequest(&resetterProto.ListPluginsRequest{}))
+		require.NoError(t, err)
+		require.Equal(t, []string{"grpc"}, listResp.Msg.GetPlugins())
 	}
 }
 

@@ -4,9 +4,10 @@ import (
 	"context"
 	"log/slog"
 
+	"tests/interceptor1"
+
 	"github.com/roadrunner-server/grpc/v6/api"
 	"google.golang.org/grpc"
-	"tests/interceptor1"
 )
 
 const name = "interceptor2"

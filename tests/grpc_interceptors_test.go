@@ -11,6 +11,11 @@ import (
 	"testing"
 	"time"
 
+	"tests/interceptor1"
+	"tests/interceptor2"
+	mocklogger "tests/mock"
+	"tests/proto/service"
+
 	"github.com/roadrunner-server/config/v6"
 	"github.com/roadrunner-server/endure/v2"
 	grpcPlugin "github.com/roadrunner-server/grpc/v6"
@@ -20,10 +25,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"tests/interceptor1"
-	"tests/interceptor2"
-	mocklogger "tests/mock"
-	"tests/proto/service"
 )
 
 func TestGrpcInterceptors(t *testing.T) {

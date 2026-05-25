@@ -2,7 +2,7 @@ module github.com/roadrunner-server/grpc/v6
 
 go 1.26
 
-toolchain go1.26.0
+toolchain go1.26.3
 
 require (
 	github.com/bmatcuk/doublestar/v4 v4.10.0
