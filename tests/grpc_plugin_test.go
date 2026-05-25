@@ -1099,11 +1099,11 @@ func sendReset(address string) func(t *testing.T) {
 		ctx := t.Context()
 
 		resetResp, err := client.Reset(ctx, connect.NewRequest(&resetterProto.ResetRequest{Plugin: "grpc"}))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, resetResp.Msg.GetOk())
 
 		listResp, err := client.ListPlugins(ctx, connect.NewRequest(&resetterProto.ListPluginsRequest{}))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		require.Equal(t, []string{"grpc"}, listResp.Msg.GetPlugins())
 	}
 }
