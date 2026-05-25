@@ -15,6 +15,9 @@ import (
 	"testing"
 	"time"
 
+	mocklogger "tests/mock"
+	"tests/proto/service"
+
 	"connectrpc.com/connect"
 	resetterProto "github.com/roadrunner-server/api-go/v6/resetter/v1"
 	"github.com/roadrunner-server/api-go/v6/resetter/v1/resetterV1connect"
@@ -36,8 +39,6 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health/grpc_health_v1"
-	mocklogger "tests/mock"
-	"tests/proto/service"
 )
 
 const getAddr = "http://127.0.0.1:2112/metrics"
