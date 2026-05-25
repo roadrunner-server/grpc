@@ -67,7 +67,7 @@ func namespace(pkg *string, sep string) string {
 	}
 
 	result := bytes.NewBuffer(nil)
-	for _, p := range strings.Split(*pkg, ".") {
+	for p := range strings.SplitSeq(*pkg, ".") {
 		result.WriteString(identifier(p, ""))
 		result.WriteString(sep)
 	}

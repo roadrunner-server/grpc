@@ -58,12 +58,10 @@ func TestGrpcRqRsGzip(t *testing.T) {
 	signal.Notify(sig, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	wg := &sync.WaitGroup{}
-	wg.Add(1)
 
 	stopCh := make(chan struct{}, 1)
 
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		for {
 			select {
 			case e := <-ch:
@@ -87,7 +85,7 @@ func TestGrpcRqRsGzip(t *testing.T) {
 				return
 			}
 		}
-	}()
+	})
 
 	time.Sleep(time.Second * 1)
 
@@ -134,12 +132,10 @@ func TestGrpcRqRsMultipleGzip(t *testing.T) {
 	signal.Notify(sig, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	wg := &sync.WaitGroup{}
-	wg.Add(1)
 
 	stopCh := make(chan struct{}, 1)
 
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		for {
 			select {
 			case e := <-ch:
@@ -163,7 +159,7 @@ func TestGrpcRqRsMultipleGzip(t *testing.T) {
 				return
 			}
 		}
-	}()
+	})
 
 	time.Sleep(time.Second * 1)
 
@@ -228,12 +224,10 @@ func TestGrpcRqRsTLSGzip(t *testing.T) {
 	signal.Notify(sig, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	wg := &sync.WaitGroup{}
-	wg.Add(1)
 
 	stopCh := make(chan struct{}, 1)
 
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		for {
 			select {
 			case e := <-ch:
@@ -257,7 +251,7 @@ func TestGrpcRqRsTLSGzip(t *testing.T) {
 				return
 			}
 		}
-	}()
+	})
 
 	time.Sleep(time.Second * 1)
 
@@ -313,12 +307,10 @@ func TestGrpcRqRsTLSRootCAGzip(t *testing.T) {
 	signal.Notify(sig, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	wg := &sync.WaitGroup{}
-	wg.Add(1)
 
 	stopCh := make(chan struct{}, 1)
 
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		for {
 			select {
 			case e := <-ch:
@@ -342,7 +334,7 @@ func TestGrpcRqRsTLSRootCAGzip(t *testing.T) {
 				return
 			}
 		}
-	}()
+	})
 
 	time.Sleep(time.Second * 1)
 
@@ -399,12 +391,10 @@ func TestGrpcRqRsTLS_WithResetGzip(t *testing.T) {
 	signal.Notify(sig, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	wg := &sync.WaitGroup{}
-	wg.Add(1)
 
 	stopCh := make(chan struct{}, 1)
 
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		for {
 			select {
 			case e := <-ch:
@@ -428,7 +418,7 @@ func TestGrpcRqRsTLS_WithResetGzip(t *testing.T) {
 				return
 			}
 		}
-	}()
+	})
 
 	time.Sleep(time.Second * 1)
 

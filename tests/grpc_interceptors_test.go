@@ -59,12 +59,10 @@ func TestGrpcInterceptors(t *testing.T) {
 	signal.Notify(sig, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	wg := &sync.WaitGroup{}
-	wg.Add(1)
 
 	stopCh := make(chan struct{}, 1)
 
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		for {
 			select {
 			case e := <-ch:
@@ -87,7 +85,7 @@ func TestGrpcInterceptors(t *testing.T) {
 				return
 			}
 		}
-	}()
+	})
 
 	time.Sleep(time.Second)
 
