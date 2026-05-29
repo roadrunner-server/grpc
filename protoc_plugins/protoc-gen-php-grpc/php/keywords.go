@@ -23,34 +23,34 @@
 package php
 
 import (
+	"slices"
 	"strings"
 	"unicode"
 )
 
 // @see https://github.com/protocolbuffers/protobuf/blob/master/php/ext/google/protobuf/protobuf.c#L168
 // immutable
-var reservedKeywordsMap = map[string]struct{}{ //nolint:gochecknoglobals
-	"abstract": {}, "and": {}, "array": {}, "as": {}, "break": {},
-	"callable": {}, "case": {}, "catch": {}, "class": {}, "clone": {},
-	"const": {}, "continue": {}, "declare": {}, "default": {}, "die": {},
-	"do": {}, "echo": {}, "else": {}, "elseif": {}, "empty": {},
-	"enddeclare": {}, "endfor": {}, "endforeach": {}, "endif": {}, "endswitch": {},
-	"endwhile": {}, "eval": {}, "exit": {}, "extends": {}, "final": {},
-	"for": {}, "foreach": {}, "function": {}, "global": {}, "goto": {},
-	"if": {}, "implements": {}, "include": {}, "include_once": {}, "instanceof": {},
-	"insteadof": {}, "interface": {}, "isset": {}, "list": {}, "namespace": {},
-	"new": {}, "or": {}, "print": {}, "private": {}, "protected": {},
-	"public": {}, "require": {}, "require_once": {}, "return": {}, "static": {},
-	"switch": {}, "throw": {}, "trait": {}, "try": {}, "unset": {},
-	"use": {}, "var": {}, "while": {}, "xor": {}, "int": {},
-	"float": {}, "bool": {}, "string": {}, "true": {}, "false": {},
-	"null": {}, "void": {}, "iterable": {},
+var reservedKeywords = []string{ //nolint:gochecknoglobals
+	"abstract", "and", "array", "as", "break",
+	"callable", "case", "catch", "class", "clone",
+	"const", "continue", "declare", "default", "die",
+	"do", "echo", "else", "elseif", "empty",
+	"enddeclare", "endfor", "endforeach", "endif", "endswitch",
+	"endwhile", "eval", "exit", "extends", "final",
+	"for", "foreach", "function", "global", "goto",
+	"if", "implements", "include", "include_once", "instanceof",
+	"insteadof", "interface", "isset", "list", "namespace",
+	"new", "or", "print", "private", "protected",
+	"public", "require", "require_once", "return", "static",
+	"switch", "throw", "trait", "try", "unset",
+	"use", "var", "while", "xor", "int",
+	"float", "bool", "string", "true", "false",
+	"null", "void", "iterable",
 }
 
 // Check if given name/keyword is reserved by php.
 func isReserved(name string) bool {
-	_, ok := reservedKeywordsMap[strings.ToLower(name)]
-	return ok
+	return slices.Contains(reservedKeywords, strings.ToLower(name))
 }
 
 // generate php namespace or path
