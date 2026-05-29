@@ -42,18 +42,26 @@ func NewHeathServer(p *Plugin, log *slog.Logger) *HealthCheckServer {
 // Clients should keep in mind that the list of health services exposed by an
 // application can change over the lifetime of the process.
 func (h *HealthCheckServer) List(context.Context, *grpc_health_v1.HealthListRequest) (*grpc_health_v1.HealthListResponse, error) {
+	h.mu.Lock()
+	st := h.status
+	h.mu.Unlock()
+
 	return &grpc_health_v1.HealthListResponse{
 		Statuses: map[string]*grpc_health_v1.HealthCheckResponse{
 			"grpc": {
-				Status: h.status,
+				Status: st,
 			},
 		},
 	}, nil
 }
 
 func (h *HealthCheckServer) Check(_ context.Context, _ *grpc_health_v1.HealthCheckRequest) (*grpc_health_v1.HealthCheckResponse, error) {
+	h.mu.Lock()
+	st := h.status
+	h.mu.Unlock()
+
 	return &grpc_health_v1.HealthCheckResponse{
-		Status: h.status,
+		Status: st,
 	}, nil
 }
 

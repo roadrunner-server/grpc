@@ -8,7 +8,6 @@ import (
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/roadrunner-server/pool/v2/pool/static_pool"
 	"github.com/roadrunner-server/tcplisten"
 	"go.opentelemetry.io/otel/propagation"
 
@@ -194,23 +193,20 @@ func (p *Plugin) Stop(ctx context.Context) error {
 		p.mu.Lock()
 		defer p.mu.Unlock()
 
-		p.healthServer.SetServingStatus(grpc_health_v1.HealthCheckResponse_NOT_SERVING)
+		if p.healthServer != nil {
+			p.healthServer.SetServingStatus(grpc_health_v1.HealthCheckResponse_NOT_SERVING)
+		}
 
 		if p.server != nil {
 			p.server.GracefulStop()
 		}
 
-		p.healthServer.Shutdown()
+		if p.healthServer != nil {
+			p.healthServer.Shutdown()
+		}
 
 		if p.gPool != nil {
-			switch pp := p.gPool.(type) {
-			case *static_pool.Pool:
-				if pp != nil {
-					pp.Destroy(ctx)
-				}
-			default:
-				// pool is nil, nothing to do
-			}
+			p.gPool.Destroy(ctx)
 		}
 
 		finCh <- struct{}{}
@@ -257,7 +253,7 @@ func (p *Plugin) Workers() []*process.State {
 	for i := range workers {
 		state, err := process.WorkerProcessState(workers[i])
 		if err != nil {
-			return nil
+			continue
 		}
 		ps = append(ps, state)
 	}

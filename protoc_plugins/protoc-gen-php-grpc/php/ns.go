@@ -23,7 +23,6 @@
 package php
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 
@@ -72,7 +71,7 @@ func (ns *ns) registerMessageNamespace(req *plugin.CodeGeneratorRequest, msg *st
 	chunks := strings.Split(*msg, ".")
 	pkg := strings.Join(chunks[:len(chunks)-1], ".")
 
-	result := bytes.NewBuffer(nil)
+	var result strings.Builder
 	for _, p := range chunks[:len(chunks)-1] {
 		result.WriteString(identifier(p, ""))
 		result.WriteString(`\`)
