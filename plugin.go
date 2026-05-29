@@ -136,8 +136,12 @@ func (p *Plugin) Serve() chan error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	var err error
-	p.gPool, err = p.rrServer.NewPool(context.Background(), &pool.Config{
+	// NewPool returns a concrete *static_pool.Pool; on error it is a nil
+	// pointer. Assigning it directly to the api.Pool interface field would
+	// produce a non-nil interface wrapping a nil pointer, so Stop's
+	// `p.gPool != nil` guard would pass and Destroy would panic. Assign the
+	// interface only after a successful NewPool.
+	gPool, err := p.rrServer.NewPool(context.Background(), &pool.Config{
 		Debug:           p.config.GrpcPool.Debug,
 		Command:         p.config.GrpcPool.Command,
 		NumWorkers:      p.config.GrpcPool.NumWorkers,
@@ -150,6 +154,7 @@ func (p *Plugin) Serve() chan error {
 		errCh <- errors.E(op, err)
 		return errCh
 	}
+	p.gPool = gPool
 
 	p.server, err = p.createGRPCserver(p.interceptors)
 	if err != nil {
@@ -253,7 +258,7 @@ func (p *Plugin) Workers() []*process.State {
 	for i := range workers {
 		state, err := process.WorkerProcessState(workers[i])
 		if err != nil {
-			continue
+			return nil
 		}
 		ps = append(ps, state)
 	}

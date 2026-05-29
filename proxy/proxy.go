@@ -334,8 +334,12 @@ func (p *Proxy) makePayload(ctx context.Context, method string, body *codec.RawM
 }
 
 func (p *Proxy) putPld(pld *payload.Payload) {
-	pld.Body = pld.Body[:0]
-	pld.Context = pld.Context[:0]
+	// makePayload reassigns Body/Context to the per-request buffers, so
+	// reslicing to [:0] would not reuse the preallocated slices and would
+	// pin the request's backing arrays in the pooled object. Drop the
+	// references so they can be collected.
+	pld.Body = nil
+	pld.Context = nil
 	p.pldPool.Put(pld)
 }
 
