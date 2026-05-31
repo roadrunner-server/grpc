@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"crypto/tls"
+	stderr "errors"
 	"math"
 	"os"
 	"strings"
@@ -80,7 +81,7 @@ func (c *Config) InitDefaults() error { //nolint:gocyclo,gocognit
 		}
 
 		if _, err := os.Stat(path); err != nil {
-			if os.IsNotExist(err) {
+			if stderr.Is(err, os.ErrNotExist) {
 				return errors.E(op, errors.Errorf("proto file '%s' does not exists", path))
 			}
 
@@ -92,7 +93,7 @@ func (c *Config) InitDefaults() error { //nolint:gocyclo,gocognit
 
 	if c.EnableTLS() {
 		if _, err := os.Stat(c.TLS.Key); err != nil {
-			if os.IsNotExist(err) {
+			if stderr.Is(err, os.ErrNotExist) {
 				return errors.E(op, errors.Errorf("key file '%s' does not exists", c.TLS.Key))
 			}
 
@@ -100,7 +101,7 @@ func (c *Config) InitDefaults() error { //nolint:gocyclo,gocognit
 		}
 
 		if _, err := os.Stat(c.TLS.Cert); err != nil {
-			if os.IsNotExist(err) {
+			if stderr.Is(err, os.ErrNotExist) {
 				return errors.E(op, errors.Errorf("cert file '%s' does not exists", c.TLS.Cert))
 			}
 
@@ -110,8 +111,8 @@ func (c *Config) InitDefaults() error { //nolint:gocyclo,gocognit
 		// RootCA is optional, but if provided - check it
 		if c.TLS.RootCA != "" {
 			if _, err := os.Stat(c.TLS.RootCA); err != nil {
-				if os.IsNotExist(err) {
-					return errors.E(op, errors.Errorf("root ca path provided, but key file '%s' does not exists", c.TLS.RootCA))
+				if stderr.Is(err, os.ErrNotExist) {
+					return errors.E(op, errors.Errorf("root ca path provided, but root ca file '%s' does not exists", c.TLS.RootCA))
 				}
 				return errors.E(op, err)
 			}

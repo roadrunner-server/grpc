@@ -8,7 +8,6 @@ import (
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/roadrunner-server/pool/v2/pool/static_pool"
 	"github.com/roadrunner-server/tcplisten"
 	"go.opentelemetry.io/otel/propagation"
 
@@ -137,8 +136,12 @@ func (p *Plugin) Serve() chan error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	var err error
-	p.gPool, err = p.rrServer.NewPool(context.Background(), &pool.Config{
+	// NewPool returns a concrete *static_pool.Pool; on error it is a nil
+	// pointer. Assigning it directly to the api.Pool interface field would
+	// produce a non-nil interface wrapping a nil pointer, so Stop's
+	// `p.gPool != nil` guard would pass and Destroy would panic. Assign the
+	// interface only after a successful NewPool.
+	gPool, err := p.rrServer.NewPool(context.Background(), &pool.Config{
 		Debug:           p.config.GrpcPool.Debug,
 		Command:         p.config.GrpcPool.Command,
 		NumWorkers:      p.config.GrpcPool.NumWorkers,
@@ -151,6 +154,7 @@ func (p *Plugin) Serve() chan error {
 		errCh <- errors.E(op, err)
 		return errCh
 	}
+	p.gPool = gPool
 
 	p.server, err = p.createGRPCserver(p.interceptors)
 	if err != nil {
@@ -194,23 +198,20 @@ func (p *Plugin) Stop(ctx context.Context) error {
 		p.mu.Lock()
 		defer p.mu.Unlock()
 
-		p.healthServer.SetServingStatus(grpc_health_v1.HealthCheckResponse_NOT_SERVING)
+		if p.healthServer != nil {
+			p.healthServer.SetServingStatus(grpc_health_v1.HealthCheckResponse_NOT_SERVING)
+		}
 
 		if p.server != nil {
 			p.server.GracefulStop()
 		}
 
-		p.healthServer.Shutdown()
+		if p.healthServer != nil {
+			p.healthServer.Shutdown()
+		}
 
 		if p.gPool != nil {
-			switch pp := p.gPool.(type) {
-			case *static_pool.Pool:
-				if pp != nil {
-					pp.Destroy(ctx)
-				}
-			default:
-				// pool is nil, nothing to do
-			}
+			p.gPool.Destroy(ctx)
 		}
 
 		finCh <- struct{}{}

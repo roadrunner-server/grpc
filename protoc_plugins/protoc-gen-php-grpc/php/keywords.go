@@ -23,7 +23,7 @@
 package php
 
 import (
-	"bytes"
+	"slices"
 	"strings"
 	"unicode"
 )
@@ -50,14 +50,7 @@ var reservedKeywords = []string{ //nolint:gochecknoglobals
 
 // Check if given name/keyword is reserved by php.
 func isReserved(name string) bool {
-	name = strings.ToLower(name)
-	for _, k := range reservedKeywords {
-		if name == k {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(reservedKeywords, strings.ToLower(name))
 }
 
 // generate php namespace or path
@@ -66,7 +59,7 @@ func namespace(pkg *string, sep string) string {
 		return ""
 	}
 
-	result := bytes.NewBuffer(nil)
+	var result strings.Builder
 	for p := range strings.SplitSeq(*pkg, ".") {
 		result.WriteString(identifier(p, ""))
 		result.WriteString(sep)
@@ -103,14 +96,14 @@ func Camelize(word string) string {
 }
 
 func splitAtCaseChangeWithTitlecase(s string) []string {
-	words := make([]string, 0)
-	word := make([]rune, 0)
+	var words []string
+	var word []rune
 	for _, c := range s {
 		spacer := isSpacerChar(c)
 		if len(word) > 0 {
 			if unicode.IsUpper(c) || spacer {
 				words = append(words, string(word))
-				word = make([]rune, 0)
+				word = word[:0]
 			}
 		}
 		if !spacer {
@@ -126,15 +119,5 @@ func splitAtCaseChangeWithTitlecase(s string) []string {
 }
 
 func isSpacerChar(c rune) bool {
-	switch {
-	case c == rune("_"[0]):
-		return true
-	case c == rune(" "[0]):
-		return true
-	case c == rune(":"[0]):
-		return true
-	case c == rune("-"[0]):
-		return true
-	}
-	return false
+	return strings.ContainsRune("_ :-", c)
 }

@@ -8,7 +8,6 @@ import (
 	stderr "errors"
 	"fmt"
 	"log/slog"
-	"math"
 	"strconv"
 	"strings"
 	"sync"
@@ -335,6 +334,10 @@ func (p *Proxy) makePayload(ctx context.Context, method string, body *codec.RawM
 }
 
 func (p *Proxy) putPld(pld *payload.Payload) {
+	// makePayload reassigns Body/Context to the per-request buffers, so
+	// reslicing to [:0] would not reuse the preallocated slices and would
+	// pin the request's backing arrays in the pooled object. Drop the
+	// references so they can be collected.
 	pld.Body = nil
 	pld.Context = nil
 	p.pldPool.Put(pld)
@@ -368,21 +371,16 @@ func GetOriginalErr(err error) string {
 func wrapError(err error) error {
 	// internal agreement
 	errMsg := GetOriginalErr(err)
-	if strings.Contains(errMsg, delimiter) {
-		chunks := strings.Split(errMsg, delimiter)
+	chunks := strings.Split(errMsg, delimiter)
+	if len(chunks) >= 2 {
 		code := codes.Internal
-
-		// protect the slice access
-		if len(chunks) < 2 {
-			return err
-		}
 
 		phpCode, errConv := strconv.ParseUint(chunks[0], 10, 32)
 		if errConv != nil {
 			return err
 		}
 
-		if phpCode > 0 && phpCode < math.MaxUint32 {
+		if phpCode > 0 {
 			code = codes.Code(phpCode)
 		}
 

@@ -29,7 +29,7 @@ func (p *Plugin) createGRPCserver(interceptors map[string]api.Interceptor) (*grp
 	}
 
 	unaryInterceptors := []grpc.UnaryServerInterceptor{
-		grpc.UnaryServerInterceptor(p.interceptor),
+		p.interceptor,
 	}
 
 	// if we have interceptors in the config, we need to chain them with our interceptor, and add them to the server options
@@ -39,7 +39,7 @@ func (p *Plugin) createGRPCserver(interceptors map[string]api.Interceptor) (*grp
 			name := p.config.Interceptors[i]
 			if _, ok := interceptors[name]; !ok {
 				// we should raise an error here, since we may silently ignore let's say auth interceptor, which is critical for security
-				return nil, errors.E(op, errors.Str(fmt.Sprintf("interceptor %s is not registered", name)))
+				return nil, errors.E(op, errors.Errorf("interceptor %s is not registered", name))
 			}
 
 			unaryInterceptors = append(
@@ -176,7 +176,7 @@ func (p *Plugin) serverOptions() ([]grpc.ServerOption, error) {
 		grpc.KeepaliveParams(keepalive.ServerParameters{
 			MaxConnectionIdle:     p.config.MaxConnectionIdle,
 			MaxConnectionAge:      p.config.MaxConnectionAge,
-			MaxConnectionAgeGrace: p.config.MaxConnectionAge,
+			MaxConnectionAgeGrace: p.config.MaxConnectionAgeGrace,
 			Time:                  p.config.PingTime,
 			Timeout:               p.config.Timeout,
 		}),
