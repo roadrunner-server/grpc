@@ -31,13 +31,7 @@ func TestStatsExporter_DescribeAndCollect(t *testing.T) {
 	// Describe must announce every descriptor the collector can emit.
 	descCh := make(chan *prometheus.Desc, 16)
 	exp.Describe(descCh)
-	close(descCh)
-
-	var descs int
-	for range descCh {
-		descs++
-	}
-	assert.Equal(t, 7, descs, "StatsExporter must describe all 7 descriptors")
+	assert.Len(t, descCh, 7, "StatsExporter must describe all 7 descriptors")
 
 	// Collect through a registry so the metric families can be asserted by name.
 	reg := prometheus.NewRegistry()
