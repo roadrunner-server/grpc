@@ -112,7 +112,7 @@ func (c *Config) InitDefaults() error { //nolint:gocyclo,gocognit
 		if c.TLS.RootCA != "" {
 			if _, err := os.Stat(c.TLS.RootCA); err != nil {
 				if stderr.Is(err, os.ErrNotExist) {
-					return errors.E(op, errors.Errorf("root ca path provided, but key file '%s' does not exists", c.TLS.RootCA))
+					return errors.E(op, errors.Errorf("root ca path provided, but root ca file '%s' does not exists", c.TLS.RootCA))
 				}
 				return errors.E(op, err)
 			}
