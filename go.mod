@@ -7,6 +7,7 @@ toolchain go1.26.3
 require (
 	github.com/bmatcuk/doublestar/v4 v4.10.0
 	github.com/emicklei/proto v1.14.3
+	github.com/jhump/protoreflect/v2 v2.0.0-beta.2
 	github.com/prometheus/client_golang v1.23.2
 	github.com/prometheus/client_model v0.6.2
 	github.com/roadrunner-server/api-plugins/v6 v6.0.0-beta.2

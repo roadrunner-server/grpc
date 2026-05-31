@@ -5,6 +5,7 @@ import (
 	"context"
 	"log/slog"
 
+	"github.com/jhump/protoreflect/v2/protoresolve"
 	"github.com/roadrunner-server/pool/v2/payload"
 	"github.com/roadrunner-server/pool/v2/pool"
 	staticPool "github.com/roadrunner-server/pool/v2/pool/static_pool"
@@ -15,6 +16,13 @@ import (
 type Interceptor interface {
 	UnaryServerInterceptor() grpc.UnaryServerInterceptor
 	Name() string
+}
+
+// Registry is provided by the protoreg plugin. It exposes the parsed protobuf
+// descriptor registry, which the gRPC server uses as the descriptor source for
+// server reflection.
+type Registry interface {
+	Registry() *protoresolve.Registry
 }
 
 type Configurer interface {
