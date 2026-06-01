@@ -14,7 +14,7 @@ import (
 	"github.com/roadrunner-server/endure/v2"
 	grpcPlugin "github.com/roadrunner-server/grpc/v6"
 	"github.com/roadrunner-server/logger/v6"
-	protoreg "github.com/roadrunner-server/protoreg/v6"
+	"github.com/roadrunner-server/protoreg/v6"
 	rpcPlugin "github.com/roadrunner-server/rpc/v6"
 	"github.com/roadrunner-server/server/v6"
 	"github.com/stretchr/testify/assert"
