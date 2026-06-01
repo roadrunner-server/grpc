@@ -24,6 +24,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/encoding"
 	"google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/reflection"
+	grpcreflectv1 "google.golang.org/grpc/reflection/grpc_reflection_v1"
+	grpcreflectv1alpha "google.golang.org/grpc/reflection/grpc_reflection_v1alpha"
 
 	// Will register via init
 	_ "google.golang.org/grpc/encoding/gzip"
@@ -60,6 +63,9 @@ type Plugin struct {
 
 	// interceptors to chain
 	interceptors map[string]api.Interceptor
+
+	// registry is the optional protoreg descriptor source backing server reflection
+	registry api.Registry
 }
 
 // needed to register our codec only once. Double registration will cause panic.
@@ -171,6 +177,8 @@ func (p *Plugin) Serve() chan error {
 	p.healthServer = NewHeathServer(p, p.log)
 	p.healthServer.RegisterServer(p.server)
 
+	p.registerReflection()
+
 	go func() {
 		p.log.Info("grpc server was started", "address", p.config.Listen)
 
@@ -190,6 +198,28 @@ func (p *Plugin) Serve() chan error {
 	}()
 
 	return errCh
+}
+
+// registerReflection enables gRPC server reflection on p.server. When the
+// protoreg plugin provided a descriptor registry, reflection serves the full
+// file/service/method descriptors for the dynamically proxied services using
+// that registry as the resolver; otherwise it falls back to the global protobuf
+// registry, which only exposes service/method names for the proxies.
+func (p *Plugin) registerReflection() {
+	if p.registry == nil {
+		reflection.Register(p.server)
+		return
+	}
+
+	opts := reflection.ServerOptions{
+		Services:           p.server,
+		DescriptorResolver: p.registry.Registry(),
+	}
+
+	// Register both v1 and v1alpha so older reflection clients keep working,
+	// mirroring reflection.Register's default behavior.
+	grpcreflectv1.RegisterServerReflectionServer(p.server, reflection.NewServerV1(opts))
+	grpcreflectv1alpha.RegisterServerReflectionServer(p.server, reflection.NewServer(opts))
 }
 
 func (p *Plugin) Stop(ctx context.Context) error {
@@ -279,5 +309,8 @@ func (p *Plugin) Collects() []*dep.In {
 		dep.Fits(func(pp any) {
 			p.tracer = pp.(Tracer).Tracer()
 		}, (*Tracer)(nil)),
+		dep.Fits(func(pp any) {
+			p.registry = pp.(api.Registry)
+		}, (*api.Registry)(nil)),
 	}
 }
