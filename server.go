@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"strings"
 	"time"
 
 	"github.com/roadrunner-server/errors"
@@ -15,6 +14,7 @@ import (
 	"github.com/roadrunner-server/grpc/v6/parser"
 	"github.com/roadrunner-server/grpc/v6/proxy"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
@@ -136,20 +136,23 @@ func statusDetails(s *status.Status) []string {
 
 	out := make([]string, 0, len(details))
 	for _, d := range details {
-		m, ok := d.(proto.Message)
-		if !ok {
-			continue
+		// Only the standard google.rpc.* error details are logged; arbitrary payloads
+		// a handler may attach are skipped (without touching them), so a failing call
+		// can't dump a large custom message into the logs.
+		switch d.(type) {
+		case *errdetails.BadRequest,
+			*errdetails.ErrorInfo,
+			*errdetails.DebugInfo,
+			*errdetails.Help,
+			*errdetails.LocalizedMessage,
+			*errdetails.PreconditionFailure,
+			*errdetails.QuotaFailure,
+			*errdetails.RequestInfo,
+			*errdetails.ResourceInfo,
+			*errdetails.RetryInfo:
+			m := d.(proto.Message)
+			out = append(out, fmt.Sprintf("%s: %s", m.ProtoReflect().Descriptor().FullName(), prototext.MarshalOptions{}.Format(m)))
 		}
-
-		// Only the standard google.rpc.* error details (BadRequest, ErrorInfo, ...)
-		// are logged; arbitrary payloads a handler may attach are skipped so a failing
-		// call can't dump a large custom message into the logs.
-		name := m.ProtoReflect().Descriptor().FullName()
-		if !strings.HasPrefix(string(name), "google.rpc.") {
-			continue
-		}
-
-		out = append(out, fmt.Sprintf("%s: %s", name, prototext.MarshalOptions{}.Format(m)))
 	}
 
 	return out
