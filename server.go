@@ -14,11 +14,14 @@ import (
 	"github.com/roadrunner-server/grpc/v6/parser"
 	"github.com/roadrunner-server/grpc/v6/proxy"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/encoding/prototext"
+	"google.golang.org/protobuf/proto"
 )
 
 func (p *Plugin) createGRPCserver(interceptors map[string]api.Interceptor) (*grpc.Server, error) {
@@ -109,13 +112,50 @@ func (p *Plugin) interceptor(ctx context.Context, req any, info *grpc.UnaryServe
 	}()
 
 	if err != nil {
-		p.log.Error("method call was finished with error", "error", err, "method", info.FullMethod, "start", start, "elapsed", time.Since(start).Milliseconds())
+		args := []any{"error", err, "method", info.FullMethod, "start", start, "elapsed", time.Since(start).Milliseconds()}
+		if details := statusDetails(s); len(details) > 0 {
+			args = append(args, "details", details)
+		}
+		p.log.Error("method call was finished with error", args...)
 
 		return nil, err
 	}
 
 	p.log.Debug("method was called successfully", "method", info.FullMethod, "start", start, "elapsed", time.Since(start).Milliseconds())
 	return resp, nil
+}
+
+// statusDetails renders the well-known google.rpc.* error details attached to s as
+// compact, one-line strings for logging, skipping any other (and potentially large)
+// handler-attached detail. It returns nil when there are no such details.
+func statusDetails(s *status.Status) []string {
+	details := s.Details()
+	if len(details) == 0 {
+		return nil
+	}
+
+	out := make([]string, 0, len(details))
+	for _, d := range details {
+		// Only the standard google.rpc.* error details are logged; arbitrary payloads
+		// a handler may attach are skipped (without touching them), so a failing call
+		// can't dump a large custom message into the logs.
+		switch d.(type) {
+		case *errdetails.BadRequest,
+			*errdetails.ErrorInfo,
+			*errdetails.DebugInfo,
+			*errdetails.Help,
+			*errdetails.LocalizedMessage,
+			*errdetails.PreconditionFailure,
+			*errdetails.QuotaFailure,
+			*errdetails.RequestInfo,
+			*errdetails.ResourceInfo,
+			*errdetails.RetryInfo:
+			m := d.(proto.Message)
+			out = append(out, fmt.Sprintf("%s: %s", m.ProtoReflect().Descriptor().FullName(), prototext.MarshalOptions{}.Format(m)))
+		}
+	}
+
+	return out
 }
 
 func (p *Plugin) serverOptions() ([]grpc.ServerOption, error) {
