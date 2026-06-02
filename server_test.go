@@ -9,6 +9,7 @@ import (
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 func TestStatusDetails_NoDetails_Nil(t *testing.T) {
@@ -50,4 +51,25 @@ func TestStatusDetails_MultipleDetails(t *testing.T) {
 	assert.Contains(t, joined, "google.rpc.BadRequest")
 	assert.Contains(t, joined, "google.rpc.ErrorInfo")
 	assert.Contains(t, joined, "QUOTA")
+}
+
+func TestStatusDetails_SkipsNonGoogleRpc(t *testing.T) {
+	// Handlers can attach arbitrary (and potentially large) details; only the
+	// standard google.rpc.* error details should be logged.
+	s, err := status.New(codes.Internal, "boom").WithDetails(&wrapperspb.StringValue{Value: "arbitrary payload"})
+	require.NoError(t, err)
+	assert.Empty(t, statusDetails(s), "non-google.rpc details must be skipped")
+}
+
+func TestStatusDetails_MixedKeepsOnlyGoogleRpc(t *testing.T) {
+	s, err := status.New(codes.InvalidArgument, "bad").WithDetails(
+		&wrapperspb.StringValue{Value: "arbitrary payload"},
+		&errdetails.BadRequest{FieldViolations: []*errdetails.BadRequest_FieldViolation{{Field: "email", Description: "is required"}}},
+	)
+	require.NoError(t, err)
+
+	got := statusDetails(s)
+	require.Len(t, got, 1, "only the google.rpc detail should be kept")
+	assert.Contains(t, got[0], "google.rpc.BadRequest")
+	assert.NotContains(t, got[0], "StringValue")
 }

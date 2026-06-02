@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 	"time"
 
 	"github.com/roadrunner-server/errors"
@@ -124,8 +125,9 @@ func (p *Plugin) interceptor(ctx context.Context, req any, info *grpc.UnaryServe
 	return resp, nil
 }
 
-// statusDetails renders the google.rpc.Status details attached to s as compact,
-// one-line strings for logging. It returns nil when there are no details.
+// statusDetails renders the well-known google.rpc.* error details attached to s as
+// compact, one-line strings for logging, skipping any other (and potentially large)
+// handler-attached detail. It returns nil when there are no such details.
 func statusDetails(s *status.Status) []string {
 	details := s.Details()
 	if len(details) == 0 {
@@ -134,11 +136,20 @@ func statusDetails(s *status.Status) []string {
 
 	out := make([]string, 0, len(details))
 	for _, d := range details {
-		if m, ok := d.(proto.Message); ok {
-			out = append(out, fmt.Sprintf("%s: %s", m.ProtoReflect().Descriptor().FullName(), prototext.MarshalOptions{}.Format(m)))
+		m, ok := d.(proto.Message)
+		if !ok {
 			continue
 		}
-		out = append(out, fmt.Sprintf("%v", d))
+
+		// Only the standard google.rpc.* error details (BadRequest, ErrorInfo, ...)
+		// are logged; arbitrary payloads a handler may attach are skipped so a failing
+		// call can't dump a large custom message into the logs.
+		name := m.ProtoReflect().Descriptor().FullName()
+		if !strings.HasPrefix(string(name), "google.rpc.") {
+			continue
+		}
+
+		out = append(out, fmt.Sprintf("%s: %s", name, prototext.MarshalOptions{}.Format(m)))
 	}
 
 	return out
