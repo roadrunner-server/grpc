@@ -19,6 +19,8 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/encoding/prototext"
+	"google.golang.org/protobuf/proto"
 )
 
 func (p *Plugin) createGRPCserver(interceptors map[string]api.Interceptor) (*grpc.Server, error) {
@@ -109,13 +111,37 @@ func (p *Plugin) interceptor(ctx context.Context, req any, info *grpc.UnaryServe
 	}()
 
 	if err != nil {
-		p.log.Error("method call was finished with error", "error", err, "method", info.FullMethod, "start", start, "elapsed", time.Since(start).Milliseconds())
+		args := []any{"error", err, "method", info.FullMethod, "start", start, "elapsed", time.Since(start).Milliseconds()}
+		if details := statusDetails(s); len(details) > 0 {
+			args = append(args, "details", details)
+		}
+		p.log.Error("method call was finished with error", args...)
 
 		return nil, err
 	}
 
 	p.log.Debug("method was called successfully", "method", info.FullMethod, "start", start, "elapsed", time.Since(start).Milliseconds())
 	return resp, nil
+}
+
+// statusDetails renders the google.rpc.Status details attached to s as compact,
+// one-line strings for logging. It returns nil when there are no details.
+func statusDetails(s *status.Status) []string {
+	details := s.Details()
+	if len(details) == 0 {
+		return nil
+	}
+
+	out := make([]string, 0, len(details))
+	for _, d := range details {
+		if m, ok := d.(proto.Message); ok {
+			out = append(out, fmt.Sprintf("%s: %s", m.ProtoReflect().Descriptor().FullName(), prototext.MarshalOptions{}.Format(m)))
+			continue
+		}
+		out = append(out, fmt.Sprintf("%v", d))
+	}
+
+	return out
 }
 
 func (p *Plugin) serverOptions() ([]grpc.ServerOption, error) {
