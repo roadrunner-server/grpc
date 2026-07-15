@@ -1059,8 +1059,9 @@ func sendReset(address string) func(t *testing.T) {
 	return func(t *testing.T) {
 		var d net.Dialer
 		conn, err := d.DialContext(context.Background(), "tcp", address)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		client := rpc.NewClientWithCodec(goridgeRpc.NewClientCodec(conn))
+		defer func() { _ = client.Close() }()
 		// WorkerList contains list of workers.
 
 		var ret bool
