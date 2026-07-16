@@ -1066,12 +1066,12 @@ func sendReset(address string) func(t *testing.T) {
 
 		resp := &resetterV1.Response{}
 		err = client.Call("resetter.Reset", &resetterV1.ResetRequest{Plugin: "grpc"}, resp)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, resp.GetOk())
 
 		list := &resetterV1.PluginsList{}
 		err = client.Call("resetter.ListPlugins", &resetterV1.ListPluginsRequest{}, list)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		require.Equal(t, []string{"grpc"}, list.GetPlugins())
 	}
 }
