@@ -5,6 +5,7 @@ go 1.26
 toolchain go1.26.5
 
 require (
+	github.com/roadrunner-server/api-go/v6 v6.0.0-beta.13
 	github.com/roadrunner-server/config/v6 v6.0.0-beta.3
 	github.com/roadrunner-server/endure/v2 v2.6.2
 	github.com/roadrunner-server/goridge/v4 v4.0.0-beta.3
@@ -26,7 +27,6 @@ require (
 	github.com/jhump/protoreflect v1.18.0 // indirect
 	github.com/jhump/protoreflect/v2 v2.0.0-beta.2 // indirect
 	github.com/petermattis/goid v0.0.0-20260713124913-97594f28f5ca // indirect
-	github.com/roadrunner-server/api-go/v6 v6.0.0-beta.13 // indirect
 	github.com/roadrunner-server/api-plugins/v6 v6.0.0-beta.2 // indirect
 	github.com/roadrunner-server/pool/v2 v2.0.0-beta.1 // indirect
 	go.uber.org/zap v1.28.0 // indirect
