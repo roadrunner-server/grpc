@@ -19,6 +19,7 @@ import (
 	mocklogger "tests/mock"
 	"tests/proto/service"
 
+	resetterV1 "github.com/roadrunner-server/api-go/v6/resetter/v1"
 	"github.com/roadrunner-server/config/v6"
 	"github.com/roadrunner-server/endure/v2"
 	goridgeRpc "github.com/roadrunner-server/goridge/v4/pkg/rpc"
@@ -1062,19 +1063,16 @@ func sendReset(address string) func(t *testing.T) {
 		require.NoError(t, err)
 		client := rpc.NewClientWithCodec(goridgeRpc.NewClientCodec(conn))
 		defer func() { _ = client.Close() }()
-		// WorkerList contains list of workers.
 
-		var ret bool
-		err = client.Call("resetter.Reset", "grpc", &ret)
+		resp := &resetterV1.Response{}
+		err = client.Call("resetter.Reset", &resetterV1.ResetRequest{Plugin: "grpc"}, resp)
 		assert.NoError(t, err)
-		assert.True(t, ret)
-		ret = false
+		assert.True(t, resp.GetOk())
 
-		var services []string
-		err = client.Call("resetter.List", nil, &services)
-		assert.NotNil(t, services)
+		list := &resetterV1.PluginsList{}
+		err = client.Call("resetter.ListPlugins", &resetterV1.ListPluginsRequest{}, list)
 		assert.NoError(t, err)
-		require.Equal(t, []string{"grpc"}, services)
+		require.Equal(t, []string{"grpc"}, list.GetPlugins())
 	}
 }
 
