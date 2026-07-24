@@ -8,7 +8,7 @@ require (
 	github.com/bmatcuk/doublestar/v4 v4.10.0
 	github.com/emicklei/proto v1.14.3
 	github.com/jhump/protoreflect/v2 v2.0.0-beta.2
-	github.com/prometheus/client_golang v1.24.0
+	github.com/prometheus/client_golang v1.24.1
 	github.com/prometheus/client_model v0.6.2
 	github.com/roadrunner-server/api-plugins/v6 v6.0.0-beta.2
 	github.com/roadrunner-server/endure/v2 v2.6.2
@@ -21,8 +21,8 @@ require (
 	go.opentelemetry.io/contrib/propagators/jaeger v1.44.0
 	go.opentelemetry.io/otel v1.44.0
 	go.opentelemetry.io/otel/sdk v1.44.0
-	google.golang.org/genproto v0.0.0-20260720211330-0afa2a65878a
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260720211330-0afa2a65878a
+	google.golang.org/genproto v0.0.0-20260723215102-3fe39f3c1018
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260723215102-3fe39f3c1018
 	google.golang.org/grpc v1.82.1
 	google.golang.org/protobuf v1.36.11
 )
