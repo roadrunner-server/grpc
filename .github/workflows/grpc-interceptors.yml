@@ -34,7 +34,7 @@ jobs:
           extensions: sockets
 
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Get Composer Cache Directory
         id: composer-cache
