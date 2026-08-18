@@ -60,9 +60,24 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Run golang root module tests
         run: |
-          go test -timeout 20m -v -race -cover -tags=debug -failfast -coverpkg=github.com/roadrunner-server/grpc/v6 -coverprofile=./tests/coverage-ci/grpc_root.out -covermode=atomic . ./codec ./parser ./protoc_plugins ./proxy
+          go test -timeout 20m -v -race -cover -tags=debug -coverpkg=./... -coverprofile=./tests/coverage-ci/grpc_root.out -covermode=atomic ./...
       - name: Run ee tests with coverage
-        run: "cd tests\n\nsudo apt update\nsudo apt install -y libnss3-tools\ncurl -JLO \"https://dl.filippo.io/mkcert/latest?for=linux/amd64\"\nchmod +x mkcert-v*-linux-amd64\nsudo cp mkcert-v*-linux-amd64 /usr/local/bin/mkcert\nmkcert -install\nmkcert localhost 127.0.0.1 ::1\nmkcert -client localhost 127.0.0.1 ::1 \nmkdir test-certs\ncp -r localhost+2-client-key.pem localhost+2-client.pem localhost+2-key.pem localhost+2.pem test-certs/\ncp -r $(mkcert -CAROOT)/rootCA.pem test-certs/\n\ngo test -timeout 20m -v -race -cover -tags=debug -failfast -coverpkg=github.com/roadrunner-server/grpc/v6 -coverprofile=./coverage-ci/grpc.out -covermode=atomic grpc_plugin_gzip_test.go grpc_plugin_test.go grpc_reflection_test.go\n"
+        run: |
+          cd tests
+
+          sudo apt update
+          sudo apt install -y libnss3-tools
+          curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
+          chmod +x mkcert-v*-linux-amd64
+          sudo cp mkcert-v*-linux-amd64 /usr/local/bin/mkcert
+          mkcert -install
+          mkcert localhost 127.0.0.1 ::1
+          mkcert -client localhost 127.0.0.1 ::1
+          mkdir test-certs
+          cp -r localhost+2-client-key.pem localhost+2-client.pem localhost+2-key.pem localhost+2.pem test-certs/
+          cp -r "$(mkcert -CAROOT)/rootCA.pem" test-certs/
+
+          go test -timeout 20m -v -race -cover -tags=debug -coverpkg=github.com/roadrunner-server/grpc/v6/... -coverprofile=./coverage-ci/grpc.out -covermode=atomic ./...
       - name: Archive code coverage results
         uses: actions/upload-artifact@v7
         with:
@@ -98,6 +113,12 @@ jobs:
             }
           ' summary.txt > summary.filtered.txt
           mv summary.filtered.txt summary.txt
+          # a profile that maps to no plugin source uploads fine and reports 0%
+          blocks=$(($(wc -l < summary.txt) - 1))
+          if [ "$blocks" -lt 10 ]; then
+            echo "::error::coverage summary holds $blocks blocks, the profile does not map to plugin sources"
+            exit 1
+          fi
       - name: upload to codecov
         uses: codecov/codecov-action@v7 # Docs: <https://github.com/codecov/codecov-action>
         with:
