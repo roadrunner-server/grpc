@@ -6,7 +6,6 @@ import (
 
 	"tests/helpers"
 
-	resetterV1 "github.com/roadrunner-server/api-go/v6/resetter/v1"
 	goridgeRpc "github.com/roadrunner-server/goridge/v4/pkg/rpc"
 	"github.com/roadrunner-server/resetter/v6"
 	"github.com/stretchr/testify/require"
@@ -102,11 +101,11 @@ func resetAll(t *testing.T, rpcAddr string) {
 	client := rpc.NewClientWithCodec(goridgeRpc.NewClientCodec(conn))
 	t.Cleanup(func() { _ = client.Close() })
 
-	var plugins resetterV1.PluginsList
-	require.NoError(t, client.Call("resetter.ListPlugins", &resetterV1.ListPluginsRequest{}, &plugins))
-	require.Contains(t, plugins.GetPlugins(), "grpc")
+	var plugins []string
+	require.NoError(t, client.Call("resetter.List", true, &plugins))
+	require.Contains(t, plugins, "grpc")
 
-	var out resetterV1.Response
-	require.NoError(t, client.Call("resetter.Reset", &resetterV1.ResetRequest{Plugin: "grpc"}, &out))
-	require.True(t, out.GetOk())
+	var done bool
+	require.NoError(t, client.Call("resetter.Reset", "grpc", &done))
+	require.True(t, done)
 }
