@@ -3,14 +3,19 @@ package grpc
 import (
 	"crypto/tls"
 	stderr "errors"
+	"fmt"
 	"math"
 	"os"
+	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/roadrunner-server/errors"
+	"github.com/roadrunner-server/grpc/v6/api"
 	"github.com/roadrunner-server/pool/v2/pool"
+	"github.com/roadrunner-server/tcplisten"
 )
 
 type ClientAuthType string
@@ -24,8 +29,9 @@ const (
 )
 
 type Config struct {
-	Listen string   `mapstructure:"listen"`
-	Proto  []string `mapstructure:"proto"`
+	Listen     string                       `mapstructure:"listen"`
+	UnixSocket *tcplisten.UnixSocketOptions `mapstructure:"unix_socket"`
+	Proto      []string                     `mapstructure:"proto"`
 
 	TLS *TLS `mapstructure:"tls"`
 
@@ -63,6 +69,9 @@ func (c *Config) InitDefaults() error { //nolint:gocyclo,gocognit
 
 	if !strings.Contains(c.Listen, ":") {
 		return errors.E(op, errors.Errorf("malformed grpc address, provided: %s", c.Listen))
+	}
+	if err := c.UnixSocket.Validate(c.Listen); err != nil {
+		return errors.E(op, fmt.Errorf("grpc.unix_socket: %w", err))
 	}
 
 	protos := make([]string, 0, len(c.Proto))
@@ -183,4 +192,37 @@ func (c *Config) EnableTLS() bool {
 		return c.TLS.Key != "" && c.TLS.Cert != ""
 	}
 	return false
+}
+
+// validateUnixSocketIDs rejects values that weak decoding can convert to valid IDs.
+func validateUnixSocketIDs(cfg api.Configurer) error {
+	const key = pluginName + ".unix_socket"
+	var options map[string]any
+	if err := cfg.UnmarshalKey(key, &options); err != nil {
+		return fmt.Errorf("%s: %w", key, err)
+	}
+	for _, field := range []string{"uid", "gid"} {
+		if options[field] == nil {
+			continue
+		}
+		value := reflect.ValueOf(options[field])
+		valid := false
+		switch {
+		case value.CanInt():
+			id := value.Int()
+			valid = id >= 0 && id < math.MaxUint32
+		case value.CanUint():
+			valid = value.Uint() < math.MaxUint32
+		case value.Kind() == reflect.String:
+			id, err := strconv.ParseInt(value.String(), 0, strconv.IntSize)
+			valid = err == nil && id >= 0 && id < math.MaxUint32
+		case value.CanFloat():
+			id := value.Float()
+			valid = id >= 0 && id < math.MaxUint32 && math.Trunc(id) == id
+		}
+		if !valid {
+			return fmt.Errorf("%s.%s: must be an integer between 0 and 4294967294", key, field)
+		}
+	}
+	return nil
 }
