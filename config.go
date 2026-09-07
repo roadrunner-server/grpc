@@ -3,6 +3,7 @@ package grpc
 import (
 	"crypto/tls"
 	stderr "errors"
+	"fmt"
 	"math"
 	"os"
 	"strings"
@@ -11,6 +12,7 @@ import (
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/roadrunner-server/errors"
 	"github.com/roadrunner-server/pool/v2/pool"
+	"github.com/roadrunner-server/tcplisten"
 )
 
 type ClientAuthType string
@@ -24,8 +26,9 @@ const (
 )
 
 type Config struct {
-	Listen string   `mapstructure:"listen"`
-	Proto  []string `mapstructure:"proto"`
+	Listen     string                       `mapstructure:"listen"`
+	UnixSocket *tcplisten.UnixSocketOptions `mapstructure:"unix_socket"`
+	Proto      []string                     `mapstructure:"proto"`
 
 	TLS *TLS `mapstructure:"tls"`
 
@@ -63,6 +66,9 @@ func (c *Config) InitDefaults() error { //nolint:gocyclo,gocognit
 
 	if !strings.Contains(c.Listen, ":") {
 		return errors.E(op, errors.Errorf("malformed grpc address, provided: %s", c.Listen))
+	}
+	if err := c.UnixSocket.Validate(c.Listen); err != nil {
+		return errors.E(op, fmt.Errorf("grpc.unix_socket: %w", err))
 	}
 
 	protos := make([]string, 0, len(c.Proto))

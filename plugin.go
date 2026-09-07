@@ -86,7 +86,6 @@ func (p *Plugin) Init(cfg api.Configurer, log api.Logger, server api.Server) err
 	if err != nil {
 		return errors.E(op, err)
 	}
-
 	err = p.config.InitDefaults()
 	if err != nil {
 		return errors.E(op, err)
@@ -168,7 +167,7 @@ func (p *Plugin) Serve() chan error {
 		return errCh
 	}
 
-	l, err := tcplisten.CreateListener(p.config.Listen)
+	l, err := tcplisten.CreateListenerWithOptions(p.config.Listen, p.config.UnixSocket)
 	if err != nil {
 		errCh <- errors.E(op, err)
 		return errCh
