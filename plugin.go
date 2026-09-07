@@ -86,16 +86,6 @@ func (p *Plugin) Init(cfg api.Configurer, log api.Logger, server api.Server) err
 	if err != nil {
 		return errors.E(op, err)
 	}
-	if cfg.Has(pluginName + ".unix_socket") {
-		if err = validateUnixSocketIDs(cfg); err != nil {
-			return errors.E(op, err)
-		}
-		// Viper can omit an empty map from the decoded section.
-		if p.config.UnixSocket == nil {
-			p.config.UnixSocket = &tcplisten.UnixSocketOptions{}
-		}
-	}
-
 	err = p.config.InitDefaults()
 	if err != nil {
 		return errors.E(op, err)

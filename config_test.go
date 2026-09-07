@@ -5,9 +5,20 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const separator = string(filepath.Separator)
+
+func TestConfigUnixSocketDefaults(t *testing.T) {
+	for _, listen := range []string{"127.0.0.1:0", "tcp://127.0.0.1:0", "unix://grpc.sock"} {
+		t.Run(listen, func(t *testing.T) {
+			cfg := &Config{Listen: listen}
+			require.NoError(t, cfg.InitDefaults())
+			require.Nil(t, cfg.UnixSocket)
+		})
+	}
+}
 
 func TestInitDefaults(t *testing.T) {
 	c := Config{}
