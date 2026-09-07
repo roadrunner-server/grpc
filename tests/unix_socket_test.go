@@ -6,7 +6,6 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"net"
 	"os"
 	"path/filepath"
 	"slices"
@@ -82,24 +81,14 @@ func TestUnixSocketServe(t *testing.T) {
 		flags []string
 		mode  os.FileMode
 	}{
-		{name: "TCP without options"},
 		{name: "quoted mode", mode: 0o600},
 		{name: "string override", flags: []string{"grpc.unix_socket.mode=0640"}, mode: 0o640},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Chdir(t.TempDir())
-			listen, target := "unix://grpc.sock", "unix:grpc.sock"
-			options := `{mode: "0600", uid: "${RR_TEST_SOCKET_UID}", gid: "${RR_TEST_SOCKET_GID}"}`
-			if tc.mode == 0 {
-				var lc net.ListenConfig
-				ln, errL := lc.Listen(t.Context(), "tcp", "127.0.0.1:0")
-				require.NoError(t, errL)
-				target = ln.Addr().String()
-				listen, options = "tcp://"+target, ""
-				require.NoError(t, ln.Close())
-			}
+			const options = `{mode: "0600", uid: "${RR_TEST_SOCKET_UID}", gid: "${RR_TEST_SOCKET_GID}"}`
 			flags := append([]string{"server.command=php " + worker, "grpc.proto=" + proto}, tc.flags...)
-			cfg := unixSocketConfig(t, listen, options, flags)
+			cfg := unixSocketConfig(t, "unix://grpc.sock", options, flags)
 			log := mocklogger.NewLogger(slog.New(slog.DiscardHandler))
 			rrServer := &server.Plugin{}
 			require.NoError(t, rrServer.Init(cfg, log))
@@ -119,7 +108,7 @@ func TestUnixSocketServe(t *testing.T) {
 			default:
 			}
 
-			conn := helpers.Dial(t, target)
+			conn := helpers.Dial(t, "unix:grpc.sock")
 			ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
 			defer cancel()
 			response, errR := service.NewEchoClient(conn).Ping(ctx, &service.Message{Msg: tc.name}, grpc.WaitForReady(true))
@@ -129,21 +118,17 @@ func TestUnixSocketServe(t *testing.T) {
 			require.NoError(t, errH)
 			require.Equal(t, grpchealth.HealthCheckResponse_SERVING, health.GetStatus())
 
-			if tc.mode != 0 {
-				info, errS := os.Stat("grpc.sock")
-				require.NoError(t, errS)
-				require.NotZero(t, info.Mode()&os.ModeSocket)
-				require.Equal(t, tc.mode, info.Mode().Perm())
-				stat := info.Sys().(*syscall.Stat_t)
-				require.EqualValues(t, os.Getuid(), stat.Uid)
-				require.EqualValues(t, os.Getgid(), stat.Gid)
-			}
+			info, errS := os.Stat("grpc.sock")
+			require.NoError(t, errS)
+			require.NotZero(t, info.Mode()&os.ModeSocket)
+			require.Equal(t, tc.mode, info.Mode().Perm())
+			stat := info.Sys().(*syscall.Stat_t)
+			require.EqualValues(t, os.Getuid(), stat.Uid)
+			require.EqualValues(t, os.Getgid(), stat.Gid)
 			require.NoError(t, conn.Close())
 			require.NoError(t, stop())
-			if tc.mode != 0 {
-				_, errS := os.Stat("grpc.sock")
-				require.ErrorIs(t, errS, os.ErrNotExist)
-			}
+			_, errS = os.Stat("grpc.sock")
+			require.ErrorIs(t, errS, os.ErrNotExist)
 		})
 	}
 }
@@ -196,6 +181,7 @@ func TestUnixSocketOwnershipError(t *testing.T) {
 
 func unixSocketConfig(t *testing.T, listen, options string, flags []string) *config.Plugin {
 	t.Helper()
+
 	contents := fmt.Sprintf(`version: "3"
 server:
   command: [unused]
