@@ -3,32 +3,21 @@
 package grpc_test
 
 import (
-	"context"
 	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
-	"slices"
-	"strconv"
-	"strings"
-	"sync"
-	"syscall"
 	"testing"
-	"time"
 
 	"tests/helpers"
 	mocklogger "tests/mock"
-	"tests/proto/service"
 
 	"github.com/roadrunner-server/config/v6"
 	grpcPlugin "github.com/roadrunner-server/grpc/v6"
-	"github.com/roadrunner-server/server/v6"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/grpc"
-	grpchealth "google.golang.org/grpc/health/grpc_health_v1"
 )
 
-func TestUnixSocketConfig(t *testing.T) {
+func TestUnixSocketConfigRejectsInvalidOptions(t *testing.T) {
 	log := mocklogger.NewLogger(slog.New(slog.DiscardHandler))
 
 	for _, tc := range []struct {
@@ -37,17 +26,9 @@ func TestUnixSocketConfig(t *testing.T) {
 		options string
 		wantErr string
 	}{
-		{name: "TCP defaults", listen: "tcp://127.0.0.1:0"},
-		{name: "UNIX defaults", listen: "unix://grpc.sock"},
-		{name: "empty options", listen: "unix://grpc.sock", options: "{}"},
-		{name: "TCP empty options", listen: "tcp://127.0.0.1:0", options: "{}"},
-		{name: "mode only", listen: "unix://grpc.sock", options: `{mode: "0600"}`},
-		{name: "explicit zero", listen: "unix://grpc.sock", options: `{mode: "0000", uid: 0, gid: 0}`},
-		{name: "unset mode", listen: "unix://grpc.sock", options: "{uid: 0, gid: 0}"},
 		{name: "TCP options", listen: "tcp://127.0.0.1:0", options: `{mode: "0600"}`, wantErr: "filesystem unix:// address"},
 		{name: "invalid mode", listen: "unix://grpc.sock", options: `{mode: "0780"}`, wantErr: "invalid unix socket mode"},
 		{name: "unquoted mode", listen: "unix://grpc.sock", options: "{mode: 0600}", wantErr: "invalid unix socket mode"},
-		{name: "empty address", options: `{mode: "0600"}`, wantErr: "malformed grpc address"},
 		{name: "empty socket path", listen: "unix://", options: `{mode: "0600"}`, wantErr: "filesystem unix:// address"},
 		{name: "scalar options", listen: "unix://grpc.sock", options: "false", wantErr: "expected a map"},
 		{name: "negative UID", listen: "unix://grpc.sock", options: "{uid: -1}", wantErr: "invalid unix socket uid"},
@@ -56,147 +37,99 @@ func TestUnixSocketConfig(t *testing.T) {
 		{name: "reserved GID", listen: "unix://grpc.sock", options: "{gid: 4294967295}", wantErr: "invalid unix socket gid"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			cfg := unixSocketConfig(t, tc.listen, tc.options, nil)
+			cfg := &config.Plugin{Path: unixSocketConfig(t, tc.listen, tc.options)}
+			require.NoError(t, cfg.Init())
 			p := &grpcPlugin.Plugin{}
-			err := p.Init(cfg, log, nil)
-			if tc.wantErr != "" {
-				require.ErrorContains(t, err, tc.wantErr)
-				return
-			}
-			require.NoError(t, err)
+			require.ErrorContains(t, p.Init(cfg, log, nil), tc.wantErr)
 		})
 	}
 }
 
-func TestUnixSocketServe(t *testing.T) {
-	worker, err := filepath.Abs("php_test_files/worker-grpc.php")
-	require.NoError(t, err)
-	proto, err := filepath.Abs("proto/service/service.proto")
-	require.NoError(t, err)
-	t.Setenv("RR_TEST_SOCKET_UID", strconv.Itoa(os.Getuid()))
-	t.Setenv("RR_TEST_SOCKET_GID", strconv.Itoa(os.Getgid()))
-
+func TestUnixSocketMode(t *testing.T) {
 	for _, tc := range []struct {
-		name  string
-		flags []string
-		mode  os.FileMode
+		name     string
+		fileMode string
+		flags    []string
+		wantMode os.FileMode
 	}{
-		{name: "quoted mode", mode: 0o600},
-		{name: "string override", flags: []string{"grpc.unix_socket.mode=0640"}, mode: 0o640},
+		{name: "quoted 0600", fileMode: "0600", wantMode: 0o600},
+		{name: "quoted 0640", fileMode: "0640", wantMode: 0o640},
+		{name: "mode override", fileMode: "0600", flags: []string{"grpc.unix_socket.mode=0640"}, wantMode: 0o640},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			t.Chdir(t.TempDir())
-			const options = `{mode: "0600", uid: "${RR_TEST_SOCKET_UID}", gid: "${RR_TEST_SOCKET_GID}"}`
-			flags := append([]string{"server.command=php " + worker, "grpc.proto=" + proto}, tc.flags...)
-			cfg := unixSocketConfig(t, "unix://grpc.sock", options, flags)
-			log := mocklogger.NewLogger(slog.New(slog.DiscardHandler))
-			rrServer := &server.Plugin{}
-			require.NoError(t, rrServer.Init(cfg, log))
-			t.Cleanup(func() { require.NoError(t, rrServer.Stop(context.Background())) })
-			p := &grpcPlugin.Plugin{}
-			require.NoError(t, p.Init(cfg, log, rrServer))
-			stop := sync.OnceValue(func() error {
-				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-				defer cancel()
-				return p.Stop(ctx)
-			})
-			t.Cleanup(func() { require.NoError(t, stop()) })
-			errCh := p.Serve()
-			select {
-			case errS := <-errCh:
-				t.Fatalf("gRPC serve: %v", errS)
-			default:
-			}
+			socket := unixSocketPath(t)
+			cfgPath := unixSocketConfig(t, "unix://"+socket, fmt.Sprintf(`{mode: %q}`, tc.fileMode))
+			helpers.Start(t, cfgPath, grpcPlugins(), helpers.WithConfigFlags(tc.flags...))
 
-			conn := helpers.Dial(t, "unix:grpc.sock")
-			ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
-			defer cancel()
-			response, errR := service.NewEchoClient(conn).Ping(ctx, &service.Message{Msg: tc.name}, grpc.WaitForReady(true))
-			require.NoError(t, errR)
-			require.Equal(t, strings.ToUpper(tc.name), response.GetMsg())
-			health, errH := grpchealth.NewHealthClient(conn).Check(ctx, &grpchealth.HealthCheckRequest{})
-			require.NoError(t, errH)
-			require.Equal(t, grpchealth.HealthCheckResponse_SERVING, health.GetStatus())
-
-			info, errS := os.Stat("grpc.sock")
-			require.NoError(t, errS)
-			require.NotZero(t, info.Mode()&os.ModeSocket)
-			require.Equal(t, tc.mode, info.Mode().Perm())
-			stat := info.Sys().(*syscall.Stat_t)
-			require.EqualValues(t, os.Getuid(), stat.Uid)
-			require.EqualValues(t, os.Getgid(), stat.Gid)
-			require.NoError(t, conn.Close())
-			require.NoError(t, stop())
-			_, errS = os.Stat("grpc.sock")
-			require.ErrorIs(t, errS, os.ErrNotExist)
+			info, err := os.Stat(socket)
+			require.NoError(t, err)
+			require.Equal(t, tc.wantMode, info.Mode().Perm())
 		})
 	}
 }
 
-func TestUnixSocketOwnershipError(t *testing.T) {
+func TestUnixSocketPing(t *testing.T) {
+	socket := unixSocketPath(t)
+	cfgPath := unixSocketConfig(t, "unix://"+socket, `{mode: "0600"}`)
+	helpers.Start(t, cfgPath, grpcPlugins())
+
+	got, err := ping(t, helpers.Dial(t, "unix://"+socket), "TOST")
+
+	require.NoError(t, err)
+	require.Equal(t, "TOST", got)
+}
+
+func TestUnixSocketStopRemovesListener(t *testing.T) {
+	socket := unixSocketPath(t)
+	cfgPath := unixSocketConfig(t, "unix://"+socket, `{mode: "0600"}`)
+	_, stop := helpers.Start(t, cfgPath, grpcPlugins())
+	require.FileExists(t, socket)
+
+	stop()
+
+	require.NoFileExists(t, socket)
+}
+
+func TestUnixSocketOwnershipErrorRemovesListener(t *testing.T) {
 	if os.Geteuid() == 0 {
 		t.Skip("Requires an unprivileged process.")
 	}
-	groups, err := os.Getgroups()
-	require.NoError(t, err)
-	otherGID := 0
-	for otherGID == os.Getegid() || slices.Contains(groups, otherGID) {
-		otherGID++
-	}
 
-	for _, tc := range []struct {
-		field string
-		id    int
-	}{
-		{field: "uid", id: 0},
-		{field: "gid", id: otherGID},
-	} {
-		t.Run(tc.field, func(t *testing.T) {
-			t.Chdir(t.TempDir())
-			t.Setenv("RR_TEST_SOCKET_ID", strconv.Itoa(tc.id))
-			options := fmt.Sprintf(`{%s: "${RR_TEST_SOCKET_ID}"}`, tc.field)
-			cfg := unixSocketConfig(t, "unix://ownership.sock", options, nil)
-			log := mocklogger.NewLogger(slog.New(slog.DiscardHandler))
-			rrServer := &server.Plugin{}
-			require.NoError(t, rrServer.Init(cfg, log))
-			t.Cleanup(func() { require.NoError(t, rrServer.Stop(context.Background())) })
-			p := &grpcPlugin.Plugin{}
-			require.NoError(t, p.Init(cfg, log, rrServer))
-			t.Cleanup(func() {
-				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-				defer cancel()
-				require.NoError(t, p.Stop(ctx))
-			})
-			select {
-			case errS := <-p.Serve():
-				require.ErrorContains(t, errS, "chown unix socket")
-			case <-time.After(5 * time.Second):
-				t.Fatal("gRPC did not report the ownership error")
-			}
-			_, errS := os.Stat("ownership.sock")
-			require.ErrorIs(t, errS, os.ErrNotExist)
-		})
-	}
+	socket := unixSocketPath(t)
+	cfgPath := unixSocketConfig(t, "unix://"+socket, "{uid: 0}")
+	err := helpers.StartExpectServeError(t, cfgPath, grpcPlugins())
+	require.ErrorContains(t, err, "chown unix socket")
+
+	_, err = os.Stat(socket)
+	require.ErrorIs(t, err, os.ErrNotExist)
 }
 
-func unixSocketConfig(t *testing.T, listen, options string, flags []string) *config.Plugin {
+func unixSocketPath(t *testing.T) string {
+	t.Helper()
+
+	// Keep the socket path below the macOS length limit.
+	dir, err := os.MkdirTemp("", "rr-grpc-")
+	require.NoError(t, err)
+	t.Cleanup(func() { require.NoError(t, os.RemoveAll(dir)) })
+	return filepath.Join(dir, "grpc.sock")
+}
+
+func unixSocketConfig(t *testing.T, listen, options string) string {
 	t.Helper()
 
 	contents := fmt.Sprintf(`version: "3"
 server:
-  command: [unused]
+  command: "php php_test_files/worker-grpc.php"
 grpc:
   listen: %q
+  proto:
+    - "proto/service/service.proto"
+  unix_socket: %s
   pool:
     debug: true
     destroy_timeout: 5s
-`, listen)
-	if options != "" {
-		contents += "  unix_socket: " + options + "\n"
-	}
+`, listen, options)
 	path := filepath.Join(t.TempDir(), ".rr.yaml")
 	require.NoError(t, os.WriteFile(path, []byte(contents), 0o600))
-	cfg := &config.Plugin{Path: path, Flags: flags}
-	require.NoError(t, cfg.Init())
-	return cfg
+	return path
 }

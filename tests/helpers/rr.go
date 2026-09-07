@@ -29,6 +29,7 @@ const (
 // bootCfg holds the options applied to a container before it is started.
 type bootCfg struct {
 	version  string
+	flags    []string
 	logLevel slog.Level
 	logger   loggerKind
 	probe    func(ctx context.Context) bool
@@ -48,6 +49,11 @@ type Option func(*bootCfg)
 // WithConfigVersion overrides the config schema version.
 func WithConfigVersion(v string) Option {
 	return func(b *bootCfg) { b.version = v }
+}
+
+// WithConfigFlags applies configuration overrides.
+func WithConfigFlags(flags ...string) Option {
+	return func(b *bootCfg) { b.flags = flags }
 }
 
 // WithLogLevel sets the endure container log level (debug by default).
@@ -171,7 +177,7 @@ func newContainer(t *testing.T, cfgPath string, plugins []any, opts []Option) (*
 		o(bc)
 	}
 
-	cfg := &config.Plugin{Version: bc.version, Path: cfgPath}
+	cfg := &config.Plugin{Version: bc.version, Path: cfgPath, Flags: bc.flags}
 
 	rr := &RR{}
 	all := []any{cfg}
