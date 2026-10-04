@@ -80,7 +80,6 @@ func (p *Plugin) createGRPCserver(interceptors map[string]api.Interceptor) (*grp
 			}
 
 			server.RegisterService(px.ServiceDesc(), px)
-			p.proxyList = append(p.proxyList, px)
 		}
 	}
 
@@ -224,7 +223,6 @@ func (p *Plugin) serverOptions() ([]grpc.ServerOption, error) {
 	}
 
 	opts = append(opts, serverOptions...)
-	opts = append(opts, p.opts...)
 
 	// custom codec is required to bypass protobuf, a common interceptor used for debug and stats
 	return opts, nil

@@ -18,7 +18,6 @@ import (
 	"github.com/roadrunner-server/errors"
 	"github.com/roadrunner-server/grpc/v6/api"
 	"github.com/roadrunner-server/grpc/v6/codec"
-	"github.com/roadrunner-server/grpc/v6/proxy"
 	"github.com/roadrunner-server/pool/v2/pool"
 	"github.com/roadrunner-server/pool/v2/state/process"
 	"google.golang.org/grpc"
@@ -45,10 +44,8 @@ type Plugin struct {
 	mu           *sync.RWMutex
 	config       *Config
 	gPool        api.Pool
-	opts         []grpc.ServerOption
 	server       *grpc.Server
 	rrServer     api.Server
-	proxyList    []*proxy.Proxy
 	healthServer *HealthCheckServer
 
 	statsExporter *StatsExporter
@@ -91,9 +88,7 @@ func (p *Plugin) Init(cfg api.Configurer, log api.Logger, server api.Server) err
 		return errors.E(op, err)
 	}
 
-	p.opts = make([]grpc.ServerOption, 0)
 	p.rrServer = server
-	p.proxyList = make([]*proxy.Proxy, 0, 1)
 
 	// worker's GRPC mode
 	if p.config.Env == nil {
