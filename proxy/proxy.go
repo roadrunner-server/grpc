@@ -4,7 +4,8 @@ package proxy
 import (
 	"context"
 	"encoding/base64"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	stderr "errors"
 	"fmt"
 	"log/slog"
@@ -321,7 +322,7 @@ func (p *Proxy) makePayload(ctx context.Context, method string, body *codec.RawM
 		}
 	}
 
-	ctxData, err := json.Marshal(rpcContext{Service: p.name, Method: method, Context: ctxMD})
+	ctxData, err := json.Marshal(rpcContext{Service: p.name, Method: method, Context: ctxMD}, jsontext.AllowInvalidUTF8(true))
 
 	if err != nil {
 		return err
