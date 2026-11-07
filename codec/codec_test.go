@@ -1,7 +1,7 @@
 package codec
 
 import (
-	"encoding/json"
+	"encoding/json/v2"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -45,7 +45,7 @@ func TestCodec_Unmarshal_ByPass(t *testing.T) {
 	c := Codec{jsonCodec{}}
 
 	s := struct {
-		Name string
+		Name string `json:"name"`
 	}{}
 
 	assert.NoError(t, c.Unmarshal([]byte(`{"name":"name"}`), &s))

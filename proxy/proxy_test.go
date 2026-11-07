@@ -5,7 +5,11 @@ import (
 	"testing"
 
 	"github.com/roadrunner-server/errors"
+	"github.com/roadrunner-server/grpc/v6/codec"
+	"github.com/roadrunner-server/pool/v2/payload"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/otel/propagation"
+	"google.golang.org/grpc/metadata"
 )
 
 func TestWrapError(t *testing.T) {
@@ -55,4 +59,26 @@ func TestRRErrorPackage(t *testing.T) {
 
 	retErr := wrapError(err)
 	require.Equal(t, "rpc error: code = PermissionDenied desc = Unauthorized access `index`", retErr.Error())
+}
+
+func TestMakePayloadJSON(t *testing.T) {
+	tests := []struct {
+		name        string
+		key         string
+		value       string
+		wantContext string
+	}{
+		{name: "text metadata", key: "key", value: "<value>", wantContext: `{"service":"test","method":"method","context":{"key":["<value>"]}}`},
+		{name: "binary metadata", key: "key-bin", value: "\xff", wantContext: `{"service":"test","method":"method","context":{"key-bin":["�"]}}`},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := &Proxy{name: "test", prop: propagation.TraceContext{}}
+			ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs(tt.key, tt.value))
+			pld := &payload.Payload{}
+			err := p.makePayload(ctx, "method", &codec.RawMessage{}, pld)
+			require.NoError(t, err)
+			require.Equal(t, tt.wantContext, string(pld.Context))
+		})
+	}
 }
