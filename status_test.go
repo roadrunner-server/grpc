@@ -7,6 +7,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/roadrunner-server/grpc/v6/api"
 	"github.com/roadrunner-server/pool/v2/fsm"
 	"github.com/roadrunner-server/pool/v2/payload"
 	staticPool "github.com/roadrunner-server/pool/v2/pool/static_pool"
@@ -48,38 +49,59 @@ func newWorker(t *testing.T, state int64) *worker.Process {
 	return w
 }
 
-func newStatusPlugin(workers ...*worker.Process) *Plugin {
-	return &Plugin{
-		mu:    &sync.RWMutex{},
-		gPool: &fakeStatusPool{workers: workers},
+func TestPluginStatusAndReady(t *testing.T) {
+	tests := []struct {
+		name       string
+		pool       api.Pool
+		statusCode int
+		readyCode  int
+	}{
+		{
+			name:       "nil pool",
+			pool:       nil,
+			statusCode: http.StatusServiceUnavailable,
+			readyCode:  http.StatusServiceUnavailable,
+		},
+		{
+			name:       "no workers",
+			pool:       &fakeStatusPool{},
+			statusCode: http.StatusServiceUnavailable,
+			readyCode:  http.StatusServiceUnavailable,
+		},
+		{
+			name:       "inactive worker",
+			pool:       &fakeStatusPool{workers: []*worker.Process{newWorker(t, fsm.StateInactive)}},
+			statusCode: http.StatusServiceUnavailable,
+			readyCode:  http.StatusServiceUnavailable,
+		},
+		{
+			name:       "ready worker",
+			pool:       &fakeStatusPool{workers: []*worker.Process{newWorker(t, fsm.StateReady)}},
+			statusCode: http.StatusOK,
+			readyCode:  http.StatusOK,
+		},
+		{
+			name:       "working worker",
+			pool:       &fakeStatusPool{workers: []*worker.Process{newWorker(t, fsm.StateWorking)}},
+			statusCode: http.StatusOK,
+			readyCode:  http.StatusOK,
+		},
 	}
-}
 
-func TestPluginStatus(t *testing.T) {
-	// No workers -> service unavailable.
-	st, err := newStatusPlugin().Status()
-	require.NoError(t, err)
-	assert.Equal(t, http.StatusServiceUnavailable, st.Code)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := &Plugin{
+				mu:    &sync.RWMutex{},
+				gPool: tt.pool,
+			}
 
-	// At least one active (ready) worker -> OK.
-	st, err = newStatusPlugin(newWorker(t, fsm.StateReady)).Status()
-	require.NoError(t, err)
-	assert.Equal(t, http.StatusOK, st.Code)
-}
+			st, err := p.Status()
+			require.NoError(t, err)
+			assert.Equal(t, tt.statusCode, st.Code)
 
-func TestPluginReady(t *testing.T) {
-	// No workers -> service unavailable.
-	st, err := newStatusPlugin().Ready()
-	require.NoError(t, err)
-	assert.Equal(t, http.StatusServiceUnavailable, st.Code)
-
-	// A ready worker -> OK.
-	st, err = newStatusPlugin(newWorker(t, fsm.StateReady)).Ready()
-	require.NoError(t, err)
-	assert.Equal(t, http.StatusOK, st.Code)
-
-	// A worker that is active but only working (not ready) -> not ready.
-	st, err = newStatusPlugin(newWorker(t, fsm.StateWorking)).Ready()
-	require.NoError(t, err)
-	assert.Equal(t, http.StatusServiceUnavailable, st.Code)
+			rd, err := p.Ready()
+			require.NoError(t, err)
+			assert.Equal(t, tt.readyCode, rd.Code)
+		})
+	}
 }
